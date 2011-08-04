@@ -11,10 +11,10 @@ require_once PATH_THIRD . 'minimee/config.php';
  */
 class Minimee_ext {
 
-	public $name			= MIMIMEE_NAME;
-	public $version			= MIMIMEE_VER;
-	public $description		= MIMIMEE_DESC;
-	public $docs_url		= MIMIMEE_DOCS;
+	public $name			= MINIMEE_NAME;
+	public $version			= MINIMEE_VER;
+	public $description		= MINIMEE_DESC;
+	public $docs_url		= MINIMEE_DOCS;
 	public $settings_exist	= 'y';
 
 	public $settings		= array();
