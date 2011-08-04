@@ -2,6 +2,7 @@
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 require_once PATH_THIRD . 'minimee/config.php';
+require_once PATH_THIRD . 'minimee/helper.php';
 
 $plugin_info = array(
 	'pi_name'			=> MINIMEE_NAME,
@@ -18,44 +19,43 @@ $plugin_info = array(
  * @license http://www.opensource.org/licenses/bsd-license.php BSD license
  * @link	http://johndwells.com/software/minimee
  */
+
 class Minimee {
+	
+	public $return_data;
 
 	/* config - required */
-	public $cache_path;
-	public $cache_url;
+	public $cache_path			= NULL;
+	public $cache_url			= NULL;
 
 	/* config - optional */
-	public $base_path;
-	public $base_url;
-	public $debug;
-	public $disable;
-	public $remote_mode;
+	public $base_path			= NULL;
+	public $base_url			= NULL;
+	public $disable				= FALSE;
+	public $remote_mode			= 'auto';
 
 	/* usage settings */
-	public $combine;
-	public $minify;
-	public $queue;
+	public $combine				= TRUE;
+	public $minify				= TRUE;
+	public $queue				= FALSE;
 
 	public $filesdata			= array();
 	public $stylesheet_query	= array();
-	public $debug_format		= "<!-- %s -->\n %s"; // first is debug message; second is orig tagdata
-	public $template;
-	public $type;
+	public $require_remote		= FALSE;
+	public $template			= NULL;
+	public $type				= NULL;					// css or js
 	
 	public $EE;
 	public $ext;
-
-
+	
 	/**
 	 * Constructor
-	 *
-	 * @return void
 	 */
 	public function __construct()
 	{
 		$this->EE =& get_instance();
 	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/**
@@ -66,10 +66,13 @@ class Minimee {
 	public function css()
 	{
 		$this->type = 'css';
-		return $this->_run();
+		
+		Minimee_helper::log('Running CSS.');
+		$this->_run();
+		
+		return $this->return_data;
 	}
-	// END
-
+	// ----------------------------------------------------------------
 
 	/**
 	 * Plugin function: exp:minimee:display
@@ -81,29 +84,27 @@ class Minimee {
 		// see which to display
 		$js = strtolower($this->EE->TMPL->fetch_param('js'));
 		$css = strtolower($this->EE->TMPL->fetch_param('css'));
-		$out = '';
 
 		if ($js)
 		{
 			$this->queue = $js;
 			$this->type = 'js';
-			$out .= $this->_display();
+			$this->_display();
 		}
 
 		if ($css)
 		{
 			$this->queue = $css;
 			$this->type = 'css';
-			$out .= $this->_display();
+			$this->_display();
 		}
 		
 		// free memory where possible
-		unset($js);
-		unset($css);
-		
-		return $out;
+		unset($js, $css);
+
+		return $this->return_data;
 	}
-	// END
+	// ----------------------------------------------------------------
 	
 	
 	/**
@@ -116,46 +117,26 @@ class Minimee {
 		// make sure only one is being specified
 		if ($this->EE->TMPL->fetch_param('js') && $this->EE->TMPL->fetch_param('css'))
 		{
-			return $this->_abort('Minimee has aborted: When using the embed method, you may not specify JS and CSS file types together.');
+			return $this->_abort('When using the embed method, you may not specify JS and CSS file types together.');
 		}
 
 		if ($this->EE->TMPL->fetch_param('js'))
 		{
 			$this->queue = $this->EE->TMPL->fetch_param('js');
-			$this->debug_format = "</script><!-- %s -->%s<script type='text/javascript'>\n";
 			$this->type = 'js';
 		}
 
 		if ($this->EE->TMPL->fetch_param('css'))
 		{
 			$this->queue = $this->EE->TMPL->fetch_param('css');
-			$this->debug_format = "</style><!-- %s -->%s<style type='text/css'>\n";
 			$this->type = 'css';
 		}
 		
-		return $this->_embed();
+		$this->_embed();
+
+		return $this->return_data;
 	}
-	// END
-
-
-	/**
-	 * Plugin function: exp:minimee:html
-	 * 
-	 * @return mixed string or empty
-	 */
-	function html()
-	{
-        // start output buffering
-        ob_start();
-
-		// include our needed HTML library
-		require_once('libraries/HTML.php');
-
-        // register a shutdown function which will be able to compress output
-        register_shutdown_function('Minimee::_html');
-
-	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/**
@@ -166,9 +147,13 @@ class Minimee {
 	public function js()
 	{
 		$this->type = 'js';
-		return $this->_run();
+
+		Minimee_helper::log('Running JS.');
+		$this->_run();
+
+		return $this->return_data;
 	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/**
@@ -176,36 +161,30 @@ class Minimee {
 	 * Attempts to handle any exceptions thrown.
 	 *
 	 * @param mixed The caught exception or empty string
-	 * @return string The un-Minimeed tagdata
+	 * @return void
 	 */	
-	private function _abort($e = FALSE)
+	protected function _abort($e = FALSE)
 	{
 		if ($e)
 		{
-			$log = 'Minimee: ' . $e->getMessage();
+			Minimee_helper::log($e->getMessage(), 3);
 		}
 		else
 		{
-			$log = 'Minimee has aborted without a specific error.';
+			Minimee_helper::log('Aborted without a specific error.', 3);
 		}
-
-		// log our debug message to EE
-		$this->EE->TMPL->log_item($log);
 
 		// Let's return the original tagdata, wherever it came from
 		if ($this->queue && array_key_exists($this->queue, $this->EE->session->cache['minimee'][$this->type]))
 		{
-			$out = $this->EE->session->cache['minimee'][$this->type][$this->queue]['tagdata'];
+			$this->return_data .= $this->EE->session->cache['minimee'][$this->type][$this->queue]['tagdata'];
 		}
 		else
 		{
-			$out = $this->EE->TMPL->tagdata;
+			$this->return_data .= $this->EE->TMPL->tagdata;
 		}
-		
-		// should we prepend our debug message to the output?
-		return ($this->debug == 'yes') ? sprintf($this->debug_format, $log, $out) : str_replace('<!--  -->', '', sprintf($this->debug_format, '', $out));
 	}
-	// END
+	// ----------------------------------------------------------------
 	
 	
 	/** 
@@ -214,9 +193,9 @@ class Minimee {
 	 * 
 	 * @param	String of filename of the new file
 	 * @param	String of contents of the new file
-	 * @return	boolean	Returns true on successful cache, false on failure
+	 * @return	Void
 	 */
-	private function _cache($filename, $file_data)
+	protected function _cache($filename, $file_data)
 	{
 		$filepath = $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename);
 		$success = file_put_contents($filepath, $file_data);
@@ -230,22 +209,21 @@ class Minimee {
 		// FILE_READ_MODE is set in /system/expressionengine/config/constants.php
 		@chmod($filepath, FILE_READ_MODE);
 
-		$this->EE->TMPL->log_item('Minimee: Cache file ' . $filename . ' was written to ' . $this->cache_path);
+		Minimee_helper::log('Cache file ' . $filename . ' was written to ' . $this->cache_path);
 
 		// free memory where possible
-		unset($filepath);
-		unset($success);
+		unset($filepath, $success);
 	}
-	// END
+	// ----------------------------------------------------------------
 	
 	
 	/**
 	 * Find out more info about each file
 	 * Attempts to get file modification times, determine what files exist, etc
 	 * 
-	 * @return bool TRUE if all are found; FALSE if at least one is not found
+	 * @return Void
 	 */
-	private function _check_headers()
+	protected function _check_headers()
 	{
 		// query for any stylesheets	
 		$stylesheet_versions = $this->_fetch_stylesheet_versions();
@@ -278,14 +256,12 @@ class Minimee {
 				default :
 
 					$realpath = realpath($this->EE->functions->remove_double_slashes($this->base_path . '/' . $file['name']));
-					if ( ! file_exists($realpath))
+					if ( ! is_file($realpath))
 					{
-						throw new Exception('Missing file has been detected: ' . $this->EE->functions->remove_double_slashes($this->base_path . '/' . $file['name']));
+						throw new Exception('Missing file has been detected: ' . $realpath);
 					}
 
 					$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
-					$this->filesdata[$key]['lastmodified'] = ($this->filesdata[$key]['lastmodified'] == 0) ? '0000000000' : $this->filesdata[$key]['lastmodified'];
-
 				break;
 			
 			endswitch;
@@ -293,35 +269,36 @@ class Minimee {
 		endforeach;
 
 		// free memory where possible
-		unset($realpath);
-		unset($stylesheet_versions);
+		unset($realpath, $stylesheet_versions);
+
+		// method chaining		
+		return $this;
 	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/**
 	 * Processes and displays queue
 	 *
-	 * @return string The final output from Minimee::out()
+	 * @return void
 	 */	
-	private function _display()
+	protected function _display()
 	{
 		try
 		{
-			$this->_init();
-			$this->_fetch_params();
-			$this->_fetch_queue();
-			$this->_flightcheck();
-			$this->_check_headers();
-			
-			return $this->_out();
+			$this->_init()
+				 ->_fetch_params()
+				 ->_fetch_queue()
+				 ->_flightcheck()
+				 ->_check_headers()
+				 ->_return_data();
 		}
 		catch (Exception $e)
 		{
-			return $this->_abort($e);
+			$this->_abort($e);
 		}
 	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/**
@@ -330,18 +307,18 @@ class Minimee {
 	 * 
 	 * @return mixed string or empty
 	 */
-	private function _embed()
+	protected function _embed()
 	{
 		try
 		{
-			$this->_init();
-			$this->_fetch_params();
-			$this->_fetch_queue();
-			$this->_flightcheck();
-			$this->_check_headers();
-			
-			// this is what we'd normally return to a template
-			$out = $this->_out();
+			// run our core methods as usual
+			// this will set our $return_data variable
+			$this->_init()
+				 ->_fetch_params()
+				 ->_fetch_queue()
+				 ->_flightcheck()
+				 ->_check_headers()
+				 ->_return_data();
 
 			// let's find the location of our cache files
 			switch (strtolower($this->type)) :
@@ -360,7 +337,7 @@ class Minimee {
 
 			endswitch;
 
-			if ( ! preg_match_all($pat, $out, $matches, PREG_PATTERN_ORDER))
+			if ( ! preg_match_all($pat, $this->return_data, $matches, PREG_PATTERN_ORDER))
 			{
 				throw new Exception('No files found to process.');
 			}
@@ -368,30 +345,25 @@ class Minimee {
 			// replace the url with path
 			$paths = str_replace($this->cache_url, $this->cache_path, $matches[1]);
 
-			// clear $out so we can replace with code to embed
-			$out = '';
+			// clear $return_data so we can replace with code to embed
+			$this->return_data = '';
 
 			// fetch contents of each file
 			foreach ($paths as $path)
 			{
 				// there's no way this doesn't exist... right?
-				$out .= @file_get_contents($path) . "\n";
+				$this->return_data .= @file_get_contents($path) . "\n";
 			}
 
 			// free memory where possible
-			unset($pat);
-			unset($haystack);
-			unset($matches);
-			unset($paths);
-
-			return $out;
+			unset($pat, $matches, $paths);
 		}
 		catch (Exception $e)
 		{
-			return $this->_abort($e);
+			$this->_abort($e);
 		}
 	}
-	// END
+	// ----------------------------------------------------------------
 	
 
 	/**
@@ -399,7 +371,7 @@ class Minimee {
 	 *
 	 * @return void
 	 */	
-	private function _fetch_queue()
+	protected function _fetch_queue()
 	{
 		if ( ! array_key_exists($this->queue, $this->EE->session->cache['minimee'][$this->type]))
 		{
@@ -419,8 +391,11 @@ class Minimee {
 		{
 			throw new Exception('No files found in the queue named \'' . $this->type . '\'.');
 		}
+
+		// method chaining
+		return $this;
 	}
-	// END
+	// ----------------------------------------------------------------
 	
 
 	/**
@@ -428,14 +403,12 @@ class Minimee {
 	 * pulling out href & src attributes respectively.
 	 * [Adapted from SL Combinator]
 	 * 
-	 * @param string tagdata
-	 * @param string either css or js
-	 * @return bool TRUE on success of fetching files; FALSE on failure
+	 * @return $this
 	 */
-	private function _fetch_files($haystack)
+	protected function _fetch_files()
 	{
 		// first up, let's substitute stylesheet= for minimee=, because we handle these special
-		$haystack = preg_replace("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", '[minimee=$1]', $haystack);
+		$haystack = preg_replace("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", '[minimee=$1]', $this->EE->TMPL->tagdata);
 
 		// parse globals if we find any EE syntax tags
 		if (preg_match("/".LD."(.*?)".RD."/", $haystack) === 1)
@@ -472,11 +445,12 @@ class Minimee {
 		$this->_set_filesdata($matches[1]);
 
 		// free memory where possible
-		unset($haystack);
-		unset($pat);
-		unset($matches);
+		unset($haystack, $pat, $matches);
+
+		// method chaining
+		return $this;
 	}
-	// END
+	// ----------------------------------------------------------------
 
 	
 	/**
@@ -484,77 +458,31 @@ class Minimee {
 	 * 
 	 * @return void
 	 */
-	private function _fetch_params()
+	protected function _fetch_params()
 	{
-		// debug, default is 'no'
-		// includes legacy support for true/false
-		switch ($this->EE->TMPL->fetch_param('debug', 'no'))
-		{
-			case ('true') :
-			case ('yes') :
-				$this->debug = 'yes';
-			break;
-			
-			default :
-				// prevent overriding settings from config
-				$this->debug = ($this->debug == 'yes') ? 'yes' : 'no';
-			break;
-				
-		}
-		
 		// disable, default is 'no'
 		// includes legacy support for true/false
-		switch ($this->EE->TMPL->fetch_param('disable', 'no'))
-		{
-			case ('true') :
-			case ('yes') :
-				$this->disable = 'yes';
-			break;
-			
-			default :
-				// prevent overriding settings from config
-				$this->disable = ($this->disable == 'yes') ? 'yes' : 'no';
-			break;
-				
-		}
+		// prevent overriding settings from config
+		$this->disable = ($this->disable) ? $this->disable : (bool) preg_match('/1|true|on|yes|y/i', $this->EE->TMPL->fetch_param('disable', 'no'));
 		
 		// combine, default is 'yes'
 		// includes legacy support for true/false
-		switch ($this->EE->TMPL->fetch_param('combine', 'yes'))
-		{
-			case ('false') :
-			case ('no') :
-				$this->combine = 'no';
-			break;
-			
-			default :
-				$this->combine = 'yes';
-			break;
-				
-		}
+		$this->combine = (bool) preg_match('/1|true|on|yes|y/i', $this->EE->TMPL->fetch_param('combine', 'yes'));
 
 		// minify, default is 'yes'
 		// includes legacy support for true/false
-		switch ($this->EE->TMPL->fetch_param('minify', 'yes'))
-		{
-			case ('false') :
-			case ('no') :
-				$this->minify = 'no';
-			break;
-			
-			default :
-				$this->minify = 'yes';
-			break;
-				
-		}
+		$this->minify = (bool) preg_match('/1|true|on|yes|y/i', $this->EE->TMPL->fetch_param('minify', 'yes'));
 
 		// fetch queue if it hasn't already been set via Minimee::_display()
 		if ( ! $this->queue)
 		{
 			$this->queue = strtolower($this->EE->TMPL->fetch_param('queue', NULL));
 		}
+		
+		// method chaining
+		return $this;
 	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/**
@@ -563,7 +491,7 @@ class Minimee {
 	 *
 	 * @return mixed array or FALSE
 	 */
-	private function _fetch_stylesheet_versions() {
+	protected function _fetch_stylesheet_versions() {
 	
 		// nothing to do if Minimee::stylesheet_query is empty
 		if ( ! $this->stylesheet_query) return FALSE;
@@ -597,45 +525,12 @@ class Minimee {
 		}
 
 		// free memory where possible
-		unset($sql);
-		unset($css_query);
+		unset($sql, $css_query);
 		
 		// return FALSE if none found
 		return ($versions) ? $versions : FALSE;
 	}
-	// END
-
-
-	/**
-	 * Compress and output HTML
-	 * All credit needs to go to Wallace, the addon that gave us back the show_full_control_panel_end hook
-	 * This is undocumented, experimental, and follows a strict use-at-your-own-peril policy.
-	 * 
-	 * @return void
-	 */
-	static function _html()
-	{
-	    // this function will be called by PHP as the very last thing
-	    // that happens before an exit
-	    $EE =& get_instance();
-	
-	    // get the output buffer
-	    $out = ob_get_contents();
-	
-	    // erase it
-	    ob_end_clean();
-	
-		// minify output
-		$out = Minify_HTML::minify($out);
-	
-	    if ($EE->config->item('send_headers') == 'y')
-	    {
-	        $EE->output->set_header('Content-Length: '.strlen($out));
-	    }
-	
-	    // print the final output
-	    echo $out;
-	}	
+	// ----------------------------------------------------------------
 
 
 	/**
@@ -643,46 +538,35 @@ class Minimee {
 	 *
 	 * @return void
 	 */
-	private function _init()
+	protected function _init()
 	{
-	
-		// have we already initialised once?
-		if ( ! isset($this->EE->session->cache['minimee']['settings']))
-		{
-			// Get settings with help of our extension
-			if ( ! class_exists('Minimee_ext'))
-			{
-				require_once(PATH_THIRD . 'minimee/ext.minimee.php');
-			}
-			$this->ext = new Minimee_ext();
-			$this->ext->get_settings();
-		}
+		// Our helper function will put our settings into session
+		Minimee_helper::get_settings();
 
-		// grab settings
+		// grab settings out of session
 		$this->base_path = $this->EE->session->cache['minimee']['settings']['base_path'];
 		$this->base_url = $this->EE->session->cache['minimee']['settings']['base_url'];
 		$this->cache_path = $this->EE->session->cache['minimee']['settings']['cache_path'];
 		$this->cache_url = $this->EE->session->cache['minimee']['settings']['cache_url'];
-		$this->debug = $this->EE->session->cache['minimee']['settings']['debug'];
-		$this->disable = $this->EE->session->cache['minimee']['settings']['disable'];
+		$this->disable = (bool) preg_match('/1|true|on|yes|y/i', $this->EE->session->cache['minimee']['settings']['disable']);
 		$this->remote_mode = $this->EE->session->cache['minimee']['settings']['remote_mode'];
 		
 		// use global FCPATH if nothing set
-		if( ! $this->base_path)
+		if ( ! $this->base_path)
 		{
 			$this->base_path = FCPATH;
 		}
 		
 		// use config base_url if nothing set
-		if( ! $this->base_url)
+		if ( ! $this->base_url)
 		{
 			$this->base_url = $this->EE->config->config['base_url'];
 		}
 		
-		// set remote mode
-		$this->_set_remote_mode();
+		// method chaining
+		return $this;
 	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/**
@@ -690,17 +574,16 @@ class Minimee {
 	 *
 	 * @return void
 	 */
-	private function _flightcheck()
+	protected function _flightcheck()
 	{
-	
 		// Flightcheck: determine if we can continue or disable permanently
 		switch ('flightcheck') :
 
-			case ($this->disable == 'yes') :
+			case ($this->disable) :
 				throw new Exception('Disabled via config or tag parameter.');
 			break;
 
-			case ( $this->minify == 'no' && $this->combine == 'no') :
+			case ( ! $this->minify && ! $this->combine) :
 				throw new Exception('Disabled because both minify and combine are set to \'no\'.');
 			break;
 
@@ -709,18 +592,25 @@ class Minimee {
 				throw new Exception('Not configured: please set a cache path and/or url.');
 			break;
 
-			case ( ! file_exists($this->cache_path)) :
+			case ( ! is_dir($this->cache_path)) :
 			case ( ! is_writable($this->cache_path)) :
 				throw new Exception('Not configured correctly: your cache folder does not exist or is not writable.');
 			break;
+			
+			case ($this->require_remote && $this->_set_remote_mode() === FALSE) :
+				throw new Exception('Either cURL or file_get_contents() is required to continue.');
+			break;
 
 			default :
-				$this->EE->TMPL->log_item('Minimee has passed flightcheck.');
+				Minimee_helper::log('Flightcheck has passed.');
 			break;
 
 		endswitch;
+
+		// method chaining
+		return $this;
 	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/** 
@@ -731,7 +621,7 @@ class Minimee {
 	 * @param	mixed A relative path to use, if provided
 	 * @return	String minified contents of file
 	 */
-	private function _minify($contents, $rel = FALSE)
+	protected function _minify($contents, $rel = FALSE)
 	{
 
 		switch ($this->type) :
@@ -758,22 +648,19 @@ class Minimee {
 		endswitch;
 	
 	}
-	// END
+	// ----------------------------------------------------------------
 	
 	
 	/**
-	 * Performs heavy lifting of plugin, processing output and returning final tags
+	 * Performs heavy lifting of plugin, processing output and sets $this->return_data
 	 * [Adapted from CodeIgniter Carabiner library]
 	 * 
 	 * @return string The final tag to be returned to template
 	 */	
-	private function _out()
+	protected function _return_data()
 	{
-		// our return variable	
-		$out = '';
-
 		// if we are not combining, then minify each file in turn
-		if ($this->combine == 'no') :
+		if ( ! $this->combine) :
 
 			$tags = array();
 
@@ -781,9 +668,9 @@ class Minimee {
 			
 				$this->filesdata[$key]['cache_filename'] = $file['lastmodified'] . md5($file['name']) . '.' . $this->type;
 
-				if (file_exists($this->EE->functions->remove_double_slashes($this->cache_path . '/' . $this->filesdata[$key]['cache_filename'])))
+				if (is_file($this->EE->functions->remove_double_slashes($this->cache_path . '/' . $this->filesdata[$key]['cache_filename'])))
 				{
-					$this->EE->TMPL->log_item('Minimee is returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $this->filesdata[$key]['cache_filename']));
+					Minimee_helper::log('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $this->filesdata[$key]['cache_filename']));
 					$tags[$key] = $this->_tag($this->filesdata[$key]['cache_filename']);
 				}
 				else
@@ -853,7 +740,7 @@ class Minimee {
 
 			endforeach;
 
-			$out = implode('', $tags);
+			$this->return_data .= implode('', $tags);
 			
 			// free memory where possible
 			unset($tags);
@@ -873,10 +760,10 @@ class Minimee {
 			$lastmodified = ($lastmodified == 0) ? '0000000000' : $lastmodified;
 			$filename = $lastmodified . md5($cache_name) . '.' . $this->type;
 	
-			if (file_exists($this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename)))
+			if (is_file($this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename)))
 			{
-				$this->EE->TMPL->log_item('Minimee is returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename));
-				$out = $this->_tag($filename);
+				Minimee_helper::log('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename));
+				$this->return_data .= $this->_tag($filename);
 			}
 			else
 			{
@@ -946,7 +833,7 @@ class Minimee {
 				endforeach;
 	
 				// gotta see if things need minifying
-				if ($this->minify == 'yes')
+				if ($this->minify)
 				{
 					$cache = '';
 					foreach ($contents as $key => $content)
@@ -963,20 +850,18 @@ class Minimee {
 				}
 
 				// free memory where possible
-				unset($contents);
-				unset($relPaths);
+				unset($contents, $relPaths);
 				
-				$out = $this->_tag($filename);
+				$this->return_data .= $this->_tag($filename);
 			}
 
 		endif;
 
 		// free memory where possible
-		unset($lastmodified);
-		unset($cache_name);
-		unset($filename);
-		
-		return $out;
+		unset($lastmodified, $cache_name, $filename);
+
+		// method chaining
+		return $this;
 	}
 	//END
 	
@@ -986,31 +871,32 @@ class Minimee {
 	 * 
 	 * @return mixed string or empty
 	 */
-	private function _run()
+	protected function _run()
 	{
 		try
 		{
-			$this->_init();
-			$this->_fetch_params();
-			$this->_fetch_files($this->EE->TMPL->tagdata);
+			$this->_init()
+				 ->_fetch_params()
+				 ->_fetch_files();
 	
 			// Are we queueing for later? If so, just save in session
 			if ($this->queue)
 			{
-				return $this->_set_queue();
+				$this->_set_queue();
 			}
-	
-			$this->_flightcheck();
-			$this->_check_headers();
-
-			return $this->_out();
+			else
+			{
+				$this->_flightcheck()
+					 ->_check_headers()
+					 ->_return_data();
+			}
 		}
 		catch (Exception $e)
 		{
-			return $this->_abort($e);
+			$this->_abort($e);
 		}
 	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/**
@@ -1019,7 +905,7 @@ class Minimee {
 	 * @param array array of files
 	 * @return void
 	 */
-	private function _set_filesdata($files) {
+	protected function _set_filesdata($files) {
 	
 		$dups = array();
 	
@@ -1030,42 +916,49 @@ class Minimee {
 		
 			$dups[] = $file;
 		
+			// our default assumption is a local file
 			$this->filesdata[$key] = array(
 				'name' => $file,
-				'type' => NULL,
+				'type' => 'local',
 				'cache_filename' => '',
 				'lastmodified' => '0000000000',
 				'stylesheet' => NULL
 			);
 
-			// from old _isURL() file from Carabiner Asset Management Library
-			if (preg_match('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)@', $this->filesdata[$key]['name']) > 0)
-			{
-				$this->filesdata[$key]['type'] = 'remote';
-			}
-			elseif (strpos($this->filesdata[$key]['name'], 'minimee=') !== FALSE && preg_match("/\[minimee=[\042\047]?(.*?)[\042\047]?\]/", $this->filesdata[$key]['name'], $matches))
-			{
-				$this->filesdata[$key]['type'] = 'stylesheet';
-				$this->filesdata[$key]['stylesheet'] = $matches[1];
+			switch('checkifnotlocal') :
+				
+				// from old _isURL() file from Carabiner Asset Management Library
+				case (preg_match('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)@', $this->filesdata[$key]['name']) > 0) :
+				// check for a protocol-relative URL
+				case (preg_match('@(//([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)@', $this->filesdata[$key]['name']) > 0) :
+					$this->require_remote = TRUE;
 	
-				// prepare part of our SQL query for later			
-				$ex = explode('/', $matches[1], 2);
-				if (isset($ex[1]))
-				{
-					$this->stylesheet_query[] = "(t.template_name = '".$this->EE->db->escape_str($ex[1])."' AND tg.group_name = '".$this->EE->db->escape_str($ex[0])."')";
-				}
-			}
-			else
-			{
-				$this->filesdata[$key]['type'] = 'local';
-			}
+					$this->filesdata[$key]['type'] = 'remote';
+				break;
+
+				case (strpos($this->filesdata[$key]['name'], 'minimee=') !== FALSE && preg_match("/\[minimee=[\042\047]?(.*?)[\042\047]?\]/", $this->filesdata[$key]['name'], $matches)) :
+					$this->require_remote = TRUE;
 	
+					$this->filesdata[$key]['type'] = 'stylesheet';
+					$this->filesdata[$key]['stylesheet'] = $matches[1];
+		
+					// prepare part of our SQL query for later			
+					$ex = explode('/', $matches[1], 2);
+					if (isset($ex[1]))
+					{
+						$this->stylesheet_query[] = "(t.template_name = '".$this->EE->db->escape_str($ex[1])."' AND tg.group_name = '".$this->EE->db->escape_str($ex[0])."')";
+					}
+				break;
+			endswitch;
 		}
 		
 		// free memory where possible
 		unset($dups);
+
+		// method chaining
+		return $this;
 	}
-	// END
+	// ----------------------------------------------------------------
 	
 
 	/** 
@@ -1073,34 +966,33 @@ class Minimee {
 	 * 
 	 * @return void
 	 */
-	private function _set_remote_mode()
+	protected function _set_remote_mode()
 	{
 		if (($this->remote_mode == 'auto' || $this->remote_mode == 'curl') && in_array('curl', get_loaded_extensions()))
 		{
-			$this->EE->TMPL->log_item('Minimee is using CURL for remote files.');
+			Minimee_helper::log('Using CURL for remote files.');
 			$this->remote_mode = 'curl';
 			
-			return;
+			return TRUE;
 		}
 		
 		if (($this->remote_mode == 'auto' || $this->remote_mode == 'fgc') && ini_get('allow_url_fopen'))
 		{
-			$this->EE->TMPL->log_item('Minimee is using file_get_contents() for remote files.');
+			Minimee_helper::log('Using file_get_contents() for remote files.');
 			$this->remote_mode = 'fgc';
 
 			if ( ! defined('OPENSSL_VERSION_NUMBER'))
 			{
-				$this->EE->TMPL->log_item('Minimee has noticed that your PHP compile does not appear to support file_get_contents() over SSL.');
+				Minimee_helper::log('Your PHP compile does not appear to support file_get_contents() over SSL.', 2);
 			}
 
-			return;
+			return TRUE;
 		}
 		
 		// if we're here, then we cannot fetch remote files,
-		// but we may not need to, so do not throw an exception.
-		$this->remote_mode = '';
+		return FALSE;
 	}
-	// END
+	// ----------------------------------------------------------------
 	
 
 	/** 
@@ -1109,7 +1001,7 @@ class Minimee {
 	 * @param string either 'js' or 'css'
 	 * @return void
 	 */
-	private function _set_queue()
+	protected function _set_queue()
 	{
 		// create new session array for this queue
 		if ( ! array_key_exists($this->queue, $this->EE->session->cache['minimee'][$this->type]))
@@ -1132,8 +1024,11 @@ class Minimee {
 				$this->EE->session->cache['minimee'][$this->type][$this->queue]['files'][] = $file['name'];
 			}
 		}
+
+		// method chaining
+		return $this;
 	}
-	// END
+	// ----------------------------------------------------------------
 	
 
 	/** 
@@ -1144,14 +1039,14 @@ class Minimee {
 	 * @param	Boolean Whether the tag is for a cached file or not (default TRUE)
 	 * @return	String containing an HTML tag reference to given reference
 	 */
-	private function _tag($filename, $cache = TRUE)
+	protected function _tag($filename, $cache = TRUE)
 	{
 		// only prepend cache_url if needed
 		$url = ($cache) ? $this->cache_url . $this->EE->functions->remove_double_slashes('/' . $filename) : $filename;
 
 		return str_replace('{minimee}', $url, $this->template);
 	}
-	// END
+	// ----------------------------------------------------------------
 
 
 	/**
