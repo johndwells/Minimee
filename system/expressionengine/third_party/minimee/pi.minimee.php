@@ -4,11 +4,11 @@ if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 require_once PATH_THIRD . 'minimee/config.php';
 
 $plugin_info = array(
-	'pi_name'			=> MINIMEE_NAME,
-	'pi_version'		=> MINIMEE_VER,
-	'pi_author'			=> MINIMEE_AUTHOR,
-	'pi_author_url'		=> MINIMEE_DOCS,
-	'pi_description'	=> MINIMEE_DESC,
+	'pi_name'			=> MIMIMEE_NAME,
+	'pi_version'		=> MIMIMEE_VER,
+	'pi_author'			=> MIMIMEE_AUTHOR,
+	'pi_author_url'		=> MIMIMEE_DOCS,
+	'pi_description'	=> MIMIMEE_DESC,
 	'pi_usage'			=> Minimee::usage()
 );
 
