@@ -97,6 +97,14 @@ class Minimee_ext {
 	 */
 	public function get_settings()
 	{
+		// -------------------------------------------
+		if ($this->EE->extensions->active_hook('minimee_get_settings'))
+		{
+			$this->EE->extensions->call('minimee_get_settings');
+		}
+		// -------------------------------------------
+
+
 		// if settings are already in session cache, use those
 		if (isset($this->EE->session->cache['minimee']['settings']))
 		{
