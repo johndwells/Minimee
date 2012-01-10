@@ -11,10 +11,10 @@ require_once PATH_THIRD . 'minimee/config.php';
  */
 class Minimee_ext {
 
-	public $name			= MIMIMEE_NAME;
-	public $version			= MIMIMEE_VER;
-	public $description		= MIMIMEE_DESC;
-	public $docs_url		= MIMIMEE_DOCS;
+	public $name			= MINIMEE_NAME;
+	public $version			= MINIMEE_VER;
+	public $description		= MINIMEE_DESC;
+	public $docs_url		= MINIMEE_DOCS;
 	public $settings_exist	= 'y';
 
 	public $settings		= array();
@@ -188,8 +188,8 @@ class Minimee_ext {
 		endswitch;
 		
 		// if config is not in DB, we need to inject ourselves into extensions hook
-		$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('minify_html', '', MIMIMEE_VER);
-  		$this->EE->extensions->version_numbers['Minimee_ext'] = MIMIMEE_VER;
+		$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('minify_html', '', MINIMEE_VER);
+  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
 
 		// normalize settings before adding to session
 		$this->settings = $this->_normalize_settings($this->settings);
