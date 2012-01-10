@@ -185,7 +185,7 @@ class Minimee_ext {
 			break;
 
 		endswitch;
-
+		
 		// normalize settings before adding to session
 		$this->settings = $this->_normalize_settings($this->settings);
 		
@@ -379,7 +379,32 @@ class Minimee_ext {
 						
 			}
 		}
-				
+		
+		if ($current < '1.1.4')
+		{
+			$this->EE->db
+						->select('settings')
+						->from('extensions')
+						->where('class', __CLASS__)
+						->limit(1);
+			$query = $this->EE->db->get();
+			
+			if ($query->num_rows() > 0)
+			{
+				// pull them out
+				$this->settings = unserialize($query->row()->settings);
+
+				//normalize just to be safe
+				$this->settings = $this->_normalize_settings($this->settings);
+
+				// update db				
+				$this->EE->db
+						->where('class', __CLASS__)
+						->update('extensions', array('settings' => serialize($this->settings)));
+						
+			}
+		}
+		
 		// update table row with version
 		$this->EE->db->where('class', __CLASS__);
 		$this->EE->db->update(
