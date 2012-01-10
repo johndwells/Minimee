@@ -298,7 +298,7 @@ class Minimee_ext {
 			$this->EE->db
 						->select('settings')
 						->from('extensions')
-						->where(array('enabled' => 'y', 'class' => __CLASS__ ))
+						->where('class', __CLASS__)
 						->limit(1);
 			$query = $this->EE->db->get();
 			
@@ -320,7 +320,7 @@ class Minimee_ext {
 
 				// update db				
 				$this->EE->db
-						->where(array('enabled' => 'y', 'class' => __CLASS__ ))
+						->where('class', __CLASS__)
 						->update('extensions', array('settings' => serialize($this->settings)));
 			}
 		}
@@ -330,7 +330,7 @@ class Minimee_ext {
 			$this->EE->db
 						->select('settings')
 						->from('extensions')
-						->where(array('enabled' => 'y', 'class' => __CLASS__ ))
+						->where('class', __CLASS__)
 						->limit(1);
 			$query = $this->EE->db->get();
 			
@@ -346,7 +346,7 @@ class Minimee_ext {
 
 				// update db				
 				$this->EE->db
-						->where(array('enabled' => 'y', 'class' => __CLASS__ ))
+						->where('class', __CLASS__)
 						->update('extensions', array('settings' => serialize($this->settings)));
 						
 			}
@@ -357,7 +357,7 @@ class Minimee_ext {
 			$this->EE->db
 						->select('settings')
 						->from('extensions')
-						->where(array('enabled' => 'y', 'class' => __CLASS__ ))
+						->where('class', __CLASS__)
 						->limit(1);
 			$query = $this->EE->db->get();
 			
@@ -374,7 +374,7 @@ class Minimee_ext {
 
 				// update db				
 				$this->EE->db
-						->where(array('enabled' => 'y', 'class' => __CLASS__ ))
+						->where('class', __CLASS__)
 						->update('extensions', array('settings' => serialize($this->settings)));
 						
 			}
