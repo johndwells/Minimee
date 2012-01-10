@@ -13,6 +13,8 @@ $lang = array(
 	'note_debug' => 'Turn on to output error debugging messages as HTML comments.',
 	'disable' => 'Disable plugin entirely?',
 	'note_disable' => 'Handy to set to \'Yes\' during development.',
+	'minify_html' => 'Minify HTML?',
+	'note_minify_html' => 'Run the parsed template through an HTML minifier.',
 	'remote_mode' => 'Remote file mode?',
 	'note_remote_mode' => 'Specify how to fetch remote and {stylesheet=} URLs. \'Auto\' mode will try cURL first.',
 	'save' => 'Save Settings',

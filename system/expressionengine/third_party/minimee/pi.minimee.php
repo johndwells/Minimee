@@ -140,20 +140,16 @@ class Minimee {
 
 	/**
 	 * Plugin function: exp:minimee:html
+	 *
+	 * Useful if the only thing you wish Minimee to do is minify HTML, AND
+	 * you have not installed Minimee's Extension.
 	 * 
 	 * @return mixed string or empty
 	 */
 	function html()
 	{
-        // start output buffering
-        ob_start();
-
-		// include our needed HTML library
-		require_once('libraries/HTML.php');
-
-        // register a shutdown function which will be able to compress output
-        register_shutdown_function('Minimee::_html');
-
+		// all we need to do here is initiate our extension; it will do the rest.
+		$this->_init();
 	}
 	// END
 
@@ -604,38 +600,6 @@ class Minimee {
 		return ($versions) ? $versions : FALSE;
 	}
 	// END
-
-
-	/**
-	 * Compress and output HTML
-	 * All credit needs to go to Wallace, the addon that gave us back the show_full_control_panel_end hook
-	 * This is undocumented, experimental, and follows a strict use-at-your-own-peril policy.
-	 * 
-	 * @return void
-	 */
-	static function _html()
-	{
-	    // this function will be called by PHP as the very last thing
-	    // that happens before an exit
-	    $EE =& get_instance();
-	
-	    // get the output buffer
-	    $out = ob_get_contents();
-	
-	    // erase it
-	    ob_end_clean();
-	
-		// minify output
-		$out = Minify_HTML::minify($out);
-	
-	    if ($EE->config->item('send_headers') == 'y')
-	    {
-	        $EE->output->set_header('Content-Length: '.strlen($out));
-	    }
-	
-	    // print the final output
-	    echo $out;
-	}	
 
 
 	/**
@@ -1192,6 +1156,9 @@ exp:minimee:css
 
 exp:minimee:js
 - Compress & combine JS files
+
+exp:minimee:html
+- Only needed when a) Extension is not installed, and b) you only wish to minify HTML, not CSS or JS.
 
 exp:minimee:display
 - Display files that have been queued for later
