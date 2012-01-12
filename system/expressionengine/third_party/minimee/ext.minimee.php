@@ -188,8 +188,11 @@ class Minimee_ext {
 		endswitch;
 		
 		// if config is not in DB, we need to inject ourselves into extensions hook
-		$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('minify_html', '', MINIMEE_VER);
-  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
+		if($this->config_loc != 'db')
+		{
+			$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('minify_html', '', MINIMEE_VER);
+	  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
+		}
 
 		// normalize settings before adding to session
 		$this->settings = $this->_normalize_settings($this->settings);
