@@ -2,7 +2,7 @@
 
 * Author: [John D Wells](http://johndwells.com)
 
-## Version 1.1.3
+## Version 1.1.4
 
 * Requires: ExpressionEngine 2
 
