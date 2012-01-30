@@ -4,14 +4,19 @@
 
 ## Version 1.1.5
 
-* Requires: ExpressionEngine 2
+### Requirements:
+
+* PHP5
+* ExpressionEngine 2.1 or later
+* For HTML Minification, EE2.4 or later is required
 
 ## Description
 
-Minimize, combine & cache your CSS and JS files. Because size DOES matter.
+Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size DOES matter.
 
 Minimee is to EE2 what SL Combinator is to EE1.  But with a few twists:
 
+* for EE2.4 and above, can minify your HTML
 * works with the global variables, even {stylesheet}
 * works with external files, over cURL or file_get_contents()
 * embed combined & minified content directly inline to your template
