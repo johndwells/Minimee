@@ -221,6 +221,12 @@ class Minimee_ext {
 	 */
 	public function minify_html($template, $sub, $site_id)
 	{
+		// has this hook already been called?
+		if (isset($this->EE->extensions->last_call) && $this->EE->extensions->last_call)
+		{
+			$template = $this->EE->extensions->last_call;
+		}
+
 		// do nothing if not final template
 		if($sub !== FALSE)
 		{
