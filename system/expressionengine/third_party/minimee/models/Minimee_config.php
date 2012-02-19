@@ -139,6 +139,18 @@ class Minimee_config
 
 
 	/**
+	 * Utility method
+	 *
+	 * Usage: if($Minimee_config->no('disable')) {...}
+	 */
+	public function no($setting)
+	{
+		return ($this->$setting == 'no') ? TRUE : FALSE;
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Sanitise an array of settings
 	 *
 	 * @param 	array	Array of possible settings
@@ -223,30 +235,6 @@ class Minimee_config
 	
 	
 	/**
-	 * Utility method
-	 *
-	 * Usage: if($Minimee_config->yes('disable')) {...}
-	 */
-	public function yes($setting)
-	{
-		return ($this->$setting == 'yes') ? TRUE : FALSE;
-	}
-	// ------------------------------------------------------
-
-
-	/**
-	 * Utility method
-	 *
-	 * Usage: if($Minimee_config->no('disable')) {...}
-	 */
-	public function no($setting)
-	{
-		return ($this->$setting == 'no') ? TRUE : FALSE;
-	}
-	// ------------------------------------------------------
-
-
-	/**
 	 * Reset runtime settings to empty array
 	 * Same as doing $Minimee_config->settings = array();
 	 *
@@ -270,6 +258,18 @@ class Minimee_config
 	public function runtime()
 	{
 		return $this->_runtime;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Utility method
+	 *
+	 * Usage: if($Minimee_config->yes('disable')) {...}
+	 */
+	public function yes($setting)
+	{
+		return ($this->$setting == 'yes') ? TRUE : FALSE;
 	}
 	// ------------------------------------------------------
 
