@@ -263,6 +263,18 @@ class Minimee_config
 
 
 	/**
+	 * Return copy of runtime settings
+	 *
+	 * @return 	array
+	 */
+	public function runtime()
+	{
+		return $this->_runtime;
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Look for settings in EE's config object
 	 */
 	protected function _from_config()
