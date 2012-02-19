@@ -541,7 +541,7 @@ class Minimee {
 
 			case ( ! file_exists($this->config->cache_path)) :
 			case ( ! is_writable($this->config->cache_path)) :
-				throw new Exception('Not configured correctly: your cache folder does not exist or is not writable.');
+				throw new Exception('Not configured correctly: your cache folder `' . $this->config->cache_path . '` does not exist or is not writable.');
 			break;
 
 			default :
