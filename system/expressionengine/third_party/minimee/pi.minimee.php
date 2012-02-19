@@ -527,7 +527,7 @@ class Minimee {
 		/**
 		 * If our cache path appears relative, append it to our base path
 		 */
-		if(strpos($this->config->cache_path, '/') !== 0)
+		if (strpos($this->config->cache_path, '/') !== 0)
 		{
 			$this->config->cache_path = $this->config->base_path . '/' . $this->config->cache_path;
 		}
@@ -535,7 +535,7 @@ class Minimee {
 		/**
 		 * If our cache url appears relative, append it to our base url
 		 */
-		if(strpos($this->config->cache_url, '//') !== 0 && ! preg_match("#https?://#", $this->config->cache_url))
+		if (strpos($this->config->cache_url, '//') !== 0 && ! preg_match("#https?://#", $this->config->cache_url))
 		{
 			$this->config->cache_url = $this->config->base_url . '/' . $this->config->cache_url;
 		}
@@ -617,7 +617,7 @@ class Minimee {
 		$out = '';
 
 		// if we are not combining, then minify each file in turn
-		if ($this->config->combine == 'no') :
+		if ($this->config->no('combine')) :
 
 			$tags = array();
 
@@ -790,7 +790,7 @@ class Minimee {
 				endforeach;
 	
 				// gotta see if things need minifying
-				if ($this->config->minify == 'yes')
+				if ($this->config->yes('minify'))
 				{
 					$cache = '';
 					foreach ($contents as $key => $content)
