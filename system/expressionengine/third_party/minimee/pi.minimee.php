@@ -581,7 +581,6 @@ class Minimee {
 	 */
 	private function _minify($contents, $rel = FALSE)
 	{
-
 		switch ($this->type) :
 			
 			case 'js':
@@ -593,20 +592,17 @@ class Minimee {
 			case 'css':
 				require_once('libraries/cssmin.php');
 				$this->cssmin = new cssmin();
-
+				
 				// set a relative path if exists
-				if ($rel !== FALSE)
-				{
-					$this->cssmin->config(array('relativePath' => $rel . '/'));
-				}
-
-				return $this->cssmin->minify($contents);
+				$relativePath = ($rel !== FALSE && $this->config->yes('css_relative_path')) ? $rel . '/' : NULL;
+				
+				// run and return
+				return $this->cssmin->minify($contents, FALSE, $relativePath);
 			break;
 
 		endswitch;
-	
 	}
-	// END
+	// ------------------------------------------------------
 	
 	
 	/**
