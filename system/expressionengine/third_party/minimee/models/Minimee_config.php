@@ -389,9 +389,9 @@ class Minimee_config
 		$ee =& get_instance();
 	
 		// see if we have already configured our defaults
-		if(isset($ee->session->cache['Minimee']['config']))
+		if(isset($ee->session->cache['minimee']['config']))
 		{
-			$this->_default = $ee->session->cache['Minimee']['config'];
+			$this->_default = $ee->session->cache['minimee']['config'];
 
 			Minimee_logger::log('Settings have been retrieved from session.', 3);
 		}
@@ -485,12 +485,12 @@ class Minimee_config
 			/*
 			 * Store this in session for subsequent runs
 			 */
-			if ( ! isset($ee->session->cache['Minimee']))
+			if ( ! isset($ee->session->cache['minimee']))
 			{
-				$ee->session->cache['Minimee'] = array();
+				$ee->session->cache['minimee'] = array();
 			}
 
-			$ee->session->cache['Minimee']['config'] = $this->_default;
+			$ee->session->cache['minimee']['config'] = $this->_default;
 
 			Minimee_logger::log('Settings have been saved in session.', 3);
 		}
