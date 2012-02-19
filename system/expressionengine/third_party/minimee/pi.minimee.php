@@ -539,11 +539,6 @@ class Minimee {
 				throw new Exception('Disabled because both minify and combine are set to \'no\'.');
 			break;
 
-			case ( ! $this->config->cache_path) :
-			case ( ! $this->config->cache_url) :
-				throw new Exception('Not configured: please set a cache path and/or url.');
-			break;
-
 			case ( ! file_exists($this->config->cache_path)) :
 			case ( ! is_writable($this->config->cache_path)) :
 				throw new Exception('Not configured correctly: your cache folder does not exist or is not writable.');
@@ -1032,9 +1027,6 @@ exp:minimee:css
 
 exp:minimee:js
 - Compress & combine JS files
-
-exp:minimee:html
-- Only needed when a) Extension is not installed, and b) you only wish to minify HTML, not CSS or JS.
 
 exp:minimee:display
 - Display files that have been queued for later
