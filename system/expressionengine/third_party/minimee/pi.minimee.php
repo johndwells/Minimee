@@ -231,42 +231,59 @@ class Minimee {
 		// now, loop through our filesdata and set all headers	
 		foreach ($this->filesdata as $key => $file) :
 
-			switch ($file['type']) :
-			
-				case ('stylesheet') :
+			/**
+			 * Stylesheets (e.g. {stylesheet='template/file'}
+			 */
+			if ($file['type'] == 'stylesheet') {
 
-					if ($stylesheet_versions && array_key_exists($file['stylesheet'], $stylesheet_versions))
-					{
-						// transform name out of super global and into valid URL
-						$this->filesdata[$key]['name'] = $this->EE->functions->fetch_site_index().QUERY_MARKER.'css='.$file['stylesheet'].(($this->EE->config->item('send_headers') == 'y') && isset($stylesheet_versions[$file['stylesheet']]) ? '.v.'.$stylesheet_versions[$file['stylesheet']] : '');
-						$this->filesdata[$key]['lastmodified'] = $stylesheet_versions[$file['stylesheet']];
-					}
-					else
-					{
-						throw new Exception('Missing file has been detected: ' . $file['stylesheet']);
-					}
-
-				break;
+				if ($stylesheet_versions && array_key_exists($file['stylesheet'], $stylesheet_versions))
+				{
+					// transform name out of super global and into valid URL
+					$this->filesdata[$key]['name'] = $this->EE->functions->fetch_site_index().QUERY_MARKER.'css='.$file['stylesheet'].(($this->EE->config->item('send_headers') == 'y') && isset($stylesheet_versions[$file['stylesheet']]) ? '.v.'.$stylesheet_versions[$file['stylesheet']] : '');
+					$this->filesdata[$key]['lastmodified'] = $stylesheet_versions[$file['stylesheet']];
+				}
+				else
+				{
+					throw new Exception('Missing file has been detected: ' . $file['stylesheet']);
+				}
 				
-				case ('remote') :
-					// it's too costly to check if a remote file exists, so we will assume here that it simply exists
-				break;
-				
-				case ('local') :
-				default :
+				// skip the rest of the current loop iteration
+				continue;
+			}
 
-					$realpath = realpath($this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $file['name']));
-					if ( ! file_exists($realpath))
-					{
-						throw new Exception('Missing file has been detected: ' . $this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $file['name']));
-					}
+			/**
+			 * Remote files
+			 */
+			if ($file['type'] == 'remote') {
 
-					$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
-					$this->filesdata[$key]['lastmodified'] = ($this->filesdata[$key]['lastmodified'] == 0) ? '0000000000' : $this->filesdata[$key]['lastmodified'];
+				// try replacing url with base path, and see if there's a file there
+				$alias = str_ireplace($this->config->base_url, $this->config->base_path, $file['name']);
+				if (file_exists($alias))
+				{
+					// let's take a chance!
+					$this->filesdata[$key]['name'] = str_ireplace($this->config->base_url, '', $file['name']);
+					$this->filesdata[$key]['type'] = 'local';
+					
+					$this->log->info('Treating `' . $file['name'] . '` as a local file: `' . $this->filesdata[$key]['name'] . '`');
+				}
+				else
+				{
+					// skip the rest of the current loop iteration
+					continue;
+				}
+			}
+		
+			/**
+			 * Local files
+			 */
+			$realpath = realpath($this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $this->filesdata[$key]['name']));
+			if ( ! file_exists($realpath))
+			{
+				throw new Exception('Missing file has been detected: ' . $this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $this->filesdata[$key]['name']));
+			}
 
-				break;
-			
-			endswitch;
+			$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
+			$this->filesdata[$key]['lastmodified'] = ($this->filesdata[$key]['lastmodified'] == 0) ? '0000000000' : $this->filesdata[$key]['lastmodified'];
 
 		endforeach;
 
