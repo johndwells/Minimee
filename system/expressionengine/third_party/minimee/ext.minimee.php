@@ -2,6 +2,7 @@
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 require_once PATH_THIRD . 'minimee/config.php';
+require_once PATH_THIRD . 'minimee/models/Minimee_logger.php';
 
 /**
  * Minimee: minimize & combine your CSS and JS files. For EE2 only.
@@ -22,6 +23,8 @@ class Minimee_ext {
 	
 	public $EE;
 
+	public $log;
+
 	/**
 	 * Constructor
 	 *
@@ -31,6 +34,9 @@ class Minimee_ext {
 	public function __construct($settings = array())
 	{
 		$this->EE =& get_instance();
+
+		// create our logger
+		$this->log = new Minimee_logger();
 
 		// initialise default settings array
 		$this->settings = $this->_default_settings();
@@ -119,7 +125,7 @@ class Minimee_ext {
 				$this->settings['minify_html'] = $this->EE->config->item('minimee_minify_html'); // optional
 				$this->settings['remote_mode'] = $this->EE->config->item('remote_mode'); // optional
 				
-				$this->EE->TMPL->log_item('Minimee has retrieved settings from config.');
+				$this->log->info('Retrieved settings from config.');
 			break;
 			
 			case ('global') :
@@ -162,7 +168,7 @@ class Minimee_ext {
 					$this->settings['remote_mode'] = $this->EE->config->_global_vars['minimee_remote_mode'];
 				}
 	
-				$this->EE->TMPL->log_item('Minimee has retrieved settings from global variables.');
+				$this->log->info('Retrieved settings from global variables.');
 			break;
 			
 			case ('db') :
@@ -177,11 +183,11 @@ class Minimee_ext {
 				if ($query->num_rows() > 0)
 				{
 					$this->settings = unserialize($query->row()->settings);
-					$this->EE->TMPL->log_item('Minimee has retrieved settings from DB.');
+					$this->log->info('Retrieved settings from DB.');
 				}
 				else
 				{
-					$this->EE->TMPL->log_item('Minimee has not yet been configured.');
+					$this->log->error('No configuration settings found.');
 				}
 			break;
 

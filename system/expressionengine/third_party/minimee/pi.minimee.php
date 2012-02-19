@@ -2,6 +2,7 @@
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 require_once PATH_THIRD . 'minimee/config.php';
+require_once PATH_THIRD . 'minimee/models/Minimee_logger.php';
 
 $plugin_info = array(
 	'pi_name'			=> MINIMEE_NAME,
@@ -45,6 +46,8 @@ class Minimee {
 	public $EE;
 	public $ext;
 
+	public $log;
+
 
 	/**
 	 * Constructor
@@ -54,6 +57,9 @@ class Minimee {
 	public function __construct()
 	{
 		$this->EE =& get_instance();
+
+		// create our logger
+		$this->log = new Minimee_logger();
 	}
 	// END
 
@@ -100,7 +106,7 @@ class Minimee {
 		// free memory where possible
 		unset($js);
 		unset($css);
-		
+
 		return $out;
 	}
 	// END
@@ -178,15 +184,15 @@ class Minimee {
 	{
 		if ($e)
 		{
-			$log = 'Minimee: ' . $e->getMessage();
+			$log = $e->getMessage();
 		}
 		else
 		{
-			$log = 'Minimee has aborted without a specific error.';
+			$log = 'Aborted without a specific error.';
 		}
 
-		// log our debug message to EE
-		$this->EE->TMPL->log_item($log);
+		// log our debug message
+		$this->log->error($log);
 
 		// Let's return the original tagdata, wherever it came from
 		if ($this->queue && array_key_exists($this->queue, $this->EE->session->cache['minimee'][$this->type]))
@@ -226,7 +232,7 @@ class Minimee {
 		// FILE_READ_MODE is set in /system/expressionengine/config/constants.php
 		@chmod($filepath, FILE_READ_MODE);
 
-		$this->EE->TMPL->log_item('Minimee: Cache file ' . $filename . ' was written to ' . $this->cache_path);
+		$this->log->info('Cache file `' . $filename . '` was written to ' . $this->cache_path);
 
 		// free memory where possible
 		unset($filepath);
@@ -679,7 +685,7 @@ class Minimee {
 			break;
 
 			default :
-				$this->EE->TMPL->log_item('Minimee has passed flightcheck.');
+				$this->log->info('Passed flightcheck.');
 			break;
 
 		endswitch;
@@ -747,7 +753,7 @@ class Minimee {
 
 				if (file_exists($this->EE->functions->remove_double_slashes($this->cache_path . '/' . $this->filesdata[$key]['cache_filename'])))
 				{
-					$this->EE->TMPL->log_item('Minimee is returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $this->filesdata[$key]['cache_filename']));
+					$this->log->info('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $this->filesdata[$key]['cache_filename']));
 					$tags[$key] = $this->_tag($this->filesdata[$key]['cache_filename']);
 				}
 				else
@@ -839,7 +845,7 @@ class Minimee {
 	
 			if (file_exists($this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename)))
 			{
-				$this->EE->TMPL->log_item('Minimee is returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename));
+				$this->log->info('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename));
 				$out = $this->_tag($filename);
 			}
 			else
@@ -1041,7 +1047,7 @@ class Minimee {
 	{
 		if (($this->remote_mode == 'auto' || $this->remote_mode == 'curl') && in_array('curl', get_loaded_extensions()))
 		{
-			$this->EE->TMPL->log_item('Minimee is using CURL for remote files.');
+			$this->log->info('Using CURL for remote files.');
 			$this->remote_mode = 'curl';
 			
 			return;
@@ -1049,12 +1055,12 @@ class Minimee {
 		
 		if (($this->remote_mode == 'auto' || $this->remote_mode == 'fgc') && ini_get('allow_url_fopen'))
 		{
-			$this->EE->TMPL->log_item('Minimee is using file_get_contents() for remote files.');
+			$this->log->info('Using file_get_contents() for remote files.');
 			$this->remote_mode = 'fgc';
 
 			if ( ! defined('OPENSSL_VERSION_NUMBER'))
 			{
-				$this->EE->TMPL->log_item('Minimee has noticed that your PHP compile does not appear to support file_get_contents() over SSL.');
+				$this->log->debug('Your PHP compile does not appear to support file_get_contents() over SSL.');
 			}
 
 			return;
