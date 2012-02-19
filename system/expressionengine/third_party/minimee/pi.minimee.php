@@ -23,7 +23,6 @@ $plugin_info = array(
 class Minimee {
 
 	/* usage settings */
-	public $remote_mode;
 	public $queue;
 
 	public $filesdata			= array();
@@ -281,7 +280,6 @@ class Minimee {
 	{
 		try
 		{
-			$this->_set_remote_mode();
 			$this->_fetch_params();
 			$this->_fetch_queue();
 			$this->_flightcheck();
@@ -307,7 +305,6 @@ class Minimee {
 	{
 		try
 		{
-			$this->_set_remote_mode();
 			$this->_fetch_params();
 			$this->_fetch_queue();
 			$this->_flightcheck();
@@ -527,12 +524,33 @@ class Minimee {
 	 */
 	private function _flightcheck()
 	{
+		/**
+		 * If our cache path appears relative, append it to our base path
+		 */
+		if(strpos($this->config->cache_path, '/') !== 0)
+		{
+			$this->config->cache_path = $this->config->base_path . '/' . $this->config->cache_path;
+		}
+
+		/**
+		 * If our cache url appears relative, append it to our base url
+		 */
+		if(strpos($this->config->cache_url, '//') !== 0 && ! preg_match("#https?://#", $this->config->cache_url))
+		{
+			$this->config->cache_url = $this->config->base_url . '/' . $this->config->cache_url;
+		}
+
+		/**
+		 * Determine our runtime remote_mode setting
+		 */
+		$this->_set_remote_mode();
+
 	
 		// Flightcheck: determine if we can continue or disable permanently
 		switch ('flightcheck') :
 
 			case ($this->config->disable == 'yes') :
-				throw new Exception('Disabled via config or tag parameter.');
+				throw new Exception('Disabled manually.');
 			break;
 
 			case ( $this->config->minify == 'no' && $this->config->combine == 'no') :
@@ -624,7 +642,7 @@ class Minimee {
 						case ('stylesheet');
 						case ('remote') :
 
-							switch ($this->remote_mode)
+							switch ($this->config->remote_mode)
 							{
 								case ('fgc') :
 									// I hate to suppress errors, but it's only way to avoid one from a 404 response
@@ -719,7 +737,7 @@ class Minimee {
 						case ('stylesheet');
 						case ('remote') :
 						
-							switch ($this->remote_mode)
+							switch ($this->config->remote_mode)
 							{
 								case ('fgc') :
 									// I hate to suppress errors, but it's only way to avoid one from a 404 response
@@ -820,7 +838,6 @@ class Minimee {
 	{
 		try
 		{
-			$this->_set_remote_mode();
 			$this->_fetch_params();
 			$this->_fetch_files($this->EE->TMPL->tagdata);
 	
@@ -944,7 +961,7 @@ class Minimee {
 		{
 			$this->log->info('Using CURL for remote files.');
 
-			$this->remote_mode = 'curl';
+			$this->config->remote_mode = 'curl';
 			
 			return;
 		}
@@ -959,15 +976,13 @@ class Minimee {
 				$this->log->debug('Your PHP compile does not appear to support file_get_contents() over SSL.');
 			}
 
-			$this->remote_mode = 'fgc';
+			$this->config->remote_mode = 'fgc';
 
 			return;
 		}
 		
 		// if we're here, then we cannot fetch remote files
 		$this->log->debug('Remote files cannot be fetched.', 2);
-		
-		$this->remote_mode = '';
 	}
 
 
