@@ -51,6 +51,12 @@ class Minimee {
 
 		// create our config
 		$this->config = new Minimee_config();
+
+		// be sure we have a cache set up
+		if ( ! isset($this->EE->session->cache['minimee']))
+		{
+			$this->EE->session->cache['minimee'] = array();
+		}
 	}
 	// END
 
@@ -371,7 +377,7 @@ class Minimee {
 	 */	
 	private function _fetch_queue()
 	{
-		if ( ! array_key_exists($this->queue, $this->EE->session->cache['minimee'][$this->type]))
+		if ( ! isset($this->EE->session->cache['minimee'][$this->type][$this->queue]))
 		{
 			throw new Exception('Could not find a queue of files by the name of \'' . $this->queue . '\'.');
 		}
@@ -919,6 +925,12 @@ class Minimee {
 	 */
 	private function _set_queue()
 	{
+		// be sure we have a cache set up
+		if ( ! isset($this->EE->session->cache['minimee'][$this->type]))
+		{
+			$this->EE->session->cache['minimee'][$this->type] = array();
+		}
+
 		// create new session array for this queue
 		if ( ! array_key_exists($this->queue, $this->EE->session->cache['minimee'][$this->type]))
 		{
