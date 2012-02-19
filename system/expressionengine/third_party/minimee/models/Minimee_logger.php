@@ -83,6 +83,13 @@ class Minimee_logger
 		{
 			get_instance()->TMPL->log_item(MINIMEE_NAME . " [{$severity}]: {$message}");
 		}
+		
+		// If we are in CP and encounter an error, throw a nasty show_message()
+		if (REQ == 'CP' && $severity == Minimee_logger::$_levels[1])
+		{
+			show_error(MINIMEE_NAME . " [{$severity}]: {$message}");
+		}
+
 	}
 	// ------------------------------------------------------
 	
