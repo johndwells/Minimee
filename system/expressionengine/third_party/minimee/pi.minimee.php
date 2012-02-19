@@ -23,11 +23,11 @@ $plugin_info = array(
 class Minimee {
 
 	/* usage settings */
+	public $remote_mode;
 	public $queue;
 
 	public $filesdata			= array();
 	public $stylesheet_query	= array();
-	public $debug_format		= "<!-- %s -->\n %s"; // first is debug message; second is orig tagdata
 	public $template;
 	public $type;
 	
@@ -120,14 +120,12 @@ class Minimee {
 		if ($this->EE->TMPL->fetch_param('js'))
 		{
 			$this->queue = $this->EE->TMPL->fetch_param('js');
-			$this->debug_format = "</script><!-- %s -->%s<script type='text/javascript'>\n";
 			$this->type = 'js';
 		}
 
 		if ($this->EE->TMPL->fetch_param('css'))
 		{
 			$this->queue = $this->EE->TMPL->fetch_param('css');
-			$this->debug_format = "</style><!-- %s -->%s<style type='text/css'>\n";
 			$this->type = 'css';
 		}
 		
@@ -167,21 +165,18 @@ class Minimee {
 			$log = 'Aborted without a specific error.';
 		}
 
-		// log our debug message
+		// log our error message
 		$this->log->error($log);
 
 		// Let's return the original tagdata, wherever it came from
 		if ($this->queue && array_key_exists($this->queue, $this->EE->session->cache['minimee'][$this->type]))
 		{
-			$out = $this->EE->session->cache['minimee'][$this->type][$this->queue]['tagdata'];
+			return $this->EE->session->cache['minimee'][$this->type][$this->queue]['tagdata'];
 		}
 		else
 		{
-			$out = $this->EE->TMPL->tagdata;
+			return $this->EE->TMPL->tagdata;
 		}
-		
-		// should we prepend our debug message to the output?
-		return ($this->config->debug == 'yes') ? sprintf($this->debug_format, $log, $out) : str_replace('<!--  -->', '', sprintf($this->debug_format, '', $out));
 	}
 	// END
 	
@@ -286,6 +281,7 @@ class Minimee {
 	{
 		try
 		{
+			$this->_set_remote_mode();
 			$this->_fetch_params();
 			$this->_fetch_queue();
 			$this->_flightcheck();
@@ -311,6 +307,7 @@ class Minimee {
 	{
 		try
 		{
+			$this->_set_remote_mode();
 			$this->_fetch_params();
 			$this->_fetch_queue();
 			$this->_flightcheck();
@@ -632,7 +629,7 @@ class Minimee {
 						case ('stylesheet');
 						case ('remote') :
 
-							switch ($this->config->remote_mode)
+							switch ($this->remote_mode)
 							{
 								case ('fgc') :
 									// I hate to suppress errors, but it's only way to avoid one from a 404 response
@@ -727,7 +724,7 @@ class Minimee {
 						case ('stylesheet');
 						case ('remote') :
 						
-							switch ($this->config->remote_mode)
+							switch ($this->remote_mode)
 							{
 								case ('fgc') :
 									// I hate to suppress errors, but it's only way to avoid one from a 404 response
@@ -828,6 +825,7 @@ class Minimee {
 	{
 		try
 		{
+			$this->_set_remote_mode();
 			$this->_fetch_params();
 			$this->_fetch_files($this->EE->TMPL->tagdata);
 	
@@ -937,6 +935,46 @@ class Minimee {
 	}
 	// END
 	
+
+	/** 
+	 * Determine our remote mode for this call
+	 * 
+	 * @param string either 'js' or 'css'
+	 * @return void
+	 */
+	public function _set_remote_mode()
+	{
+		// if 'auto', then we try curl first
+		if (preg_match('/auto|curl/i', $this->config->remote_mode) && in_array('curl', get_loaded_extensions()))
+		{
+			$this->log->info('Using CURL for remote files.');
+
+			$this->remote_mode = 'curl';
+			
+			return;
+		}
+
+		// file_get_contents() is auto mode fallback
+		if (preg_match('/auto|fgc/i', $this->config->remote_mode) && ini_get('allow_url_fopen'))
+		{
+			$this->log->info('Using file_get_contents() for remote files.');
+
+			if ( ! defined('OPENSSL_VERSION_NUMBER'))
+			{
+				$this->log->debug('Your PHP compile does not appear to support file_get_contents() over SSL.');
+			}
+
+			$this->remote_mode = 'fgc';
+
+			return;
+		}
+		
+		// if we're here, then we cannot fetch remote files
+		$this->log->debug('Remote files cannot be fetched.', 2);
+		
+		$this->remote_mode = '';
+	}
+
 
 	/** 
 	 * Internal function for making tag strings

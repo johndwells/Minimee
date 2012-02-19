@@ -10,12 +10,10 @@ class Minimee_config
 {
 
 	/**
-	 * Default settings
-	 *
-	 * Set once during init and NOT modified thereafter.
-	 * Ensures we are only ever working with valid settings.
+	 * Allowed settings - the master list
+	 * 
 	 */
-	protected $_default = array(
+	public $allowed = array(
 		'base_path'				=> '',
 		'base_url'				=> '',
 		'cache_path'			=> '',
@@ -23,7 +21,6 @@ class Minimee_config
 		'combine'				=> '',
 		'combine_css'			=> '',
 		'combine_js'			=> '',
-		'debug'					=> '',
 		'disable'				=> '',
 		'minify'				=> '',
 		'minify_css'			=> '',
@@ -37,18 +34,26 @@ class Minimee_config
 	
 	
 	/**
+	 * Where we find our config ('db', 'config', 'hook' or 'default').
+	 * A 3rd party hook may also rename to something else.
+	 */
+	public $location = FALSE;
+
+
+	/**
+	 * Default settings
+	 *
+	 * Set once during init and NOT modified thereafter.
+	 */
+	protected $_default = array();
+	
+	
+	/**
 	 * Runtime settings
 	 *
 	 * Overrides of defaults used at runtime; our only settings modified directly.
 	 */
 	protected $_runtime	= array();
-	
-	
-	/**
-	 * Where we find our config ('db', 'config', 'hook' or 'default').
-	 * A 3rd party hook may also rename to something else.
-	 */
-	public $location = FALSE;
 
 
 	// ------------------------------------------------------
@@ -129,7 +134,7 @@ class Minimee_config
 			}
 		}
 		// just set an individual setting
-		elseif(array_key_exists($prop, $this->_default))
+		elseif(array_key_exists($prop, $this->allowed))
 		{
 			$this->_runtime[$prop] = $this->sanitise_setting($prop, $value);
 		}
@@ -151,7 +156,7 @@ class Minimee_config
 		}
 
 		// reduce our $settings array to only valid keys
-        $valid = array_flip(array_intersect(array_keys($this->_default), array_keys($settings)));
+        $valid = array_flip(array_intersect(array_keys($this->allowed), array_keys($settings)));
         
 		foreach($valid as $setting => $value)
 		{
@@ -172,10 +177,9 @@ class Minimee_config
 	 */
 	public function sanitise_setting($setting, $value)
 	{
-		switch($setting)
-		{
+		switch($setting) :
+
 			/* Booleans default NO */
-			case('debug') :
 			case('disable') :
 			case('minify_html') :
 				return ($value === TRUE OR preg_match('/1|true|on|yes|y/i', $value)) ? 'yes' : 'no';
@@ -199,35 +203,7 @@ class Minimee_config
 			
 			/* ENUM */
 			case('remote_mode') :
-			
-				// first set to something valid
-				$value = preg_match('/auto|curl|fgc/i', $value) ? $value : 'auto';
-
-				// if 'auto', then we try curl first
-				if (preg_match('/auto|curl/i', $value) && in_array('curl', get_loaded_extensions()))
-				{
-					Minimee_logger::log('Using CURL for remote files.', 3);
-
-					return 'curl';
-				}
-	
-				// file_get_contents() is auto mode fallback
-				if (preg_match('/auto|fgc/i', $value) && ini_get('allow_url_fopen'))
-				{
-					$this->log->info('Using file_get_contents() for remote files.');
-
-					if ( ! defined('OPENSSL_VERSION_NUMBER'))
-					{
-						Minimee_logger::log('Your PHP compile does not appear to support file_get_contents() over SSL.', 2);
-					}
-
-					return 'fgc';
-				}
-				
-				// if we're here, then we cannot fetch remote files,
-				Minimee_logger::log('Remote files cannot be fetched.', 2);
-
-				return '';
+				return preg_match('/auto|curl|fgc/i', $value) ? $value : 'auto';
 			break;
 			
 			/* String - Paths */
@@ -248,7 +224,8 @@ class Minimee_config
 			default :
 				return $value;
 			break;
-		}
+		
+		endswitch;
 	}
 	// ------------------------------------------------------
 	
@@ -256,7 +233,7 @@ class Minimee_config
 	/**
 	 * Utility method
 	 *
-	 * Usage: if($Minimee_config->yes('debug')) {...}
+	 * Usage: if($Minimee_config->yes('disable')) {...}
 	 */
 	public function yes($setting)
 	{
@@ -268,7 +245,7 @@ class Minimee_config
 	/**
 	 * Utility method
 	 *
-	 * Usage: if($Minimee_config->no('debug')) {...}
+	 * Usage: if($Minimee_config->no('disable')) {...}
 	 */
 	public function no($setting)
 	{
@@ -418,6 +395,9 @@ class Minimee_config
 				Minimee_logger::log('Could not find any settings to use. Using defaults.', 2);
 				
 				$this->location = 'default';
+				
+				// start with an empty array
+				$settings = array();
 			}
 
 			/*
@@ -450,7 +430,7 @@ class Minimee_config
 			/*
 			 * Now make a complete & sanitised settings array, and set as our default
 			 */
-			$this->_default = $this->sanitise_settings(array_merge($this->_default, $settings));
+			$this->_default = $this->sanitise_settings(array_merge($this->allowed, $settings));
 	
 			// cleanup
 			unset($settings);
