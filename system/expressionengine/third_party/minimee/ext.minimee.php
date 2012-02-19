@@ -99,123 +99,6 @@ class Minimee_ext {
 
 
 	/**
-	 * Used by plugin, retrieves settings from config, global variables OR database (and in that order)
-	 *
-	 * @return void
-	 */
-	public function get_settings()
-	{
-		// if settings are already in session cache, use those
-		if (isset($this->EE->session->cache['minimee']['settings']))
-		{
-			$this->settings = $this->EE->session->cache['minimee']['settings'];
-			return;
-		}
-		
-		// retrieve config settings (location may vary)
-		switch ($this->config_loc) :
-
-			case ('config') :
-				$this->settings['cache_path'] = $this->EE->config->item('minimee_cache_path');
-				$this->settings['cache_url'] = $this->EE->config->item('minimee_cache_url');
-				$this->settings['base_path'] = $this->EE->config->item('minimee_base_path'); // optional
-				$this->settings['base_url'] = $this->EE->config->item('minimee_base_url'); // optional
-				$this->settings['debug'] = $this->EE->config->item('minimee_debug'); // optional
-				$this->settings['disable'] = $this->EE->config->item('minimee_disable'); // optional
-				$this->settings['minify_html'] = $this->EE->config->item('minimee_minify_html'); // optional
-				$this->settings['remote_mode'] = $this->EE->config->item('remote_mode'); // optional
-				
-				$this->log->info('Retrieved settings from config.');
-			break;
-			
-			case ('global') :
-				$this->settings['cache_path'] = $this->EE->config->_global_vars['minimee_cache_path'];
-				$this->settings['cache_url'] = $this->EE->config->_global_vars['minimee_cache_url'];
-	
-				// optional
-				if (array_key_exists('minimee_base_path', $this->EE->config->_global_vars))
-				{
-					$this->settings['base_path'] = $this->EE->config->_global_vars['minimee_base_path'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_base_url', $this->EE->config->_global_vars))
-				{
-					$this->settings['base_url'] = $this->EE->config->_global_vars['minimee_base_url'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_debug', $this->EE->config->_global_vars))
-				{
-					$this->settings['debug'] = $this->EE->config->_global_vars['minimee_debug'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_disable', $this->EE->config->_global_vars))
-				{
-					$this->settings['disable'] = $this->EE->config->_global_vars['minimee_disable'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_minify_html', $this->EE->config->_global_vars))
-				{
-					$this->settings['minify_html'] = $this->EE->config->_global_vars['minimee_minify_html'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_remote_mode', $this->EE->config->_global_vars))
-				{
-					$this->settings['remote_mode'] = $this->EE->config->_global_vars['minimee_remote_mode'];
-				}
-	
-				$this->log->info('Retrieved settings from global variables.');
-			break;
-			
-			case ('db') :
-			default :
-				$this->EE->db
-							->select('settings')
-							->from('extensions')
-							->where(array('enabled' => 'y', 'class' => __CLASS__ ))
-							->limit(1);
-				$query = $this->EE->db->get();
-				
-				if ($query->num_rows() > 0)
-				{
-					$this->settings = unserialize($query->row()->settings);
-					$this->log->info('Retrieved settings from DB.');
-				}
-				else
-				{
-					$this->log->error('No configuration settings found.');
-				}
-			break;
-
-		endswitch;
-		
-		// if config is not in DB, we need to inject ourselves into extensions hook
-		if($this->config_loc != 'db')
-		{
-			$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('minify_html', '', MINIMEE_VER);
-	  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
-		}
-
-		// normalize settings before adding to session
-		$this->settings = $this->_normalize_settings($this->settings);
-		
-		// now set to session for subsequent calls
-		$this->EE->session->cache['minimee'] = array(
-			'settings' => array(),
-			'js' => array(),
-			'css' => array()
-		);
-		$this->EE->session->cache['minimee']['settings'] = $this->settings;
-		
-	}
-	// END
-
-
-	/**
 	 * Method for template_post_parse hook
 	 *
 	 * 
@@ -239,11 +122,12 @@ class Minimee_ext {
 			return $template;
 		}
 		
-		// fetch settings
-		$this->get_settings();
+		// grab our config
+		require_once PATH_THIRD . 'minimee/models/Minimee_config.php';
+		$config = new Minimee_config();
 		
 		// do not run through HTML minifier?
-		if($this->settings['disable'] == 'yes' || $this->settings['minify_html'] == 'no')
+		if($config->disable == 'yes' || $config->minify_html == 'no')
 		{
 			return $template;
 		}

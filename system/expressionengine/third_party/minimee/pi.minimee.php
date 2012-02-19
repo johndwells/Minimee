@@ -2,6 +2,7 @@
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 require_once PATH_THIRD . 'minimee/config.php';
+require_once PATH_THIRD . 'minimee/models/Minimee_config.php';
 require_once PATH_THIRD . 'minimee/models/Minimee_logger.php';
 
 $plugin_info = array(
@@ -21,20 +22,7 @@ $plugin_info = array(
  */
 class Minimee {
 
-	/* config - required */
-	public $cache_path;
-	public $cache_url;
-
-	/* config - optional */
-	public $base_path;
-	public $base_url;
-	public $debug;
-	public $disable;
-	public $remote_mode;
-
 	/* usage settings */
-	public $combine;
-	public $minify;
 	public $queue;
 
 	public $filesdata			= array();
@@ -47,6 +35,7 @@ class Minimee {
 	public $ext;
 
 	public $log;
+	public $config;
 
 
 	/**
@@ -60,6 +49,9 @@ class Minimee {
 
 		// create our logger
 		$this->log = new Minimee_logger();
+
+		// create our config
+		$this->config = new Minimee_config();
 	}
 	// END
 
@@ -145,22 +137,6 @@ class Minimee {
 
 
 	/**
-	 * Plugin function: exp:minimee:html
-	 *
-	 * Useful if the only thing you wish Minimee to do is minify HTML, AND
-	 * you have not installed Minimee's Extension.
-	 * 
-	 * @return mixed string or empty
-	 */
-	function html()
-	{
-		// all we need to do here is initiate our extension; it will do the rest.
-		$this->_init();
-	}
-	// END
-
-
-	/**
 	 * Plugin function: exp:minimee:js
 	 * 
 	 * @return mixed string or empty
@@ -205,7 +181,7 @@ class Minimee {
 		}
 		
 		// should we prepend our debug message to the output?
-		return ($this->debug == 'yes') ? sprintf($this->debug_format, $log, $out) : str_replace('<!--  -->', '', sprintf($this->debug_format, '', $out));
+		return ($this->config->debug == 'yes') ? sprintf($this->debug_format, $log, $out) : str_replace('<!--  -->', '', sprintf($this->debug_format, '', $out));
 	}
 	// END
 	
@@ -220,19 +196,19 @@ class Minimee {
 	 */
 	private function _cache($filename, $file_data)
 	{
-		$filepath = $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename);
+		$filepath = $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $filename);
 		$success = file_put_contents($filepath, $file_data);
 		
 		if ($success === FALSE)
 		{ 
-			throw new Exception('There was an error writing cache file ' . $filename . ' to ' . $this->cache_path);
+			throw new Exception('There was an error writing cache file ' . $filename . ' to ' . $this->config->cache_path);
 		}
 
 		// borrowed from /system/expressionengine/libraries/Template.php
 		// FILE_READ_MODE is set in /system/expressionengine/config/constants.php
 		@chmod($filepath, FILE_READ_MODE);
 
-		$this->log->info('Cache file `' . $filename . '` was written to ' . $this->cache_path);
+		$this->log->info('Cache file `' . $filename . '` was written to ' . $this->config->cache_path);
 
 		// free memory where possible
 		unset($filepath);
@@ -279,10 +255,10 @@ class Minimee {
 				case ('local') :
 				default :
 
-					$realpath = realpath($this->EE->functions->remove_double_slashes($this->base_path . '/' . $file['name']));
+					$realpath = realpath($this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $file['name']));
 					if ( ! file_exists($realpath))
 					{
-						throw new Exception('Missing file has been detected: ' . $this->EE->functions->remove_double_slashes($this->base_path . '/' . $file['name']));
+						throw new Exception('Missing file has been detected: ' . $this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $file['name']));
 					}
 
 					$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
@@ -310,7 +286,6 @@ class Minimee {
 	{
 		try
 		{
-			$this->_init();
 			$this->_fetch_params();
 			$this->_fetch_queue();
 			$this->_flightcheck();
@@ -336,7 +311,6 @@ class Minimee {
 	{
 		try
 		{
-			$this->_init();
 			$this->_fetch_params();
 			$this->_fetch_queue();
 			$this->_flightcheck();
@@ -368,7 +342,7 @@ class Minimee {
 			}
 			
 			// replace the url with path
-			$paths = str_replace($this->cache_url, $this->cache_path, $matches[1]);
+			$paths = str_replace($this->config->cache_url, $this->config->cache_path, $matches[1]);
 
 			// clear $out so we can replace with code to embed
 			$out = '';
@@ -488,67 +462,8 @@ class Minimee {
 	 */
 	private function _fetch_params()
 	{
-		// debug, default is 'no'
-		// includes legacy support for true/false
-		switch ($this->EE->TMPL->fetch_param('debug', 'no'))
-		{
-			case ('true') :
-			case ('yes') :
-				$this->debug = 'yes';
-			break;
-			
-			default :
-				// prevent overriding settings from config
-				$this->debug = ($this->debug == 'yes') ? 'yes' : 'no';
-			break;
-				
-		}
-		
-		// disable, default is 'no'
-		// includes legacy support for true/false
-		switch ($this->EE->TMPL->fetch_param('disable', 'no'))
-		{
-			case ('true') :
-			case ('yes') :
-				$this->disable = 'yes';
-			break;
-			
-			default :
-				// prevent overriding settings from config
-				$this->disable = ($this->disable == 'yes') ? 'yes' : 'no';
-			break;
-				
-		}
-		
-		// combine, default is 'yes'
-		// includes legacy support for true/false
-		switch ($this->EE->TMPL->fetch_param('combine', 'yes'))
-		{
-			case ('false') :
-			case ('no') :
-				$this->combine = 'no';
-			break;
-			
-			default :
-				$this->combine = 'yes';
-			break;
-				
-		}
-
-		// minify, default is 'yes'
-		// includes legacy support for true/false
-		switch ($this->EE->TMPL->fetch_param('minify', 'yes'))
-		{
-			case ('false') :
-			case ('no') :
-				$this->minify = 'no';
-			break;
-			
-			default :
-				$this->minify = 'yes';
-			break;
-				
-		}
+		// pass all params through our config, will magically pick up what's needed
+		$this->config->settings = $this->EE->TMPL->tagparams;
 
 		// fetch queue if it hasn't already been set via Minimee::_display()
 		if ( ! $this->queue)
@@ -609,53 +524,6 @@ class Minimee {
 
 
 	/**
-	 * Initialise: retrieve settings
-	 *
-	 * @return void
-	 */
-	private function _init()
-	{
-	
-		// have we already initialised once?
-		if ( ! isset($this->EE->session->cache['minimee']['settings']))
-		{
-			// Get settings with help of our extension
-			if ( ! class_exists('Minimee_ext'))
-			{
-				require_once(PATH_THIRD . 'minimee/ext.minimee.php');
-			}
-			$this->ext = new Minimee_ext();
-			$this->ext->get_settings();
-		}
-
-		// grab settings
-		$this->base_path = $this->EE->session->cache['minimee']['settings']['base_path'];
-		$this->base_url = $this->EE->session->cache['minimee']['settings']['base_url'];
-		$this->cache_path = $this->EE->session->cache['minimee']['settings']['cache_path'];
-		$this->cache_url = $this->EE->session->cache['minimee']['settings']['cache_url'];
-		$this->debug = $this->EE->session->cache['minimee']['settings']['debug'];
-		$this->disable = $this->EE->session->cache['minimee']['settings']['disable'];
-		$this->remote_mode = $this->EE->session->cache['minimee']['settings']['remote_mode'];
-		
-		// use global FCPATH if nothing set
-		if( ! $this->base_path)
-		{
-			$this->base_path = FCPATH;
-		}
-		
-		// use config base_url if nothing set
-		if( ! $this->base_url)
-		{
-			$this->base_url = $this->EE->config->config['base_url'];
-		}
-		
-		// set remote mode
-		$this->_set_remote_mode();
-	}
-	// END
-
-
-	/**
 	 * Flightcheck - make some basic config checks before proceeding
 	 *
 	 * @return void
@@ -666,21 +534,21 @@ class Minimee {
 		// Flightcheck: determine if we can continue or disable permanently
 		switch ('flightcheck') :
 
-			case ($this->disable == 'yes') :
+			case ($this->config->disable == 'yes') :
 				throw new Exception('Disabled via config or tag parameter.');
 			break;
 
-			case ( $this->minify == 'no' && $this->combine == 'no') :
+			case ( $this->config->minify == 'no' && $this->config->combine == 'no') :
 				throw new Exception('Disabled because both minify and combine are set to \'no\'.');
 			break;
 
-			case ( ! $this->cache_path) :
-			case ( ! $this->cache_url) :
+			case ( ! $this->config->cache_path) :
+			case ( ! $this->config->cache_url) :
 				throw new Exception('Not configured: please set a cache path and/or url.');
 			break;
 
-			case ( ! file_exists($this->cache_path)) :
-			case ( ! is_writable($this->cache_path)) :
+			case ( ! file_exists($this->config->cache_path)) :
+			case ( ! is_writable($this->config->cache_path)) :
 				throw new Exception('Not configured correctly: your cache folder does not exist or is not writable.');
 			break;
 
@@ -743,7 +611,7 @@ class Minimee {
 		$out = '';
 
 		// if we are not combining, then minify each file in turn
-		if ($this->combine == 'no') :
+		if ($this->config->combine == 'no') :
 
 			$tags = array();
 
@@ -751,9 +619,9 @@ class Minimee {
 			
 				$this->filesdata[$key]['cache_filename'] = $file['lastmodified'] . md5($file['name']) . '.' . $this->type;
 
-				if (file_exists($this->EE->functions->remove_double_slashes($this->cache_path . '/' . $this->filesdata[$key]['cache_filename'])))
+				if (file_exists($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->filesdata[$key]['cache_filename'])))
 				{
-					$this->log->info('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $this->filesdata[$key]['cache_filename']));
+					$this->log->info('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->filesdata[$key]['cache_filename']));
 					$tags[$key] = $this->_tag($this->filesdata[$key]['cache_filename']);
 				}
 				else
@@ -764,7 +632,7 @@ class Minimee {
 						case ('stylesheet');
 						case ('remote') :
 
-							switch ($this->remote_mode)
+							switch ($this->config->remote_mode)
 							{
 								case ('fgc') :
 									// I hate to suppress errors, but it's only way to avoid one from a 404 response
@@ -811,8 +679,8 @@ class Minimee {
 						
 						case ('local') :
 						default :
-							$rel = dirname($this->base_url . $this->EE->functions->remove_double_slashes('/' . $file['name'] . '/'));
-							$contents = file_get_contents(realpath($this->EE->functions->remove_double_slashes($this->base_path . '/' . $file['name']))) . "\n";
+							$rel = dirname($this->config->base_url . $this->EE->functions->remove_double_slashes('/' . $file['name'] . '/'));
+							$contents = file_get_contents(realpath($this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $file['name']))) . "\n";
 							
 							$this->_cache($this->filesdata[$key]['cache_filename'], $this->_minify($contents, $rel));
 							$tags[$key] = $this->_tag($this->filesdata[$key]['cache_filename']);
@@ -843,9 +711,9 @@ class Minimee {
 			$lastmodified = ($lastmodified == 0) ? '0000000000' : $lastmodified;
 			$filename = $lastmodified . md5($cache_name) . '.' . $this->type;
 	
-			if (file_exists($this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename)))
+			if (file_exists($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $filename)))
 			{
-				$this->log->info('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->cache_path . '/' . $filename));
+				$this->log->info('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $filename));
 				$out = $this->_tag($filename);
 			}
 			else
@@ -859,7 +727,7 @@ class Minimee {
 						case ('stylesheet');
 						case ('remote') :
 						
-							switch ($this->remote_mode)
+							switch ($this->config->remote_mode)
 							{
 								case ('fgc') :
 									// I hate to suppress errors, but it's only way to avoid one from a 404 response
@@ -908,15 +776,15 @@ class Minimee {
 						
 						case ('local') :
 						default :
-							$contents[$key] = file_get_contents(realpath($this->EE->functions->remove_double_slashes($this->base_path . '/' . $file['name']))) . "\n";
-							$relPaths[$key] = dirname($this->base_url . $this->EE->functions->remove_double_slashes('/' . $file['name'] . '/'));
+							$contents[$key] = file_get_contents(realpath($this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $file['name']))) . "\n";
+							$relPaths[$key] = dirname($this->config->base_url . $this->EE->functions->remove_double_slashes('/' . $file['name'] . '/'));
 						break;
 			
 					endswitch;
 				endforeach;
 	
 				// gotta see if things need minifying
-				if ($this->minify == 'yes')
+				if ($this->config->minify == 'yes')
 				{
 					$cache = '';
 					foreach ($contents as $key => $content)
@@ -960,7 +828,6 @@ class Minimee {
 	{
 		try
 		{
-			$this->_init();
 			$this->_fetch_params();
 			$this->_fetch_files($this->EE->TMPL->tagdata);
 	
@@ -1039,41 +906,6 @@ class Minimee {
 	
 
 	/** 
-	 * Set our remote mode to either curl or fgc
-	 * 
-	 * @return void
-	 */
-	private function _set_remote_mode()
-	{
-		if (($this->remote_mode == 'auto' || $this->remote_mode == 'curl') && in_array('curl', get_loaded_extensions()))
-		{
-			$this->log->info('Using CURL for remote files.');
-			$this->remote_mode = 'curl';
-			
-			return;
-		}
-		
-		if (($this->remote_mode == 'auto' || $this->remote_mode == 'fgc') && ini_get('allow_url_fopen'))
-		{
-			$this->log->info('Using file_get_contents() for remote files.');
-			$this->remote_mode = 'fgc';
-
-			if ( ! defined('OPENSSL_VERSION_NUMBER'))
-			{
-				$this->log->debug('Your PHP compile does not appear to support file_get_contents() over SSL.');
-			}
-
-			return;
-		}
-		
-		// if we're here, then we cannot fetch remote files,
-		// but we may not need to, so do not throw an exception.
-		$this->remote_mode = '';
-	}
-	// END
-	
-
-	/** 
 	 * Adds the files to be queued into session
 	 * 
 	 * @param string either 'js' or 'css'
@@ -1117,7 +949,7 @@ class Minimee {
 	private function _tag($filename, $cache = TRUE)
 	{
 		// only prepend cache_url if needed
-		$url = ($cache) ? $this->cache_url . $this->EE->functions->remove_double_slashes('/' . $filename) : $filename;
+		$url = ($cache) ? $this->config->cache_url . $this->EE->functions->remove_double_slashes('/' . $filename) : $filename;
 
 		return str_replace('{minimee}', $url, $this->template);
 	}
