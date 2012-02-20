@@ -140,6 +140,19 @@ class Minimee {
 
 
 	/**
+	 * Plugin function: exp:minimee:html
+	 * 
+	 * @return void
+	 */
+	public function html()
+	{
+		// we do not need to actually do anything. Simply being called is enough.
+		return;
+	}
+	// END
+
+
+	/**
 	 * Plugin function: exp:minimee:js
 	 * 
 	 * @return mixed string or empty
