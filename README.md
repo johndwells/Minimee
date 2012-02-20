@@ -2,7 +2,7 @@
 
 * Author: [John D Wells](http://johndwells.com)
 
-## Version 1.1.6
+## Version 2.x
 
 ### Requirements:
 
@@ -14,7 +14,17 @@
 
 Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size DOES matter.
 
-Minimee is to EE2 what SL Combinator is to EE1.  But with a few twists:
+## Upgrading from 1.x
+
+If you have configured Minimee via extension, there is nothing you need to do differently from any other add-on upgrade.
+
+However for those configuring Minimee via config or global variables, you will have to alter your configuration:
+
+- Global variables are no longer supported
+- Rather than each configuration item requiring its own key/value pair in the config array,
+  simply provide one array with all settings within.
+
+## Features (shortlist only)
 
 * for EE2.4 and above, can minify your HTML
 * works with the global variables, even {stylesheet}
@@ -25,4 +35,4 @@ Minimee is to EE2 what SL Combinator is to EE1.  But with a few twists:
 
 Minimee is inspired and influenced by [SL Combinator](http://experienceinternet.co.uk/software/sl-combinator/) from Experience Internet, and [Carabiner Asset Management Library](http://codeigniter.com/wiki/Carabiner/) from Tony Dewan. It is released under a BSD License.
 
-Complete and up-to-date documentation can be found on [Minimee’s homepage](http://johndwells.com/software/minimee).
+Complete and up-to-date documentation can be found on [Minimee's homepage](http://johndwells.com/software/minimee).

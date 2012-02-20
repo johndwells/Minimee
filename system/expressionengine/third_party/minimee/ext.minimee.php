@@ -237,11 +237,11 @@ class Minimee_ext {
 		}
 		
 		/**
-		 * 1.2.0
+		 * 2.0.0
 		 * 
 		 * - refactor to use new Minimee_config object
 		 */
-		if ($current < '1.2.0')
+		if ($current < '2.0.0')
 		{
 			$query = $this->EE->db
 							->select('settings')
@@ -254,7 +254,7 @@ class Minimee_ext {
 			{
 				$settings = unserialize($query->row()->settings);
 
-				// Sanitise everything
+				// Sanitise & merge to get a complete up-to-date array of settings
 				$settings = $this->config->sanitise_settings(array_merge($this->config->allowed, $settings));
 				
 				// update db				
@@ -267,7 +267,7 @@ class Minimee_ext {
 						));
 			}
 			
-			$this->log->info('Upgraded to 1.2.0.');
+			$this->log->info('Upgraded to 2.0.0');
 		}
 
 		// update table row with version
