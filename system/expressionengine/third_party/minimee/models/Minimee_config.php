@@ -14,15 +14,20 @@ class Minimee_config
 	 * 
 	 */
 	public $allowed = array(
+	
+		/* per file settings */
 		'base_path'				=> '',
 		'base_url'				=> '',
 		'cache_path'			=> '',
 		'cache_url'				=> '',
-		'css_relative_path'		=> '',
+		'css_prepend_mode'		=> '',
+		'css_prepend_url'		=> '',
+
+		/* per run settings */
 		'combine'				=> '',
 		'disable'				=> '',
 		'minify_html'			=> '',
-		'remote_mode'			=> '',
+		'remote_mode'			=> ''
 	);
 	
 	
@@ -220,7 +225,7 @@ class Minimee_config
 		
 			/* Booleans default YES */
 			case('combine') :
-			case('css_relative_path') :
+			case('css_prepend_mode') :
 				return ($value === FALSE OR preg_match('/0|false|off|no|n/i', $value)) ? 'no' : 'yes';
 			break;
 		
@@ -239,6 +244,7 @@ class Minimee_config
 			/* String - URLs */
 			case('cache_url') :
 			case('base_url') :
+			case('css_prepend_url') :
 				// regex pattern removes all double slashes, preserving http:// and '//' at start
 				return rtrim(preg_replace("#([^:])//+#", "\\1/", $value));
 			break;
