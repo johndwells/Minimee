@@ -19,7 +19,6 @@ class Minimee_config
 		'cache_path'			=> '',
 		'cache_url'				=> '',
 		'css_relative_path'		=> '',
-		'combine'				=> '',
 		'disable'				=> '',
 		'minify'				=> '',
 		'minify_html'			=> '',
@@ -151,6 +150,34 @@ class Minimee_config
 
 
 	/**
+	 * Reset runtime settings to empty array
+	 * Same as doing $Minimee_config->settings = array();
+	 *
+	 * @return 	void
+	 */
+	public function reset()
+	{
+		$this->_runtime = array();
+
+		// chaining
+		return $this;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Return copy of runtime settings
+	 *
+	 * @return 	array
+	 */
+	public function runtime()
+	{
+		return $this->_runtime;
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Sanitise an array of settings
 	 *
 	 * @param 	array	Array of possible settings
@@ -194,7 +221,6 @@ class Minimee_config
 			break;
 		
 			/* Booleans default YES */
-			case('combine') :
 			case('css_relative_path') :
 			case('minify') :
 				return ($value === FALSE OR preg_match('/0|false|off|no|n/i', $value)) ? 'no' : 'yes';
@@ -235,29 +261,12 @@ class Minimee_config
 	
 	
 	/**
-	 * Reset runtime settings to empty array
-	 * Same as doing $Minimee_config->settings = array();
-	 *
-	 * @return 	void
+	 * Return array of all settings at runtime
 	 */
-	public function reset()
+	public function to_array()
 	{
-		$this->_runtime = array();
-
-		// chaining
-		return $this;
-	}
-	// ------------------------------------------------------
-
-
-	/**
-	 * Return copy of runtime settings
-	 *
-	 * @return 	array
-	 */
-	public function runtime()
-	{
-		return $this->_runtime;
+		// merge with defaults first
+		return array_merge($this->_default, $this->_runtime);
 	}
 	// ------------------------------------------------------
 
