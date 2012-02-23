@@ -38,6 +38,7 @@ class Minimee {
 	public $stylesheet_query		= array();
 	public $template				= '';
 	public $type					= '';
+	public $cache_lastmodified		= '';
 	public $cache_filename			= '';
 	public $remote_mode				= '';
 
@@ -670,13 +671,12 @@ class Minimee {
 	/** 
 	 * Utility method
 	 * 
-	 * @param string last modified timestamp
 	 * @param string file name
 	 * @return string
 	 */
-	protected function _create_cache_name($lastmodified, $name)
+	protected function _create_cache_name($name)
 	{
-		return $lastmodified . md5($name) . '.' . $this->type;
+		return md5($name) . '.' . $this->type;
 	}
 	// ------------------------------------------------------
 	
@@ -691,34 +691,54 @@ class Minimee {
 		// our return variable
 		$out = '';
 
-		// some helper vars
-		$combined_lastmodified = 0;
-		$combined_filenames = '';
-		
 		// loop through our files once
 		foreach ($this->filesdata as $key => $file)
 		{
 			// max to determine most recently modified
-			$combined_lastmodified = max($combined_lastmodified, $file['lastmodified'] );
+			$this->cache_lastmodified = max($this->cache_lastmodified, $file['lastmodified'] );
 			
 			// prepend for combined cache name
-			$combined_filenames .= $file['name'];
+			$this->cache_filename .= $file['name'];
 			
 			// singular cache name
-			$this->filesdata[$key]['cache_filename'] = $this->_create_cache_name($file['lastmodified'], $file['name']);
+			$this->filesdata[$key]['cache_filename'] = $this->_create_cache_name($file['name']);
 		}
+
+		$this->cache_lastmodified = ($this->cache_lastmodified == 0) ? '0000000000' : $this->cache_lastmodified;
+		$this->cache_filename = $this->_create_cache_name($this->cache_filename);
 
 		// if we are combining
 		if ($this->combine == 'yes') :
 
-			$combined_lastmodified = ($combined_lastmodified == 0) ? '0000000000' : $combined_lastmodified;
-			$this->cache_filename = $this->_create_cache_name($combined_lastmodified, $combined_filenames);
-	
 			// check for cache file
 			if (file_exists($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename)))
 			{
+
+				/* should we refresh after a period of time?
+				if($this->config->refresh_after > 0)
+				{
+					$lastmodified = filemtime($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
+					
+					// our refresh_after is specified in minutes
+					$seconds = 60 * $this->config->refresh_after;
+					
+					$now = time();
+					
+					// if $now is greater than $seconds + $lastmodified, trash file
+					if($lastmodified + $seconds < $now)
+					{
+						// if we make it this far, the cache is valid
+						$this->log->info('Cache file found but it was too old: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
+
+						@unlink($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
+						return FALSE;
+					}
+				}
+				*/
+
+				// if we make it this far, the cache is valid
 				$this->log->info('Cache file found: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
-				$out = $this->_tag($this->config->cache_url, $this->cache_filename);
+				$out = $this->_tag($this->config->cache_url, $this->cache_filename, $this->cache_lastmodified);
 			}
 			else
 			{
@@ -741,7 +761,7 @@ class Minimee {
 				if (file_exists($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->filesdata[$key]['cache_filename'])))
 				{
 					$this->log->info('Cache file found: `' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->filesdata[$key]['cache_filename']) . '`');
-					$out .= $this->_tag($this->config->cache_url, $this->filesdata[$key]['cache_filename']);
+					$out .= $this->_tag($this->config->cache_url, $this->filesdata[$key]['cache_filename'], $this->filesdata[$key]['lastmodified']);
 				}
 				else
 				{
@@ -759,9 +779,6 @@ class Minimee {
 			unset($runtime);
 
 		endif;
-
-		// free memory where possible
-		unset($combined_lastmodified, $combined_filenames);
 
 		// if we've made it this far...		
 		return $out;
@@ -884,7 +901,7 @@ class Minimee {
 					$this->_cache($this->config->cache_path, $file['cache_filename'], $cache);
 					
 					// create our output tag
-					$out .= $this->_tag($this->config->cache_url, $file['cache_filename']);
+					$out .= $this->_tag($this->config->cache_url, $file['cache_filename'], $file['last_modified']);
 				}
 
 			endforeach;
@@ -900,7 +917,7 @@ class Minimee {
 				$this->_cache($this->config->cache_path, $this->cache_filename, $cache);
 
 				// create our output tag
-				$out = $this->_tag($this->config->cache_url, $this->cache_filename);
+				$out = $this->_tag($this->config->cache_url, $this->cache_filename, $this->cache_lastmodified);
 			}
 
 			// free memory where possible
@@ -1108,10 +1125,10 @@ class Minimee {
 	 * @param	Boolean Whether the tag is for a cached file or not (default TRUE)
 	 * @return	String containing an HTML tag reference to given reference
 	 */
-	protected function _tag($cache_url, $filename, $cache = TRUE)
+	protected function _tag($cache_url, $filename, $lastmodified)
 	{
-		// only prepend cache_url if needed
-		$url = ($cache) ? preg_replace("#([^:])//+#", "\\1/", $cache_url . '/' . $filename) : $filename;
+		// construct url
+		$url = preg_replace("#([^:])//+#", "\\1/", $cache_url . '/' . $filename . '?m=' . $lastmodified);
 
 		return str_replace('{minimee}', $url, $this->template);
 	}
