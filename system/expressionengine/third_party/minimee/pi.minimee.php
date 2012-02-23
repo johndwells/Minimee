@@ -690,11 +690,11 @@ class Minimee {
 	{
 		// our return variable
 		$out = '';
-		
+
 		// some helper vars
 		$combined_lastmodified = 0;
 		$combined_filenames = '';
-
+		
 		// loop through our files once
 		foreach ($this->filesdata as $key => $file)
 		{
@@ -868,7 +868,7 @@ class Minimee {
 						
 						// determine css prepend url
 						$css_prepend_url = ($this->config->css_prepend_url) ? $this->config->css_prepend_url : $this->config->base_url;
-						$css_prepend_url = dirname($css_prepend_url . $this->EE->functions->remove_double_slashes('/' . $file['name']));
+						$css_prepend_url = dirname(preg_replace("#([^:])//+#", "\\1/", $css_prepend_url . '/' . $file['name']));
 					break;
 		
 				endswitch;
@@ -954,15 +954,10 @@ class Minimee {
 	protected function _set_filesdata($files, $from_queue = FALSE) {
 	
 		$dups = array();
-	
+
 		foreach ($files as $key => $file)
 		{
-			// try to avoid duplicates
-			if (in_array($file['name'], $dups)) continue;
-		
-			$dups[] = $file['name'];
-			
-			// if we are receiving these from the queue, no need to calculate the below
+			// if we are receiving these from the queue, no need to calculate ALL of the below
 			if($from_queue === TRUE)
 			{
 				$this->filesdata[$key] = $file;
@@ -970,6 +965,11 @@ class Minimee {
 			
 			else
 			{
+				// try to avoid duplicates
+				if (in_array($file, $dups)) continue;
+			
+				$dups[] = $file['name'];
+			
 				$this->filesdata[$key] = array(
 					'name' => $file,
 					'type' => NULL,
@@ -1008,7 +1008,7 @@ class Minimee {
 			}
 
 		}
-		
+
 		// free memory where possible
 		unset($dups);
 	}
@@ -1111,7 +1111,7 @@ class Minimee {
 	protected function _tag($cache_url, $filename, $cache = TRUE)
 	{
 		// only prepend cache_url if needed
-		$url = ($cache) ? $cache_url . $this->EE->functions->remove_double_slashes('/' . $filename) : $filename;
+		$url = ($cache) ? preg_replace("#([^:])//+#", "\\1/", $cache_url . '/' . $filename) : $filename;
 
 		return str_replace('{minimee}', $url, $this->template);
 	}
