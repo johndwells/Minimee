@@ -25,6 +25,7 @@ class Minimee {
 	/* usage settings */
 	public $queue;
 
+	public $remote_mode			= '';
 	public $filesdata			= array();
 	public $stylesheet_query	= array();
 	public $template;
@@ -999,7 +1000,7 @@ class Minimee {
 		{
 			$this->log->info('Using CURL for remote files.');
 
-			$this->config->remote_mode = 'curl';
+			$this->remote_mode = 'curl';
 			
 			return;
 		}
@@ -1014,7 +1015,7 @@ class Minimee {
 				$this->log->debug('Your PHP compile does not appear to support file_get_contents() over SSL.');
 			}
 
-			$this->config->remote_mode = 'fgc';
+			$this->remote_mode = 'fgc';
 
 			return;
 		}
