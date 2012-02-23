@@ -19,8 +19,8 @@ class Minimee_config
 		'cache_path'			=> '',
 		'cache_url'				=> '',
 		'css_relative_path'		=> '',
+		'combine'				=> '',
 		'disable'				=> '',
-		'minify'				=> '',
 		'minify_html'			=> '',
 		'refresh_after'			=> '',
 		'remote_mode'			=> '',
@@ -221,8 +221,8 @@ class Minimee_config
 			break;
 		
 			/* Booleans default YES */
+			case('combine') :
 			case('css_relative_path') :
-			case('minify') :
 				return ($value === FALSE OR preg_match('/0|false|off|no|n/i', $value)) ? 'no' : 'yes';
 			break;
 		

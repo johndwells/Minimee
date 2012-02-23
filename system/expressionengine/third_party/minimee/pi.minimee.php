@@ -1093,10 +1093,6 @@ disable="no"
 - set to "yes" if you wish to temporarily disable this usage of plugin
 - note that if Minimee is globally disabled via config, it cannot be overridden by this parameter
 
-minify="yes"
-- tells the plugin whether to minify files when caching; if set to 'no',
-  it will not run files through minify engine
-
 combine="yes"
 - tells plugin whether to combine files when caching; if set to 'no',
   it will cache each file separately
@@ -1106,10 +1102,6 @@ queue="name"
 - The string passed to the queue parameter can later be used in the
   exp:minimee:display single tags. See online docs for more info and examples.
 
-* Note: if minify & combine are both set to false, it performs no caching,
-  effectively disabling plugin
-
-	
 EOT;
 
 	}
