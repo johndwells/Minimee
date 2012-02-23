@@ -172,7 +172,7 @@ class Minimee {
 	 * @param mixed The caught exception or empty string
 	 * @return string The un-Minimeed tagdata
 	 */	
-	private function _abort($e = FALSE)
+	protected function _abort($e = FALSE)
 	{
 		if ($e)
 		{
@@ -207,7 +207,7 @@ class Minimee {
 	 * @param	String of contents of the new file
 	 * @return	boolean	Returns true on successful cache, false on failure
 	 */
-	private function _cache($filename, $file_data)
+	protected function _cache($filename, $file_data)
 	{
 		$filepath = $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $filename);
 		$success = file_put_contents($filepath, $file_data);
@@ -236,7 +236,7 @@ class Minimee {
 	 * 
 	 * @return bool TRUE if all are found; FALSE if at least one is not found
 	 */
-	private function _check_headers()
+	protected function _check_headers()
 	{
 		// query for any stylesheets	
 		$stylesheet_versions = $this->_fetch_stylesheet_versions();
@@ -312,7 +312,7 @@ class Minimee {
 	 *
 	 * @return string The final output from Minimee::out()
 	 */	
-	private function _display()
+	protected function _display()
 	{
 		try
 		{
@@ -337,7 +337,7 @@ class Minimee {
 	 * 
 	 * @return mixed string or empty
 	 */
-	private function _embed()
+	protected function _embed()
 	{
 		try
 		{
@@ -405,7 +405,7 @@ class Minimee {
 	 *
 	 * @return void
 	 */	
-	private function _fetch_queue()
+	protected function _fetch_queue()
 	{
 		if ( ! isset($this->EE->session->cache['minimee'][$this->type][$this->queue]))
 		{
@@ -438,7 +438,7 @@ class Minimee {
 	 * @param string either css or js
 	 * @return bool TRUE on success of fetching files; FALSE on failure
 	 */
-	private function _fetch_files($haystack)
+	protected function _fetch_files($haystack)
 	{
 		// first up, let's substitute stylesheet= for minimee=, because we handle these special
 		$haystack = preg_replace("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", '[minimee=$1]', $haystack);
@@ -490,7 +490,7 @@ class Minimee {
 	 * 
 	 * @return void
 	 */
-	private function _fetch_params()
+	protected function _fetch_params()
 	{
 		// pass all params through our config, will magically pick up what's needed
 		$this->config->settings = $this->EE->TMPL->tagparams;
@@ -510,7 +510,7 @@ class Minimee {
 	 *
 	 * @return mixed array or FALSE
 	 */
-	private function _fetch_stylesheet_versions() {
+	protected function _fetch_stylesheet_versions() {
 	
 		// nothing to do if Minimee::stylesheet_query is empty
 		if ( ! $this->stylesheet_query) return FALSE;
@@ -558,7 +558,7 @@ class Minimee {
 	 *
 	 * @return void
 	 */
-	private function _flightcheck()
+	protected function _flightcheck()
 	{
 		/**
 		 * If our cache path appears relative, append it to our base path
@@ -615,7 +615,7 @@ class Minimee {
 	 * @param	mixed A relative path to use, if provided
 	 * @return	String minified contents of file
 	 */
-	private function _minify($contents, $rel = FALSE)
+	protected function _minify($contents, $rel = FALSE)
 	{
 		switch ($this->type) :
 			
@@ -647,7 +647,7 @@ class Minimee {
 	 * 
 	 * @return string The final tag to be returned to template
 	 */	
-	private function _out()
+	protected function _out()
 	{
 		// our return variable	
 		$out = '';
@@ -866,7 +866,7 @@ class Minimee {
 	 * 
 	 * @return mixed string or empty
 	 */
-	private function _run()
+	protected function _run()
 	{
 		try
 		{
@@ -898,7 +898,7 @@ class Minimee {
 	 * @param array array of files
 	 * @return void
 	 */
-	private function _set_filesdata($files) {
+	protected function _set_filesdata($files) {
 	
 		$dups = array();
 	
@@ -953,7 +953,7 @@ class Minimee {
 	 * @param string either 'js' or 'css'
 	 * @return void
 	 */
-	private function _set_queue()
+	protected function _set_queue()
 	{
 		// be sure we have a cache set up
 		if ( ! isset($this->EE->session->cache['minimee'][$this->type]))
@@ -1032,7 +1032,7 @@ class Minimee {
 	 * @param	Boolean Whether the tag is for a cached file or not (default TRUE)
 	 * @return	String containing an HTML tag reference to given reference
 	 */
-	private function _tag($filename, $cache = TRUE)
+	protected function _tag($filename, $cache = TRUE)
 	{
 		// only prepend cache_url if needed
 		$url = ($cache) ? $this->config->cache_url . $this->EE->functions->remove_double_slashes('/' . $filename) : $filename;
