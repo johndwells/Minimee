@@ -22,20 +22,34 @@ $plugin_info = array(
  */
 class Minimee {
 
-	/* usage settings */
-	public $queue;
+	/**
+	 * runtime config settings
+	 * 
+	 * Note: Any other configs will be per-file
+	 */
+	public $combine;
+	public $disable;
 
-	public $remote_mode			= '';
-	public $filesdata			= array();
-	public $stylesheet_query	= array();
-	public $template;
-	public $type;
-	
+	/**
+	 * runtime variables
+	 */
+	public $queue					= '';
+	public $filesdata				= array();
+	public $stylesheet_query		= array();
+	public $template				= '';
+	public $type					= '';
+	public $cache_filename			= '';
+	public $remote_mode				= '';
+
+	/**
+	 * properties
+	 */
 	public $EE;
-	public $ext;
-
 	public $log;
 	public $config;
+
+
+	// ------------------------------------------------------
 
 
 	/**
@@ -59,7 +73,7 @@ class Minimee {
 			$this->EE->session->cache['minimee'] = array();
 		}
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -72,7 +86,7 @@ class Minimee {
 		$this->type = 'css';
 		return $this->_run();
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -107,7 +121,7 @@ class Minimee {
 
 		return $out;
 	}
-	// END
+	// ------------------------------------------------------
 	
 	
 	/**
@@ -137,7 +151,7 @@ class Minimee {
 		
 		return $this->_embed();
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -150,7 +164,7 @@ class Minimee {
 		// we do not need to actually do anything. Simply being called is enough.
 		return;
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -163,7 +177,7 @@ class Minimee {
 		$this->type = 'js';
 		return $this->_run();
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -197,7 +211,7 @@ class Minimee {
 			return $this->EE->TMPL->tagdata;
 		}
 	}
-	// END
+	// ------------------------------------------------------
 	
 	
 	/** 
@@ -208,27 +222,27 @@ class Minimee {
 	 * @param	String of contents of the new file
 	 * @return	boolean	Returns true on successful cache, false on failure
 	 */
-	protected function _cache($filename, $file_data)
+	protected function _cache($cache_path, $filename, $file_data)
 	{
-		$filepath = $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $filename);
+		$filepath = $this->EE->functions->remove_double_slashes($cache_path . '/' . $filename);
 		$success = file_put_contents($filepath, $file_data);
 		
 		if ($success === FALSE)
 		{ 
-			throw new Exception('There was an error writing cache file ' . $filename . ' to ' . $this->config->cache_path);
+			throw new Exception('There was an error writing cache file ' . $filename . ' to ' . $cache_path);
 		}
 
 		// borrowed from /system/expressionengine/libraries/Template.php
 		// FILE_READ_MODE is set in /system/expressionengine/config/constants.php
 		@chmod($filepath, FILE_READ_MODE);
 
-		$this->log->info('Cache file `' . $filename . '` was written to ' . $this->config->cache_path);
+		$this->log->info('Cache file `' . $filename . '` was written to ' . $cache_path);
 
 		// free memory where possible
 		unset($filepath);
 		unset($success);
 	}
-	// END
+	// ------------------------------------------------------
 	
 	
 	/**
@@ -241,9 +255,16 @@ class Minimee {
 	{
 		// query for any stylesheets	
 		$stylesheet_versions = $this->_fetch_stylesheet_versions();
+		
+		// temporarily store runtime settings
+		$runtime = $this->config->runtime();
 
 		// now, loop through our filesdata and set all headers	
 		foreach ($this->filesdata as $key => $file) :
+		
+			// adjust our runtime settings
+			$this->config->reset();
+			$this->config->settings = $file['runtime'];
 
 			/**
 			 * Stylesheets (e.g. {stylesheet='template/file'}
@@ -301,11 +322,14 @@ class Minimee {
 
 		endforeach;
 
+		// return our settings to our runtime
+		$this->config->reset();
+		$this->config->settings = $runtime;
+
 		// free memory where possible
-		unset($realpath);
-		unset($stylesheet_versions);
+		unset($runtime, $realpath, $stylesheet_versions);
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -329,7 +353,7 @@ class Minimee {
 			return $this->_abort($e);
 		}
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -398,7 +422,7 @@ class Minimee {
 			return $this->_abort($e);
 		}
 	}
-	// END
+	// ------------------------------------------------------
 	
 
 	/**
@@ -419,7 +443,7 @@ class Minimee {
 		$this->template = $this->EE->session->cache['minimee'][$this->type][$this->queue]['template'];
 
 		// set our Minimee::filesdata array
-		$this->_set_filesdata($this->EE->session->cache['minimee'][$this->type][$this->queue]['files']);
+		$this->_set_filesdata($this->EE->session->cache['minimee'][$this->type][$this->queue]['filesdata'], TRUE);
 
 		// No files found?
 		if ( ! is_array($this->filesdata) OR count($this->filesdata) == 0)
@@ -427,7 +451,7 @@ class Minimee {
 			throw new Exception('No files found in the queue named \'' . $this->type . '\'.');
 		}
 	}
-	// END
+	// ------------------------------------------------------
 	
 
 	/**
@@ -483,7 +507,7 @@ class Minimee {
 		unset($pat);
 		unset($matches);
 	}
-	// END
+	// ------------------------------------------------------
 
 	
 	/**
@@ -496,13 +520,18 @@ class Minimee {
 		// pass all params through our config, will magically pick up what's needed
 		$this->config->settings = $this->EE->TMPL->tagparams;
 
+		// copy some per-run config items to our local properties
+		$this->combine = $this->config->combine;
+		$this->disable = $this->config->disable;
+		$this->remote_mode = $this->config->remote_mode;
+
 		// fetch queue if it hasn't already been set via Minimee::_display()
 		if ( ! $this->queue)
 		{
 			$this->queue = strtolower($this->EE->TMPL->fetch_param('queue', NULL));
 		}
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -551,7 +580,7 @@ class Minimee {
 		// return FALSE if none found
 		return ($versions) ? $versions : FALSE;
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -586,12 +615,8 @@ class Minimee {
 		// Flightcheck: determine if we can continue or disable permanently
 		switch ('flightcheck') :
 
-			case ($this->config->disable == 'yes') :
+			case ($this->disable == 'yes') :
 				throw new Exception('Disabled manually.');
-			break;
-
-			case ( $this->config->minify == 'no' && $this->config->combine == 'no') :
-				throw new Exception('Disabled because both minify and combine are set to \'no\'.');
 			break;
 
 			case ( ! file_exists($this->config->cache_path)) :
@@ -605,7 +630,7 @@ class Minimee {
 
 		endswitch;
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/** 
@@ -631,7 +656,7 @@ class Minimee {
 				$this->cssmin = new cssmin();
 				
 				// set a relative path if exists
-				$relativePath = ($rel !== FALSE && $this->config->yes('css_relative_path')) ? $rel . '/' : NULL;
+				$relativePath = ($rel !== FALSE && $this->config->yes('css_prepend_mode')) ? $rel . '/' : NULL;
 				
 				// run and return
 				return $this->cssmin->minify($contents, FALSE, $relativePath);
@@ -642,6 +667,108 @@ class Minimee {
 	// ------------------------------------------------------
 	
 	
+	/** 
+	 * Utility method
+	 * 
+	 * @param string last modified timestamp
+	 * @param string file name
+	 * @return string
+	 */
+	protected function _create_cache_name($lastmodified, $name)
+	{
+		return $lastmodified . md5($name) . '.' . $this->type;
+	}
+	// ------------------------------------------------------
+	
+
+	/**
+	 * Internal function to look for cache file(s)
+	 * 
+	 * @return mixed String of final tag output or FALSE if cache needs to be refreshed
+	 */
+	protected function _get_from_cache()
+	{
+		// our return variable
+		$out = '';
+		
+		// some helper vars
+		$combined_lastmodified = 0;
+		$combined_filenames = '';
+
+		// loop through our files once
+		foreach ($this->filesdata as $key => $file)
+		{
+			// max to determine most recently modified
+			$combined_lastmodified = max($combined_lastmodified, $file['lastmodified'] );
+			
+			// prepend for combined cache name
+			$combined_filenames .= $file['name'];
+			
+			// singular cache name
+			$this->filesdata[$key]['cache_filename'] = $this->_create_cache_name($file['lastmodified'], $file['name']);
+		}
+
+		// if we are combining
+		if ($this->combine == 'yes') :
+
+			$combined_lastmodified = ($combined_lastmodified == 0) ? '0000000000' : $combined_lastmodified;
+			$this->cache_filename = $this->_create_cache_name($combined_lastmodified, $combined_filenames);
+	
+			// check for cache file
+			if (file_exists($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename)))
+			{
+				$this->log->info('Cache file found: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
+				$out = $this->_tag($this->config->cache_url, $this->cache_filename);
+			}
+			else
+			{
+				$this->log->info('Combined cache file not found.');
+				return FALSE;
+			}
+
+		// if we are not combining, determine all cache names and check for existence of each
+		else :
+
+			// save our runtime settings temporarily
+			$runtime = $this->config->runtime();
+
+			foreach ($this->filesdata as $key => $file) :
+			
+				// adjust our runtime settings
+				$this->config->reset();
+				$this->config->settings = $file['runtime'];
+
+				if (file_exists($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->filesdata[$key]['cache_filename'])))
+				{
+					$this->log->info('Cache file found: `' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->filesdata[$key]['cache_filename']) . '`');
+					$out .= $this->_tag($this->config->cache_url, $this->filesdata[$key]['cache_filename']);
+				}
+				else
+				{
+				$this->log->info('Cached file not found.');
+					return FALSE;
+				}
+
+			endforeach;
+
+			// return our settings to our runtime
+			$this->config->reset();
+			$this->config->settings = $runtime;
+			
+			// free
+			unset($runtime);
+
+		endif;
+
+		// free memory where possible
+		unset($combined_lastmodified, $combined_filenames);
+
+		// if we've made it this far...		
+		return $out;
+	}
+	// ------------------------------------------------------
+
+
 	/**
 	 * Performs heavy lifting of plugin, processing output and returning final tags
 	 * [Adapted from CodeIgniter Carabiner library]
@@ -650,216 +777,141 @@ class Minimee {
 	 */	
 	protected function _out()
 	{
-		// our return variable	
-		$out = '';
 
-		// if we are not combining, then minify each file in turn
-		if ($this->config->no('combine')) :
+		// our return variable; will have tags for our cache, or FALSE if cache needs to be refreshed
+		$out = $this->_get_from_cache();
+		
+		// proceed with creating new cache
+		if($out === FALSE) :
 
-			$tags = array();
+			// reset to empty string
+			$out = '';
 
+			// the eventual contents of our cache
+			$cache = '';
+			
+			// the contents of each file
+			$contents = '';
+			
+			// the relative path for each file
+			$css_prepend_url = '';
+			
+			// save our runtime settings temporarily
+			$runtime = $this->config->runtime();
+			
 			foreach ($this->filesdata as $key => $file) :
 			
-				$this->filesdata[$key]['cache_filename'] = $file['lastmodified'] . md5($file['name']) . '.' . $this->type;
+				// adjust our runtime settings
+				$this->config->reset();
+				$this->config->settings = $file['runtime'];
+			
+				switch ($file['type']) :
+		
+					case ('stylesheet');
+					case ('remote') :
+					
+						// no relative paths
+						$css_prepend_url = FALSE;
 
-				if (file_exists($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->filesdata[$key]['cache_filename'])))
+						// determine how to fetch contents
+						switch ($this->remote_mode)
+						{
+
+							case ('fgc') :
+								// I hate to suppress errors, but it's only way to avoid one from a 404 response
+								$response = @file_get_contents($file['name']);
+								if ($response && isset($http_response_header) && (substr($http_response_header[0], 9, 3) < 400))
+								{
+									$contents = $response;
+								}
+								else
+								{
+									throw new Exception('A problem occurred while fetching the following over file_get_contents(): ' . $file['name']);
+								}
+							break;
+							
+							case ('curl') :
+
+								if ( ! isset($epicurl))
+								{
+									require_once(PATH_THIRD . 'minimee/libraries/EpiCurl.php');
+									$epicurl = EpiCurl::getInstance();
+								}
+
+								$ch = FALSE;
+								$ch = curl_init($file['name']);
+								curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+								@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+								$curls[$key] = $epicurl->addCurl($ch);
+
+								if ($curls[$key]->code >= 400)
+								{
+									throw new Exception('Error encountered while fetching \'' . $this->filesdata[$key]['name'] . '\' over cURL.');
+								}
+		
+								$contents = $curls[$key]->data;
+							break;
+							
+							default :
+								throw new Exception('Could not fetch file \'' . $file['name'] . '\' because neither cURL or file_get_contents() appears available.');
+							break;
+						}
+
+
+					break;
+					
+					case ('local') :
+					default :
+					
+						// grab contents of file
+						$contents = file_get_contents(realpath($this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $file['name']))) . "\n";
+						
+						// determine css prepend url
+						$css_prepend_url = ($this->config->css_prepend_url) ? $this->config->css_prepend_url : $this->config->base_url;
+						$css_prepend_url = dirname($css_prepend_url . $this->EE->functions->remove_double_slashes('/' . $file['name']));
+					break;
+		
+				endswitch;
+				
+				// combining? if so, minify contents and append to $cache
+				if ($this->combine == 'yes')
 				{
-					$this->log->info('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->filesdata[$key]['cache_filename']));
-					$tags[$key] = $this->_tag($this->filesdata[$key]['cache_filename']);
+					$cache .= $this->_minify($contents, $css_prepend_url);
 				}
 				else
 				{
-					// must get contents of file to minify
-					switch ($file['type']) :
-			
-						case ('stylesheet');
-						case ('remote') :
-
-							switch ($this->config->remote_mode)
-							{
-								case ('fgc') :
-									// I hate to suppress errors, but it's only way to avoid one from a 404 response
-									$response = @file_get_contents($file['name']);
-									if ($response && isset($http_response_header) && (substr($http_response_header[0], 9, 3) < 400))
-									{
-										$this->_cache($this->filesdata[$key]['cache_filename'], $this->_minify($response));
-										$tags[$key] = $this->_tag($this->filesdata[$key]['cache_filename']);
-									}
-									else
-									{
-										throw new Exception('A problem occurred while fetching the following over file_get_contents(): ' . $file['name']);
-									}
-								break;
-								
-								case ('curl') :
-									if ( ! isset($epicurl))
-									{
-										require_once(PATH_THIRD . 'minimee/libraries/EpiCurl.php');
-										$epicurl = EpiCurl::getInstance();
-									}
-
-									$ch = FALSE;
-									$ch = curl_init($file['name']);
-									curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-									@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-									$curls[$key] = $epicurl->addCurl($ch);
-
-									if ($curls[$key]->code >= 400)
-									{
-										throw new Exception('Error encountered while fetching \'' . $this->filesdata[$key]['name'] . '\' over cURL.');
-									}
-			
-									$this->_cache($this->filesdata[$key]['cache_filename'], $this->_minify($curls[$key]->data));
-									$tags[$key] = $this->_tag($this->filesdata[$key]['cache_filename']);
-								break;
-
-								default :
-									throw new Exception('Could not fetch file \'' . $file['name'] . '\' because neither cURL or file_get_contents() appears available.');
-								break;
-							}
-
-						break;
-						
-						case ('local') :
-						default :
-							$rel = dirname($this->config->base_url . $this->EE->functions->remove_double_slashes('/' . $file['name'] . '/'));
-							$contents = file_get_contents(realpath($this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $file['name']))) . "\n";
-							
-							$this->_cache($this->filesdata[$key]['cache_filename'], $this->_minify($contents, $rel));
-							$tags[$key] = $this->_tag($this->filesdata[$key]['cache_filename']);
-						break;
-			
-					endswitch;
+					$cache = $this->_minify($contents, $css_prepend_url);
+					$this->_cache($this->config->cache_path, $file['cache_filename'], $cache);
+					
+					// create our output tag
+					$out .= $this->_tag($this->config->cache_url, $file['cache_filename']);
 				}
 
 			endforeach;
 
-			$out = implode('', $tags);
-			
+			// return our settings to our runtime
+			$this->config->reset();
+			$this->config->settings = $runtime;
+
+			// combining? write cache now
+			if ($this->combine == 'yes')
+			{
+				// write our cache file
+				$this->_cache($this->config->cache_path, $this->cache_filename, $cache);
+
+				// create our output tag
+				$out = $this->_tag($this->config->cache_url, $this->cache_filename);
+			}
+
 			// free memory where possible
-			unset($tags);
-
-		// combine (& possibly minify) files
-		else :
-		
-			$lastmodified = 0;
-			$cache_name = '';
-
-			foreach ($this->filesdata as $key => $file)
-			{
-				$lastmodified = max($lastmodified, $file['lastmodified'] );
-				$cache_name .= $file['name'];
-			}
-
-			$lastmodified = ($lastmodified == 0) ? '0000000000' : $lastmodified;
-			$filename = $lastmodified . md5($cache_name) . '.' . $this->type;
-	
-			if (file_exists($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $filename)))
-			{
-				$this->log->info('Returning a cached file: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $filename));
-				$out = $this->_tag($filename);
-			}
-			else
-			{
-				$contents = array();
-				$relPaths = array();
-
-				foreach ($this->filesdata as $key => $file) :
-					switch ($file['type']) :
+			unset($cache, $contents, $css_prepend_url, $runtime);
 			
-						case ('stylesheet');
-						case ('remote') :
-						
-							switch ($this->config->remote_mode)
-							{
-								case ('fgc') :
-									// I hate to suppress errors, but it's only way to avoid one from a 404 response
-									$response = @file_get_contents($file['name']);
-									if ($response && isset($http_response_header) && (substr($http_response_header[0], 9, 3) < 400))
-									{
-										$contents[$key] = $response;
-										$relPaths[$key] = FALSE;
-									}
-									else
-									{
-										throw new Exception('A problem occurred while fetching the following over file_get_contents(): ' . $file['name']);
-									}
-								break;
-								
-								case ('curl') :
-
-									if ( ! isset($epicurl))
-									{
-										require_once(PATH_THIRD . 'minimee/libraries/EpiCurl.php');
-										$epicurl = EpiCurl::getInstance();
-									}
-
-									$ch = FALSE;
-									$ch = curl_init($file['name']);
-									curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-									@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-									$curls[$key] = $epicurl->addCurl($ch);
-
-									if ($curls[$key]->code >= 400)
-									{
-										throw new Exception('Error encountered while fetching \'' . $this->filesdata[$key]['name'] . '\' over cURL.');
-									}
-			
-									$contents[$key] = $curls[$key]->data;
-									$relPaths[$key] = FALSE;
-								break;
-								
-								default :
-									throw new Exception('Could not fetch file \'' . $file['name'] . '\' because neither cURL or file_get_contents() appears available.');
-								break;
-							}
-
-
-						break;
-						
-						case ('local') :
-						default :
-							$contents[$key] = file_get_contents(realpath($this->EE->functions->remove_double_slashes($this->config->base_path . '/' . $file['name']))) . "\n";
-							$relPaths[$key] = dirname($this->config->base_url . $this->EE->functions->remove_double_slashes('/' . $file['name'] . '/'));
-						break;
-			
-					endswitch;
-				endforeach;
-	
-				// gotta see if things need minifying
-				if ($this->config->yes('minify'))
-				{
-					$cache = '';
-					foreach ($contents as $key => $content)
-					{
-						$cache .= $this->_minify($content, $relPaths[$key]);
-					}
-
-					$this->_cache($filename, $cache);
-
-				}
-				else
-				{
-					$this->_cache($filename, implode('', $contents));
-				}
-
-				// free memory where possible
-				unset($contents);
-				unset($relPaths);
-				
-				$out = $this->_tag($filename);
-			}
-
 		endif;
 
-		// free memory where possible
-		unset($lastmodified);
-		unset($cache_name);
-		unset($filename);
-		
+		// return output tag
 		return $out;
 	}
-	//END
+	// ------------------------------------------------------
 	
 	
 	/**
@@ -873,7 +925,7 @@ class Minimee {
 		{
 			$this->_fetch_params();
 			$this->_fetch_files($this->EE->TMPL->tagdata);
-	
+
 			// Are we queueing for later? If so, just save in session
 			if ($this->queue)
 			{
@@ -890,7 +942,7 @@ class Minimee {
 			return $this->_abort($e);
 		}
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -899,53 +951,68 @@ class Minimee {
 	 * @param array array of files
 	 * @return void
 	 */
-	protected function _set_filesdata($files) {
+	protected function _set_filesdata($files, $from_queue = FALSE) {
 	
 		$dups = array();
 	
 		foreach ($files as $key => $file)
 		{
 			// try to avoid duplicates
-			if (in_array($file, $dups)) continue;
+			if (in_array($file['name'], $dups)) continue;
 		
-			$dups[] = $file;
-		
-			$this->filesdata[$key] = array(
-				'name' => $file,
-				'type' => NULL,
-				'cache_filename' => '',
-				'lastmodified' => '0000000000',
-				'stylesheet' => NULL
-			);
-
-			// from old _isURL() file from Carabiner Asset Management Library
-			if (preg_match('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)@', $this->filesdata[$key]['name']) > 0)
+			$dups[] = $file['name'];
+			
+			// if we are receiving these from the queue, no need to calculate the below
+			if($from_queue === TRUE)
 			{
-				$this->filesdata[$key]['type'] = 'remote';
+				$this->filesdata[$key] = $file;
 			}
-			elseif (strpos($this->filesdata[$key]['name'], 'minimee=') !== FALSE && preg_match("/\[minimee=[\042\047]?(.*?)[\042\047]?\]/", $this->filesdata[$key]['name'], $matches))
+			
+			else
 			{
-				$this->filesdata[$key]['type'] = 'stylesheet';
-				$this->filesdata[$key]['stylesheet'] = $matches[1];
+				$this->filesdata[$key] = array(
+					'name' => $file,
+					'type' => NULL,
+					'runtime' => $this->config->runtime(),
+					'cache_filename' => '',
+					'lastmodified' => '0000000000',
+					'stylesheet' => NULL
+				);
 	
-				// prepare part of our SQL query for later			
-				$ex = explode('/', $matches[1], 2);
+				// from old _isURL() file from Carabiner Asset Management Library
+				if (preg_match('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)@', $this->filesdata[$key]['name']) > 0)
+				{
+					$this->filesdata[$key]['type'] = 'remote';
+				}
+				elseif (strpos($this->filesdata[$key]['name'], 'minimee=') !== FALSE && preg_match("/\[minimee=[\042\047]?(.*?)[\042\047]?\]/", $this->filesdata[$key]['name'], $matches))
+				{
+				
+					$this->filesdata[$key]['type'] = 'stylesheet';
+					$this->filesdata[$key]['stylesheet'] = $matches[1];
+		
+				}
+				else
+				{
+					$this->filesdata[$key]['type'] = 'local';
+				}
+			}
+
+			// prepare part of our SQL query for later
+			if($this->filesdata[$key]['type'] == 'stylesheet')
+			{
+				$ex = explode('/', $this->filesdata[$key]['stylesheet'], 2);
 				if (isset($ex[1]))
 				{
 					$this->stylesheet_query[] = "(t.template_name = '".$this->EE->db->escape_str($ex[1])."' AND tg.group_name = '".$this->EE->db->escape_str($ex[0])."')";
 				}
 			}
-			else
-			{
-				$this->filesdata[$key]['type'] = 'local';
-			}
-	
+
 		}
 		
 		// free memory where possible
 		unset($dups);
 	}
-	// END
+	// ------------------------------------------------------
 	
 
 	/** 
@@ -968,23 +1035,21 @@ class Minimee {
 			$this->EE->session->cache['minimee'][$this->type][$this->queue] = array(
 				'template' => $this->template,
 				'tagdata' => '',
-				'files' => array()
+				'filesdata' => array()
 			);
 		}
 		
 		// Append tagdata - used if diplay() is disabled
 		$this->EE->session->cache['minimee'][$this->type][$this->queue]['tagdata'] .= $this->EE->TMPL->tagdata;
-		
+
 		// Add all files to the queue cache
-		foreach ($this->filesdata as $file)
+		foreach($this->filesdata as $filesdata)
 		{
-			if ( ! in_array($file['name'], $this->EE->session->cache['minimee'][$this->type][$this->queue]['files']))
-			{
-				$this->EE->session->cache['minimee'][$this->type][$this->queue]['files'][] = $file['name'];
-			}
+			$this->EE->session->cache['minimee'][$this->type][$this->queue]['filesdata'][] = $filesdata;
 		}
+		
 	}
-	// END
+	// ------------------------------------------------------
 	
 
 	/** 
@@ -995,34 +1060,44 @@ class Minimee {
 	 */
 	public function _set_remote_mode()
 	{
-		// if 'auto', then we try curl first
-		if (preg_match('/auto|curl/i', $this->config->remote_mode) && in_array('curl', get_loaded_extensions()))
+
+		// let's only do this once per session
+		if ( ! isset($this->EE->session->cache['minimee']['remote_mode']))
 		{
-			$this->log->info('Using CURL for remote files.');
+		
+			// empty to start, then attempt to update it
+			$this->EE->session->cache['minimee']['remote_mode'] = '';		
 
-			$this->remote_mode = 'curl';
-			
-			return;
-		}
-
-		// file_get_contents() is auto mode fallback
-		if (preg_match('/auto|fgc/i', $this->config->remote_mode) && ini_get('allow_url_fopen'))
-		{
-			$this->log->info('Using file_get_contents() for remote files.');
-
-			if ( ! defined('OPENSSL_VERSION_NUMBER'))
+			// if 'auto', then we try curl first
+			if (preg_match('/auto|curl/i', $this->config->remote_mode) && in_array('curl', get_loaded_extensions()))
 			{
-				$this->log->debug('Your PHP compile does not appear to support file_get_contents() over SSL.');
+				$this->log->info('Using CURL for remote files.');
+				$this->EE->session->cache['minimee']['remote_mode'] = 'curl';
 			}
+	
+			// file_get_contents() is auto mode fallback
+			elseif (preg_match('/auto|fgc/i', $this->config->remote_mode) && ini_get('allow_url_fopen'))
+			{
+				$this->log->info('Using file_get_contents() for remote files.');
+	
+				if ( ! defined('OPENSSL_VERSION_NUMBER'))
+				{
+					$this->log->debug('Your PHP compile does not appear to support file_get_contents() over SSL.');
+				}
 
-			$this->remote_mode = 'fgc';
-
-			return;
+				$this->EE->session->cache['minimee']['remote_mode'] = 'fgc';
+			}
+			
+			// if we're here, then we cannot fetch remote files
+			else
+			{
+				$this->log->debug('Remote files cannot be fetched.', 2);
+			}
 		}
 		
-		// if we're here, then we cannot fetch remote files
-		$this->log->debug('Remote files cannot be fetched.', 2);
+		$this->remote_mode = $this->EE->session->cache['minimee']['remote_mode'];
 	}
+	// ------------------------------------------------------
 
 
 	/** 
@@ -1033,14 +1108,14 @@ class Minimee {
 	 * @param	Boolean Whether the tag is for a cached file or not (default TRUE)
 	 * @return	String containing an HTML tag reference to given reference
 	 */
-	protected function _tag($filename, $cache = TRUE)
+	protected function _tag($cache_url, $filename, $cache = TRUE)
 	{
 		// only prepend cache_url if needed
-		$url = ($cache) ? $this->config->cache_url . $this->EE->functions->remove_double_slashes('/' . $filename) : $filename;
+		$url = ($cache) ? $cache_url . $this->EE->functions->remove_double_slashes('/' . $filename) : $filename;
 
 		return str_replace('{minimee}', $url, $this->template);
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -1106,6 +1181,7 @@ queue="name"
 EOT;
 
 	}
+	// ------------------------------------------------------
 }
 	
 /* End of file pi.minimee.php */ 
