@@ -640,27 +640,46 @@ class Minimee {
 	 * 
 	 * @param	Contents to be minified
 	 * @param	mixed A relative path to use, if provided
-	 * @return	String minified contents of file
+	 * @return	String (maybe) minified contents of file
 	 */
 	protected function _minify($contents, $rel = FALSE)
 	{
 		switch ($this->type) :
 			
 			case 'js':
-				require_once('libraries/jsmin.php');
-				$this->jsmin = new jsmin();
-				return $this->jsmin->minify($contents);
+			
+				// be sure we want to minify
+				if ($this->config->yes('minify') && $this->config->yes('minify_js'))
+				{
+					require_once('libraries/jsmin.php');
+					$this->jsmin = new jsmin();
+					return $this->jsmin->minify($contents);
+				}
+				else
+				{
+					// un-minified
+					return $contents;
+				}
 			break;
 			
 			case 'css':
-				require_once('libraries/cssmin.php');
-				$this->cssmin = new cssmin();
-				
-				// set a relative path if exists
-				$relativePath = ($rel !== FALSE && $this->config->yes('css_prepend_mode')) ? $rel . '/' : NULL;
-				
-				// run and return
-				return $this->cssmin->minify($contents, FALSE, $relativePath);
+				// be sure we want to minify
+				if ($this->config->yes('minify') && $this->config->yes('minify_css'))
+				{
+					require_once('libraries/cssmin.php');
+					$this->cssmin = new cssmin();
+					
+					// set a relative path if exists
+					$relativePath = ($rel !== FALSE && $this->config->yes('css_prepend_mode')) ? $rel . '/' : NULL;
+					
+					// run and return
+					return $this->cssmin->minify($contents, FALSE, $relativePath);
+				}
+				else
+				{
+					// un-minified
+					return $contents;
+				}
 			break;
 
 		endswitch;
@@ -1189,6 +1208,13 @@ disable="no"
 combine="yes"
 - tells plugin whether to combine files when caching; if set to 'no',
   it will cache each file separately
+
+minify="yes"
+minify_css="yes"
+minify_js="yes"
+- tells the plugin whether to minify all files when caching; if set to 'no',
+  it will not run any files through minify engine.
+  Use minify_css or minify_js to disable minifying of only those files.
 
 queue="name"
 - Allows you to create a queue of assets to be output at a later stage in code.

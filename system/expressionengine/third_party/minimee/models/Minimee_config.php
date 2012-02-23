@@ -22,6 +22,9 @@ class Minimee_config
 		'cache_url'				=> '',
 		'css_prepend_mode'		=> '',
 		'css_prepend_url'		=> '',
+		'minify'				=> '',
+		'minify_js'				=> '',
+		'minify_css'			=> '',
 
 		/* per run settings */
 		'combine'				=> '',
@@ -226,6 +229,9 @@ class Minimee_config
 			/* Booleans default YES */
 			case('combine') :
 			case('css_prepend_mode') :
+			case('minify') :
+			case('minify_css') :
+			case('minify_js') :
 				return ($value === FALSE OR preg_match('/0|false|off|no|n/i', $value)) ? 'no' : 'yes';
 			break;
 		
