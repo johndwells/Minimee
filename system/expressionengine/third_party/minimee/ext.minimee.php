@@ -38,8 +38,8 @@ class Minimee_ext {
 	{
 		$this->EE =& get_instance();
 
-		// grab our cache
-		$this->cache = Minimee_helper::cache();
+		// grab alias of our cache
+		$this->cache =& Minimee_helper::cache();
 
 		// create our config object
 		$this->config = new Minimee_config();
@@ -166,7 +166,7 @@ class Minimee_ext {
 		}
 
 		// Protected by our sanitise_settings() method, we are safe to pass all of $_POST
-		$settings = $this->config->sanitise_settings(array_merge($this->config->allowed, $settings));
+		$settings = $this->config->sanitise_settings(array_merge($this->config->allowed(), $settings));
 		
 		$this->EE->db->where('class', __CLASS__)
 					 ->update('extensions', array('settings' => serialize($settings)));
@@ -195,7 +195,7 @@ class Minimee_ext {
 		$this->EE->load->library('table');
 
 		// Merge the contents of our db with the allowed
-		$current = array_merge($this->config->allowed, $current);
+		$current = array_merge($this->config->allowed(), $current);
 
 		// view vars		
 		$vars = array(

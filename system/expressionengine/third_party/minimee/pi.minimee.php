@@ -60,8 +60,8 @@ class Minimee {
 	{
 		$this->EE =& get_instance();
 		
-		// grab our cache
-		$this->cache = Minimee_helper::cache();
+		// grab alias of our cache
+		$this->cache =& Minimee_helper::cache();
 
 		// create our logger
 		$this->log = new Minimee_logger();

@@ -4,20 +4,43 @@ require_once PATH_THIRD . 'minimee/config.php';
 require_once PATH_THIRD . 'minimee/models/Minimee_config.php';
 require_once PATH_THIRD . 'minimee/models/Minimee_logger.php';
 
+/**
+ * Minimee Helper
+ * @author John D Wells <http://johndwells.com>
+ * @license http://www.opensource.org/licenses/bsd-license.php BSD license
+ * @link	http://johndwells.com/software/minimee
+ */
 class Minimee_helper
 {
-	public static function cache()
+	/**
+	 * Create an alias to our cache
+	 *
+	 * @return 	Array	Our cache in EE->session->cache
+	 */
+	public static function &cache()
 	{
+		$ee =& get_instance();
+
 		// be sure we have a cache set up
-		if ( ! isset(get_instance()->session->cache['minimee']))
+		if ( ! isset($ee->session->cache['minimee']))
 		{
-			get_instance()->session->cache['minimee'] = array();
+			$ee->session->cache['minimee'] = array();
 		}
-
+		
 		// alias our cache for shorthand		
-		return get_instance()->session->cache['minimee'];
+		return $ee->session->cache['minimee'];
 	}
+	// ------------------------------------------------------
 
+
+	/**
+	 * Loads our requested library
+	 *
+	 * On first call it will adjust the include_path, for Minify support
+	 *
+	 * @param 	string	Name of library to require
+	 * @return 	void
+	 */
 	public static function library($which)
 	{
 		// update our include_path only once
@@ -47,7 +70,18 @@ class Minimee_helper
 			break;
 		}
 	}
-	
+	// ------------------------------------------------------
+
+
+	/**
+	 * Modified remove_double_slashes()
+	 *
+	 * If the string passed is a URL, it will preserve leading double slashes
+	 *
+	 * @param 	string	String to remove double slashes from
+	 * @param 	boolean	True if string is a URL
+	 * @return 	string	String without double slashes
+	 */
 	public static function remove_double_slashes($string, $url = FALSE)
 	{
 		// is our string a URL?
@@ -64,4 +98,9 @@ class Minimee_helper
 			return preg_replace("#(^|[^:])//+#", "\\1/", $string);
 		}
 	}
+	// ------------------------------------------------------
 }
+// END CLASS
+
+/* End of file Minimee_helper.php */
+/* Location: ./system/expressionengine/third_party/minimee/models/Minimee_helper.php */

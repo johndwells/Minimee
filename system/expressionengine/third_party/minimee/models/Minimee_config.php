@@ -12,8 +12,14 @@ class Minimee_config
 	/**
 	 * Allowed settings - the master list
 	 * 
+	 * You might wonder what's going on here. Why no, you may ask, simply make each of these
+	 * a property of the Minimee_config class?  And why this $allowed, plus the "defaults", 
+	 * plus "runtime" settings?
+	 * 
+	 * Well. 
+	 * 
 	 */
-	public $allowed = array(
+	protected $_allowed = array(
 	
 		/* per file settings */
 		'base_path'				=> '',
@@ -36,6 +42,12 @@ class Minimee_config
 	);
 	
 	
+	/**
+	 * Alias of our EE session cache
+	 */
+	public $cache = FALSE;
+
+
 	/**
 	 * Where we find our config ('db', 'config', 'hook' or 'default').
 	 * A 3rd party hook may also rename to something else.
@@ -68,11 +80,15 @@ class Minimee_config
 	 */
 	public function __construct($runtime = array())
 	{
+		// grab alias of our cache
+		$this->cache =& Minimee_helper::cache();
+		
 		// grab our config settings, will become our defaults
 		$this->_init();
 		
 		// Runtime settings? Use magic __set()
 		$this->settings = $runtime;
+		
 	}
 	// ------------------------------------------------------
 
@@ -137,10 +153,22 @@ class Minimee_config
 			}
 		}
 		// just set an individual setting
-		elseif(array_key_exists($prop, $this->allowed))
+		elseif(array_key_exists($prop, $this->_allowed))
 		{
 			$this->_runtime[$prop] = $this->sanitise_setting($prop, $value);
 		}
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Return copy of allowed settings
+	 *
+	 * @return 	array
+	 */
+	public function allowed()
+	{
+		return $this->_allowed;
 	}
 	// ------------------------------------------------------
 
@@ -199,7 +227,7 @@ class Minimee_config
 		}
 
 		// reduce our $settings array to only valid keys
-        $valid = array_flip(array_intersect(array_keys($this->allowed), array_keys($settings)));
+        $valid = array_flip(array_intersect(array_keys($this->_allowed), array_keys($settings)));
         
 		foreach($valid as $setting => $value)
 		{
@@ -330,6 +358,8 @@ class Minimee_config
 	
 	/**
 	 * Look for settings in database (set by our extension)
+	 * 
+	 * @return void
 	 */
 	protected function _from_db()
 	{
@@ -370,6 +400,8 @@ class Minimee_config
 
 	/**
 	 * Allow 3rd parties to provide own configuration settings
+	 * 
+	 * @return mixed	array of settings of FALSE
 	 */
 	protected function _from_hook()
 	{
@@ -402,18 +434,19 @@ class Minimee_config
 	 */
 	protected function _init()
 	{
-		$ee =& get_instance();
-	
+
 		// see if we have already configured our defaults
-		if(isset($ee->session->cache['minimee']['config']))
+		if(isset($this->cache['config']))
 		{
-			$this->_default = $ee->session->cache['minimee']['config'];
+			$this->_default = $this->cache['config'];
 
 			Minimee_logger::log('Settings have been retrieved from session.', 3);
 		}
 		else
 		{
-
+			// need EE for this
+			$ee =& get_instance();
+	
 			// we are trying to turn this into an array full of goodness.
 			$settings = FALSE;
 	
@@ -481,7 +514,7 @@ class Minimee_config
 			/*
 			 * Now make a complete & sanitised settings array, and set as our default
 			 */
-			$this->_default = $this->sanitise_settings(array_merge($this->allowed, $settings));
+			$this->_default = $this->sanitise_settings(array_merge($this->_allowed, $settings));
 	
 			// cleanup
 			unset($settings);
@@ -499,17 +532,10 @@ class Minimee_config
 				Minimee_logger::log('Manually injected into template_post_parse extension hook.', 3);
 			}
 
-			/*
-			 * Store this in session for subsequent runs
-			 */
-			if ( ! isset($ee->session->cache['minimee']))
-			{
-				$ee->session->cache['minimee'] = array();
-			}
-
-			$ee->session->cache['minimee']['config'] = $this->_default;
-
-			Minimee_logger::log('Settings have been saved in session.', 3);
+			// set our settings to cache for retrieval later on
+			$this->cache['config'] = $this->_default;
+			
+			Minimee_logger::log('Settings have been saved in session cache.', 3);
 		}
 
 	}
