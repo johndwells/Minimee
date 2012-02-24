@@ -325,6 +325,9 @@ class Minimee {
 
 		// free memory where possible
 		unset($runtime, $realpath, $stylesheet_versions);
+		
+		// chaining
+		return $this;
 	}
 	// ------------------------------------------------------
 
@@ -338,12 +341,11 @@ class Minimee {
 	{
 		try
 		{
-			$this->_fetch_params();
-			$this->_fetch_queue();
-			$this->_flightcheck();
-			$this->_check_headers();
-			
-			return $this->_out();
+			return $this->_fetch_params()
+						->_fetch_queue()
+						->_flightcheck()
+						->_check_headers()
+						->_out();
 		}
 		catch (Exception $e)
 		{
@@ -363,10 +365,10 @@ class Minimee {
 	{
 		try
 		{
-			$this->_fetch_params();
-			$this->_fetch_queue();
-			$this->_flightcheck();
-			$this->_check_headers();
+			$this->_fetch_params()
+				 ->_fetch_queue()
+				 ->_flightcheck()
+				 ->_check_headers();
 			
 			// this is what we'd normally return to a template
 			$out = $this->_out();
@@ -407,10 +409,7 @@ class Minimee {
 			}
 
 			// free memory where possible
-			unset($pat);
-			unset($haystack);
-			unset($matches);
-			unset($paths);
+			unset($pat, $haystack, $matches, $paths);
 
 			return $out;
 		}
@@ -447,6 +446,9 @@ class Minimee {
 		{
 			throw new Exception('No files found in the queue named \'' . $this->type . '\'.');
 		}
+		
+		// chaining
+		return $this;
 	}
 	// ------------------------------------------------------
 	
@@ -500,9 +502,10 @@ class Minimee {
 		$this->_set_filesdata($matches[1]);
 
 		// free memory where possible
-		unset($haystack);
-		unset($pat);
-		unset($matches);
+		unset($haystack, $pat, $matches);
+		
+		// chaining
+		return $this;
 	}
 	// ------------------------------------------------------
 
@@ -526,6 +529,9 @@ class Minimee {
 		{
 			$this->queue = strtolower($this->EE->TMPL->fetch_param('queue', NULL));
 		}
+		
+		// chaining
+		return $this;
 	}
 	// ------------------------------------------------------
 
@@ -625,6 +631,9 @@ class Minimee {
 			break;
 
 		endswitch;
+		
+		// chaining
+		return $this;
 	}
 	// ------------------------------------------------------
 
@@ -725,10 +734,7 @@ class Minimee {
 		{
 
 			$lastmodified = filemtime(Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
-			$now = time();
-			// $now = $now + (60 * $this->config->refresh_after)
-			
-			if($lastmodified < $now)
+			if($lastmodified < $this->cache_lastmodified)
 			{
 				//Cache is old
 				$this->log->info('Cache file found but it was too old: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
@@ -890,20 +896,40 @@ class Minimee {
 	{
 		try
 		{
-			$this->_fetch_params();
-			$this->_fetch_files($this->EE->TMPL->tagdata);
+			$this->_fetch_params()
+				 ->_fetch_files($this->EE->TMPL->tagdata);
 
 			// Are we queueing for later? If so, just save in session
 			if ($this->queue)
 			{
 				return $this->_set_queue();
 			}
-	
-			$this->_flightcheck();
-			$this->_check_headers();
-			
 
-			return $this->_out();
+			$this->_flightcheck()
+				 ->_check_headers();
+			
+			// combining files?
+			if ($this->config->yes('combine') && $this->config->yes('combine_' . $this->type))
+			{
+				return $this->_out();
+			}
+			
+			// manual work to combine each file in turn
+			else
+			{
+				$filesdata = $this->filesdata;
+				$this->filesdata = array();
+				$return = '';
+				foreach($filesdata as $file)
+				{
+					$this->filesdata = array($file);
+					
+					$return .= $this->_out();
+				}
+				
+				return $return;
+			}
+
 		}
 		catch (Exception $e)
 		{

@@ -144,6 +144,14 @@ class Minimee_ext {
 		$settings = $_POST;
 		
 		// a non-existent key means "no"
+		if( ! isset($settings['combine_css']))
+		{
+			$settings['combine_css'] = 'no';
+		}
+		if( ! isset($settings['combine_js']))
+		{
+			$settings['combine_js'] = 'no';
+		}
 		if( ! isset($settings['minify_css']))
 		{
 			$settings['minify_css'] = 'no';
@@ -169,6 +177,8 @@ class Minimee_ext {
 		);
 
 		$this->log->info('Extension settings have been saved.');
+		
+		unset($settings);
 	}
 	// ------------------------------------------------------
 

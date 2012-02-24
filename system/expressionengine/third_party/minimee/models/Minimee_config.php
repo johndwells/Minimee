@@ -20,6 +20,9 @@ class Minimee_config
 		'base_url'				=> '',
 		'cache_path'			=> '',
 		'cache_url'				=> '',
+		'combine'				=> '',
+		'combine_css'			=> '',
+		'combine_js'			=> '',
 		'css_prepend_mode'		=> '',
 		'css_prepend_url'		=> '',
 		'minify'				=> '',
@@ -29,7 +32,6 @@ class Minimee_config
 		/* per run settings */
 		'disable'				=> '',
 		'minify_html'			=> '',
-/*		'refresh_after'			=> '', */
 		'remote_mode'			=> '',
 	);
 	
@@ -226,6 +228,9 @@ class Minimee_config
 			break;
 		
 			/* Booleans default YES */
+			case('combine') :
+			case('combine_css') :
+			case('combine_js') :
 			case('css_prepend_mode') :
 			case('minify') :
 			case('minify_css') :
@@ -233,12 +238,6 @@ class Minimee_config
 			case('minify_js') :
 				return ($value === FALSE OR preg_match('/0|false|off|no|n/i', $value)) ? 'no' : 'yes';
 			break;
-
-			/* Integer
-			case('refresh_after') :
-				return (int) $value;
-			break;
-			*/
 
 			/* ENUM */
 			case('remote_mode') :

@@ -48,16 +48,6 @@
 
 
 	/**
-	 * Minify settings
-	 */
-	$label = lang('minify', 'minify') . sprintf($note_format, lang('note_minify'));
-	$setting = '<label for="minify_css">CSS&nbsp;' . form_checkbox(array_merge($extra_array, array('name' => 'minify_css', 'id' => 'minify_css', 'value' => 'yes', 'checked' => ($settings['minify_css'] == 'yes')))) . '</label>';
-	$setting .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="minify_js">JS&nbsp;' . form_checkbox(array_merge($extra_array, array('name' => 'minify_js', 'id' => 'minify_js', 'value' => 'yes', 'checked' => ($settings['minify_js'] == 'yes')))) . '</label>';
-	$setting .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="minify_html">HTML&nbsp;' . form_checkbox(array_merge($extra_array, array('name' => 'minify_html', 'id' => 'minify_html', 'value' => 'yes', 'checked' => ($settings['minify_html'] == 'yes')))) . '</label>';
-	$this->table->add_row($label, $setting);
-
-
-	/**
 	 * Spit our our 'basic' table
 	 */
 	echo $this->table->generate();
@@ -71,6 +61,33 @@
 	    array('data' => lang('advanced_config'), 'style' => 'width:50%;'),
 	    lang('setting')
 	);
+
+	/**
+	 * Disable
+	 */
+	$label = lang('disable', 'disable') . sprintf($note_format, lang('note_disable'));
+	$setting = form_dropdown('disable', array('no' => lang('no'),'yes' => lang('yes')), $settings['disable'], 'id="disable" ' . $extra_string);
+	$this->table->add_row($label, $setting);
+
+
+	/**
+	 * Combine settings
+	 */
+	$label = lang('combine', 'combine') . sprintf($note_format, lang('note_combine'));
+	$setting = '<label for="combine_css">CSS&nbsp;' . form_checkbox(array_merge($extra_array, array('name' => 'combine_css', 'id' => 'combine_css', 'value' => 'yes', 'checked' => ($settings['combine_css'] == 'yes')))) . '</label>';
+	$setting .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="combine_js">JS&nbsp;' . form_checkbox(array_merge($extra_array, array('name' => 'combine_js', 'id' => 'combine_js', 'value' => 'yes', 'checked' => ($settings['combine_js'] == 'yes')))) . '</label>';
+	$this->table->add_row($label, $setting);
+
+
+	/**
+	 * Minify settings
+	 */
+	$label = lang('minify', 'minify') . sprintf($note_format, lang('note_minify'));
+	$setting = '<label for="minify_css">CSS&nbsp;' . form_checkbox(array_merge($extra_array, array('name' => 'minify_css', 'id' => 'minify_css', 'value' => 'yes', 'checked' => ($settings['minify_css'] == 'yes')))) . '</label>';
+	$setting .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="minify_js">JS&nbsp;' . form_checkbox(array_merge($extra_array, array('name' => 'minify_js', 'id' => 'minify_js', 'value' => 'yes', 'checked' => ($settings['minify_js'] == 'yes')))) . '</label>';
+	$setting .= '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label for="minify_html">HTML&nbsp;' . form_checkbox(array_merge($extra_array, array('name' => 'minify_html', 'id' => 'minify_html', 'value' => 'yes', 'checked' => ($settings['minify_html'] == 'yes')))) . '</label>';
+	$this->table->add_row($label, $setting);
+
 
 	/**
 	 * Base Path
