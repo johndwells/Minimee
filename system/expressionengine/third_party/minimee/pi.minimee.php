@@ -1172,43 +1172,8 @@ JS:
 {/exp:minimee:js}
 
 
-=====================================================
-Tags
-=====================================================
-
-exp:minimee:css
-- Compress & combine CSS files
-
-exp:minimee:js
-- Compress & combine JS files
-
-exp:minimee:display
-- Display files that have been queued for later
-- See online docs for more information on usage
-
-=====================================================
-Parameters
-=====================================================
-
-disable="no"
-- set to "yes" if you wish to temporarily disable this usage of plugin
-- note that if Minimee is globally disabled via config, it cannot be overridden by this parameter
-
-combine="yes"
-- tells plugin whether to combine files when caching; if set to 'no',
-  it will cache each file separately
-
-minify="yes"
-minify_css="yes"
-minify_js="yes"
-- tells the plugin whether to minify all files when caching; if set to 'no',
-  it will not run any files through minify engine.
-  Use minify_css or minify_js to disable minifying of only those files.
-
-queue="name"
-- Allows you to create a queue of assets to be output at a later stage in code.
-- The string passed to the queue parameter can later be used in the
-  exp:minimee:display single tags. See online docs for more info and examples.
+HTML (for EE2.4+):
+See documentation for details.
 
 EOT;
 
