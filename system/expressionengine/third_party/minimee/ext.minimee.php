@@ -1,9 +1,7 @@
-<?php
-if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once PATH_THIRD . 'minimee/config.php';
-require_once PATH_THIRD . 'minimee/models/Minimee_config.php';
-require_once PATH_THIRD . 'minimee/models/Minimee_logger.php';
+// our helper will require_once() everything else we need
+require_once PATH_THIRD . 'minimee/models/Minimee_helper.php';
 
 /**
  * Minimee: minimize & combine your CSS and JS files. For EE2 only.
@@ -22,6 +20,7 @@ class Minimee_ext {
 	public $EE;
 
 	public $log;
+	public $cache;
 	public $config;
 
 	/**
@@ -39,12 +38,15 @@ class Minimee_ext {
 	{
 		$this->EE =& get_instance();
 
-		// create our logger
-		$this->log = new Minimee_logger();
+		// grab our cache
+		$this->cache = Minimee_helper::cache();
 
 		// create our config object
 		$this->config = new Minimee_config();
 		
+		// create our logger
+		$this->log = new Minimee_logger();
+
 		$this->log->info('Extension has been instantiated.');
 	}
 	// ------------------------------------------------------
@@ -119,9 +121,8 @@ class Minimee_ext {
 
 		$this->log->info('Running HTML minification.');
 
-		// we've made it this far, so...		
-		// include our needed HTML library
-		require_once('libraries/HTML.php');
+		// we've made it this far, so...
+		Minimee_helper::library('html');
 		return Minify_HTML::minify($template);
 	}
 	// ------------------------------------------------------
@@ -139,8 +140,25 @@ class Minimee_ext {
 			$this->log->error($this->EE->lang->line('unauthorized_access'));
 		}
 
+		// because our settings default to "yes", we need to ensure these values are in
+		$settings = $_POST;
+		
+		// a non-existent key means "no"
+		if( ! isset($settings['minify_css']))
+		{
+			$settings['minify_css'] = 'no';
+		}
+		if( ! isset($settings['minify_html']))
+		{
+			$settings['minify_html'] = 'no';
+		}
+		if( ! isset($settings['minify_js']))
+		{
+			$settings['minify_js'] = 'no';
+		}
+
 		// Protected by our sanitise_settings() method, we are safe to pass all of $_POST
-		$settings = $this->config->sanitise_settings(array_merge($this->config->allowed, $_POST));
+		$settings = $this->config->sanitise_settings(array_merge($this->config->allowed, $settings));
 		
 		$this->EE->db->where('class', __CLASS__)
 					 ->update('extensions', array('settings' => serialize($settings)));
@@ -166,55 +184,18 @@ class Minimee_ext {
 		$this->EE->load->helper('form');
 		$this->EE->load->library('table');
 
-		// view vars		
-		$vars = array('config_loc' => $this->config->location);
-		
-		// begin with data that either has disabled or not
-		if($this->config->location == 'db')
-		{
-			$extra = '';
-			$data = array();
-		}
-		else
-		{
-			$extra = ' disabled="disabled"';
-			$data = array(
-				'disabled' => 'disabled'
-			);
-		}
-		
-		// NOTE: we are NOT sanitising so that our contents come straight from the DB
+		// Merge the contents of our db with the allowed
 		$current = array_merge($this->config->allowed, $current);
 
-		$no_yes_options = array(
-			'no'	=> lang('no'),
-			'yes' 	=> lang('yes')
-		);
-		
-		$yes_no_options = array(
-			'yes' 	=> lang('yes'),
-			'no'	=> lang('no')
-		);
-		
-		$remote_mode_options = array(
-			'auto' 	=> lang('auto'), 
-			'curl'	=> lang('curl'),
-			'fgc' 	=> lang('fgc'),
-		);
-		
-		$vars['settings'] = array(
-			'cache_path'	=> form_input(array_merge($data, array('name' => 'cache_path', 'id' => 'cache_path', 'value' => $current['cache_path']))),
-			'cache_url'		=> form_input(array_merge($data, array('name' => 'cache_url', 'id' => 'cache_url', 'value' => $current['cache_url']))),
-			'minify_html'	=> form_dropdown('minify_html', $no_yes_options, $current['minify_html'], 'id="minify_html" ' . $extra),
+		// view vars		
+		$vars = array(
+			'config_loc' => $this->config->location,
+			'disabled' => ($this->config->location != 'db'),
+			'form_open' => form_open('C=addons_extensions'.AMP.'M=save_extension_settings'.AMP.'file=minimee'),
+			'settings' => $current
 			);
-		
-		$vars['settings_advanced'] = array(
-			'disable'		=> form_dropdown('disable', $no_yes_options, $current['disable'], 'id="disable" ' . $extra),
-			'remote_mode'	=> form_dropdown('remote_mode', $remote_mode_options, $current['remote_mode'], 'id="remote_mode" ' . $extra),
-			'base_path'		=> form_input(array_merge($data, array('name' => 'base_path', 'id' => 'base_path', 'value' => $current['base_path']))),
-			'base_url'		=> form_input(array_merge($data, array('name' => 'base_url', 'id' => 'base_url', 'value' => $current['base_url']))),
-		);
-		
+
+		// return our view
 		return $this->EE->load->view('settings_form', $vars, TRUE);			
 	}
 	// ------------------------------------------------------

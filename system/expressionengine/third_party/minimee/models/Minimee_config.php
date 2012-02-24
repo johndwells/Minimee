@@ -27,7 +27,6 @@ class Minimee_config
 		'minify_css'			=> '',
 
 		/* per run settings */
-		'combine'				=> '',
 		'disable'				=> '',
 		'minify_html'			=> '',
 /*		'refresh_after'			=> '', */
@@ -122,7 +121,7 @@ class Minimee_config
 	 */
 	public function __set($prop, $value)
 	{
-		// are we setting the entire Minimee_helper::settings array?
+		// are we setting the entire Minimee_config::settings array?
 		if($prop == 'settings' && is_array($value))
 		{
 			// is our array empty? if so, consider it "reset"
@@ -223,15 +222,14 @@ class Minimee_config
 
 			/* Booleans default NO */
 			case('disable') :
-			case('minify_html') :
 				return ($value === TRUE OR preg_match('/1|true|on|yes|y/i', $value)) ? 'yes' : 'no';
 			break;
 		
 			/* Booleans default YES */
-			case('combine') :
 			case('css_prepend_mode') :
 			case('minify') :
 			case('minify_css') :
+			case('minify_html') :
 			case('minify_js') :
 				return ($value === FALSE OR preg_match('/0|false|off|no|n/i', $value)) ? 'no' : 'yes';
 			break;
@@ -250,16 +248,14 @@ class Minimee_config
 			/* String - Paths */
 			case('cache_path') :
 			case('base_path') :
-				// regex pattern removes all double slashes
-				return rtrim(preg_replace("#(^|[^:])//+#", "\\1/", $value));
+				return rtrim(Minimee_helper::remove_double_slashes($value));
 			break;
 
 			/* String - URLs */
 			case('cache_url') :
 			case('base_url') :
 			case('css_prepend_url') :
-				// regex pattern removes all double slashes, preserving http:// and '//' at start
-				return rtrim(preg_replace("#([^:])//+#", "\\1/", $value));
+				return rtrim(Minimee_helper::remove_double_slashes($value, TRUE));
 			break;
 
 			/* Default */			
@@ -418,6 +414,7 @@ class Minimee_config
 		}
 		else
 		{
+
 			// we are trying to turn this into an array full of goodness.
 			$settings = FALSE;
 	
