@@ -733,27 +733,16 @@ class Minimee {
 			if (file_exists($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename)))
 			{
 
-				/* should we refresh after a period of time?
-				if($this->config->refresh_after > 0)
+				$lastmodified = filemtime($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
+				$now = time();
+				// $now = $now + (60 * $this->config->refresh_after)
+				
+				if($lastmodified < $now)
 				{
-					$lastmodified = filemtime($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
-					
-					// our refresh_after is specified in minutes
-					$seconds = 60 * $this->config->refresh_after;
-					
-					$now = time();
-					
-					// if $now is greater than $seconds + $lastmodified, trash file
-					if($lastmodified + $seconds < $now)
-					{
-						// if we make it this far, the cache is valid
-						$this->log->info('Cache file found but it was too old: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
-
-						@unlink($this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
-						return FALSE;
-					}
+					//Cache is old
+					$this->log->info('Cache file found but it was too old: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
+					return FALSE;
 				}
-				*/
 
 				// if we make it this far, the cache is valid
 				$this->log->info('Cache file found: ' . $this->EE->functions->remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
