@@ -30,7 +30,8 @@ class Minimee_config
 		'combine'				=> '',
 		'disable'				=> '',
 		'minify_html'			=> '',
-		'remote_mode'			=> ''
+/*		'refresh_after'			=> '', */
+		'remote_mode'			=> '',
 	);
 	
 	
@@ -234,7 +235,13 @@ class Minimee_config
 			case('minify_js') :
 				return ($value === FALSE OR preg_match('/0|false|off|no|n/i', $value)) ? 'no' : 'yes';
 			break;
-		
+
+			/* Integer
+			case('refresh_after') :
+				return (int) $value;
+			break;
+			*/
+
 			/* ENUM */
 			case('remote_mode') :
 				return preg_match('/auto|curl|fgc/i', $value) ? $value : 'auto';
