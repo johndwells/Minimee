@@ -112,7 +112,7 @@ class Minimee_ext {
 		}
 		
 		// do not run through HTML minifier?
-		if($this->config->disable == 'yes' || $this->config->minify_html == 'no')
+		if($this->config->no('minify') || $this->config->no('minify_html'))
 		{
 			return $template;
 		}
