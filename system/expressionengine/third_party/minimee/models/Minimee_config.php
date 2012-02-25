@@ -11,13 +11,6 @@ class Minimee_config
 
 	/**
 	 * Allowed settings - the master list
-	 * 
-	 * You might wonder what's going on here. Why no, you may ask, simply make each of these
-	 * a property of the Minimee_config class?  And why this $allowed, plus the "defaults", 
-	 * plus "runtime" settings?
-	 * 
-	 * Well. 
-	 * 
 	 */
 	protected $_allowed = array(
 	
@@ -49,7 +42,7 @@ class Minimee_config
 
 
 	/**
-	 * Where we find our config ('db', 'config', 'hook' or 'default').
+	 * Where we find our config - 'db', 'config', 'hook' or 'default'.
 	 * A 3rd party hook may also rename to something else.
 	 */
 	public $location = FALSE;
