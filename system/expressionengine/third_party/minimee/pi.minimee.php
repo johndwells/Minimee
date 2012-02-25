@@ -25,7 +25,6 @@ class Minimee {
 	 * 
 	 * Note: Any other configs will be per-file
 	 */
-	public $combine;
 	public $disable;
 
 	/**
@@ -113,9 +112,8 @@ class Minimee {
 		}
 		
 		// free memory where possible
-		unset($js);
-		unset($css);
-
+		unset($js, $css);
+		
 		return $out;
 	}
 	// ------------------------------------------------------
@@ -131,7 +129,7 @@ class Minimee {
 		// make sure only one is being specified
 		if ($this->EE->TMPL->fetch_param('js') && $this->EE->TMPL->fetch_param('css'))
 		{
-			return $this->_abort('Minimee has aborted: When using the embed method, you may not specify JS and CSS file types together.');
+			return $this->_abort('When using exp:minimee:embed, you may not specify JS and CSS file types together.');
 		}
 
 		if ($this->EE->TMPL->fetch_param('js'))
@@ -177,6 +175,34 @@ class Minimee {
 	// ------------------------------------------------------
 
 
+	/**
+	 * Rather than returning the tags or cache contents, simply return a link to cache(s)
+	 */
+	public function link()
+	{
+		// make sure only one is being specified
+		if ($this->EE->TMPL->fetch_param('js') && $this->EE->TMPL->fetch_param('css'))
+		{
+			return $this->_abort('When using exp:minimee:link, you may not specify JS and CSS file types together.');
+		}
+
+		if ($this->EE->TMPL->fetch_param('js'))
+		{
+			$this->queue = $this->EE->TMPL->fetch_param('js');
+			$this->type = 'js';
+		}
+
+		if ($this->EE->TMPL->fetch_param('css'))
+		{
+			$this->queue = $this->EE->TMPL->fetch_param('css');
+			$this->type = 'css';
+		}
+		
+		return $this->_link();
+	}
+	// ------------------------------------------------------
+
+	
 	/**
 	 * Abort and return original or reconstructed tagdata.
 	 * Attempts to handle any exceptions thrown.
@@ -236,8 +262,7 @@ class Minimee {
 		$this->log->info('Cache file `' . $filename . '` was written to ' . $cache_path);
 
 		// free memory where possible
-		unset($filepath);
-		unset($success);
+		unset($filepath, $success);
 	}
 	// ------------------------------------------------------
 	
@@ -404,8 +429,11 @@ class Minimee {
 			// fetch contents of each file
 			foreach ($paths as $path)
 			{
+				// strip timestamp
+				$name = substr($path, 0, strpos($path, '?'));
+				
 				// there's no way this doesn't exist... right?
-				$out .= @file_get_contents($path) . "\n";
+				$out .= file_get_contents($name) . "\n";
 			}
 
 			// free memory where possible
@@ -520,10 +548,6 @@ class Minimee {
 		// pass all params through our config, will magically pick up what's needed
 		$this->config->settings = $this->EE->TMPL->tagparams;
 
-		// copy some per-run config items to our local properties
-		$this->disable = $this->config->disable;
-		$this->remote_mode = $this->config->remote_mode;
-
 		// fetch queue if it hasn't already been set via Minimee::_display()
 		if ( ! $this->queue)
 		{
@@ -576,8 +600,7 @@ class Minimee {
 		}
 
 		// free memory where possible
-		unset($sql);
-		unset($css_query);
+		unset($sql, $css_query);
 		
 		// return FALSE if none found
 		return ($versions) ? $versions : FALSE;
@@ -617,8 +640,19 @@ class Minimee {
 		// Flightcheck: determine if we can continue or disable permanently
 		switch ('flightcheck') :
 
-			case ($this->disable == 'yes') :
-				throw new Exception('Disabled manually.');
+			case ($this->config->yes('disable')) :
+				// we can actually figure out if it's a runtime setting or default
+				$runtime = $this->config->runtime();
+				
+				if(isset($runtime['disable']))
+				{
+					throw new Exception('Disabled via tag parameter.');
+				}
+				else
+				{
+					throw new Exception('Disabled via config.');
+				}
+				
 			break;
 
 			case ( ! file_exists($this->config->cache_path)) :
@@ -634,6 +668,58 @@ class Minimee {
 		
 		// chaining
 		return $this;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Processes things like normal, but only return the links to cache file(s).
+	 * 
+	 * @return mixed string or empty
+	 */
+	protected function _link()
+	{
+		try
+		{
+			$this->_fetch_params()
+				 ->_fetch_queue()
+				 ->_flightcheck()
+				 ->_check_headers();
+			
+			// this is what we'd normally return to a template
+			$out = $this->_out();
+
+			// let's find the location of our cache files
+			switch (strtolower($this->type)) :
+
+				case 'css' :
+					$pat = "/<link{1}.*?href=['|\"']{1}(.*?)['|\"]{1}[^>]*>/i";
+				break;
+
+				case 'js' :
+					$pat = "/<script{1}.*?src=['|\"]{1}(.*?)['|\"]{1}[^>]*>(.*?)<\/script>/i";
+				break;
+
+				default :
+					throw new Exception('No appropriate css/js tags found to parse.');
+				break;
+
+			endswitch;
+
+			if ( ! preg_match_all($pat, $out, $matches, PREG_PATTERN_ORDER))
+			{
+				throw new Exception('No files found to return.');
+			}
+
+			// free memory where possible
+			unset($pat, $haystack);
+
+			return implode('|', $matches[1]);
+		}
+		catch (Exception $e)
+		{
+			return $this->_abort($e);
+		}
 	}
 	// ------------------------------------------------------
 
