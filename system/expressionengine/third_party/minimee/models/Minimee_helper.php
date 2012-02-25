@@ -25,6 +25,8 @@ class Minimee_helper
 		if ( ! isset($ee->session->cache['minimee']))
 		{
 			$ee->session->cache['minimee'] = array();
+
+			Minimee_logger::log('Session cache has been set up.', 3);
 		}
 		
 		// alias our cache for shorthand		
@@ -46,6 +48,8 @@ class Minimee_helper
 		// update our include_path only once
 		if ( ! isset(get_instance()->session->cache['include_path']))
 		{
+			Minimee_logger::log('include path has been updated.', 3);
+
 			set_include_path(PATH_THIRD . 'minimee/libraries' . PATH_SEPARATOR . get_include_path());
 			
 			get_instance()->session->cache['include_path'] = TRUE;
