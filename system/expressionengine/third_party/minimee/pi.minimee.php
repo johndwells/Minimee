@@ -891,7 +891,7 @@ class Minimee {
 				// we can actually figure out if it's a runtime setting or default
 				$runtime = $this->config->runtime();
 				
-				if(isset($runtime['disable']))
+				if(isset($runtime['disable']) && $runtime['disable'] == 'yes')
 				{
 					throw new Exception('Disabled via tag parameter.');
 				}
@@ -978,8 +978,7 @@ class Minimee {
 
 
 	/** 
-	 * Internal function for minifying assets
-	 * [Adapted from CodeIgniter Carabiner library]
+	 * Internal function for (maybe) minifying assets
 	 * 
 	 * @param	Contents to be minified
 	 * @param	mixed A relative path to use, if provided
@@ -1069,7 +1068,7 @@ class Minimee {
 	 * Process our filesdata
 	 *
 	 * The main purpose of this method is to handle combine="no" circumstances.
-	 * 
+	 * @return String	Final tag output
 	 */
 	protected function _process()
 	{
