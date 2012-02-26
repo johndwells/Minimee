@@ -43,7 +43,6 @@ class Minimee {
 	 * properties
 	 */
 	public $EE;
-	public $log;
 	public $config;
 
 
@@ -61,9 +60,6 @@ class Minimee {
 		
 		// grab alias of our cache
 		$this->cache =& Minimee_helper::cache();
-
-		// create our logger
-		$this->log = new Minimee_logger();
 
 		// create our config
 		$this->config = new Minimee_config();
@@ -110,7 +106,7 @@ class Minimee {
 			$this->type = 'css';
 			$out .= $this->_display();
 		}
-		
+
 		// free memory where possible
 		unset($js, $css);
 		
@@ -222,7 +218,7 @@ class Minimee {
 		}
 
 		// log our error message
-		$this->log->error($log);
+		Minimee_helper::log($log, 1);
 
 		// Let's return the original tagdata, wherever it came from
 		if ($this->queue && array_key_exists($this->queue, $this->cache[$this->type]))
@@ -259,7 +255,7 @@ class Minimee {
 		// FILE_READ_MODE is set in /system/expressionengine/config/constants.php
 		@chmod($filepath, FILE_READ_MODE);
 
-		$this->log->info('Cache file `' . $filename . '` was written to ' . $cache_path);
+		Minimee_helper::log('Cache file `' . $filename . '` was written to ' . $cache_path, 3);
 
 		// free memory where possible
 		unset($filepath, $success);
@@ -286,61 +282,93 @@ class Minimee {
 		
 			// adjust our runtime settings
 			$this->config->reset();
-			$this->config->settings = $file['runtime'];
+			$this->config->settings = $this->filesdata[$key]['runtime'];
 
-			/**
-			 * Stylesheets (e.g. {stylesheet='template/file'}
-			 */
-			if ($file['type'] == 'stylesheet') {
+			switch ($this->filesdata[$key]['type']) :
+			
+				/**
+				 * Stylesheets (e.g. {stylesheet='template/file'}
+				 */
+				case('stylesheet') :
 
-				if ($stylesheet_versions && array_key_exists($file['stylesheet'], $stylesheet_versions))
-				{
-					// transform name out of super global and into valid URL
-					$this->filesdata[$key]['name'] = $this->EE->functions->fetch_site_index().QUERY_MARKER.'css='.$file['stylesheet'].(($this->EE->config->item('send_headers') == 'y') && isset($stylesheet_versions[$file['stylesheet']]) ? '.v.'.$stylesheet_versions[$file['stylesheet']] : '');
-					$this->filesdata[$key]['lastmodified'] = $stylesheet_versions[$file['stylesheet']];
-				}
-				else
-				{
-					throw new Exception('Missing file has been detected: ' . $file['stylesheet']);
-				}
-				
-				// skip the rest of the current loop iteration
-				continue;
-			}
-
-			/**
-			 * Remote files
-			 */
-			if ($file['type'] == 'remote') {
-
-				// try replacing url with base path, and see if there's a file there
-				$alias = str_ireplace($this->config->base_url, $this->config->base_path, $file['name']);
-				if (file_exists($alias))
-				{
-					// let's take a chance!
-					$this->filesdata[$key]['name'] = str_ireplace($this->config->base_url, '', $file['name']);
-					$this->filesdata[$key]['type'] = 'local';
+					// the stylesheet matches one we've found in db
+					if ($stylesheet_versions && array_key_exists($this->filesdata[$key]['stylesheet'], $stylesheet_versions))
+					{
+						// transform name out of super global and into valid URL
+						$this->filesdata[$key]['name'] = $this->EE->functions->fetch_site_index().QUERY_MARKER.'css='.$this->filesdata[$key]['stylesheet'].(($this->EE->config->item('send_headers') == 'y') && isset($stylesheet_versions[$this->filesdata[$key]['stylesheet']]) ? '.v.'.$stylesheet_versions[$this->filesdata[$key]['stylesheet']] : '');
+						$this->filesdata[$key]['lastmodified'] = $stylesheet_versions[$this->filesdata[$key]['stylesheet']];
+	
+						Minimee_helper::log('Found stylesheet template: `' . $this->filesdata[$key]['stylesheet'] . '`.', 3);
+					}
+	
+					// couldn't find stylesheet in db
+					else
+					{
+						throw new Exception('Missing stylesheet template: ' . $this->filesdata[$key]['stylesheet']);
+					}
 					
-					$this->log->info('Treating `' . $file['name'] . '` as a local file: `' . $this->filesdata[$key]['name'] . '`');
-				}
-				else
-				{
-					// skip the rest of the current loop iteration
-					continue;
-				}
-			}
-		
-			/**
-			 * Local files
-			 */
-			$realpath = realpath(Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $this->filesdata[$key]['name']));
-			if ( ! file_exists($realpath))
-			{
-				throw new Exception('Missing file has been detected: ' . Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $this->filesdata[$key]['name']));
-			}
+				break;
 
-			$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
-			$this->filesdata[$key]['lastmodified'] = ($this->filesdata[$key]['lastmodified'] == 0) ? '0000000000' : $this->filesdata[$key]['lastmodified'];
+				/**
+				 * Remote files
+				 */
+				case('remote') :
+	
+					// try replacing url with base path, and see if there's a file there
+					$local = str_ireplace($this->config->base_url, '', $file['name']);
+	
+					// the filename needs to be without any cache-busting or otherwise $_GETs
+					if($position = strpos($local, '?'))
+					{
+						$local = substr($local, 0, $position);
+					}
+					
+					$realpath = realpath(Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $local));
+	
+					// if the $local file exists, let's alter the file type & name, and calculate lastmodified
+					if (file_exists($realpath))
+					{
+						$this->filesdata[$key]['name'] = $local;
+						$this->filesdata[$key]['type'] = 'local';
+						
+						$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
+	
+						Minimee_helper::log('Treating `' . $file['name'] . '` as a local file: `' . $this->filesdata[$key]['name'] . '`', 2);
+					}
+					
+					// nope; keep as remote
+					else
+					{
+						Minimee_helper::log('Found remote file: `' . $file['name'] . '`.', 3);
+					}
+	
+				break;
+				
+				/**
+				 * Local files
+				 */
+				default:
+
+					// the filename needs to be without any cache-busting or otherwise $_GETs
+					if($position = strpos($this->filesdata[$key]['name'], '?'))
+					{
+						$this->filesdata[$key]['name'] = substr($this->filesdata[$key]['name'], 0, $position);
+					}
+					
+					$realpath = realpath(Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $this->filesdata[$key]['name']));
+
+					if (file_exists($realpath))
+					{
+						$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
+		
+						Minimee_helper::log('Found local file: `' . $this->filesdata[$key]['name'] . '`.', 3);
+					}
+					else
+					{
+						throw new Exception('Missing local file: ' . Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $this->filesdata[$key]['name']));
+					}
+				break;
+			endswitch;
 
 		endforeach;
 
@@ -349,7 +377,7 @@ class Minimee {
 		$this->config->settings = $runtime;
 
 		// free memory where possible
-		unset($runtime, $realpath, $stylesheet_versions);
+		unset($runtime, $stylesheet_versions);
 		
 		// chaining
 		return $this;
@@ -370,7 +398,8 @@ class Minimee {
 						->_fetch_queue()
 						->_flightcheck()
 						->_check_headers()
-						->_out();
+						->_process();
+
 		}
 		catch (Exception $e)
 		{
@@ -396,7 +425,7 @@ class Minimee {
 				 ->_check_headers();
 			
 			// this is what we'd normally return to a template
-			$out = $this->_out();
+			$out = $this->_process();
 
 			// let's find the location of our cache files
 			switch (strtolower($this->type)) :
@@ -571,39 +600,55 @@ class Minimee {
 		// nothing to do if Minimee::stylesheet_query is empty
 		if ( ! $this->stylesheet_query) return FALSE;
 
-		$versions = array();
-		
-		$sql = "SELECT t.template_name, tg.group_name, t.edit_date, t.save_template_file FROM exp_templates t, exp_template_groups tg
-				WHERE  t.group_id = tg.group_id
-				AND    t.template_type = 'css'
-				AND    t.site_id = '".$this->EE->db->escape_str($this->EE->config->item('site_id'))."'";
-	
-		$css_query = $this->EE->db->query($sql.' AND ('.implode(' OR ', $this->stylesheet_query) .')');
-		
-		if ($css_query->num_rows() > 0)
+		// let's only do this once per session
+		if ( ! isset($this->cache['stylesheet_versions']))
 		{
-			foreach ($css_query->result_array() as $row)
+			$versions = array();
+			
+			$sql = "SELECT t.template_name, tg.group_name, t.edit_date, t.save_template_file FROM exp_templates t, exp_template_groups tg
+					WHERE  t.group_id = tg.group_id
+					AND    t.template_type = 'css'
+					AND    t.site_id = '".$this->EE->db->escape_str($this->EE->config->item('site_id'))."'";
+		
+			$css_query = $this->EE->db->query($sql.' AND ('.implode(' OR ', $this->stylesheet_query) .')');
+			
+			if ($css_query->num_rows() > 0)
 			{
-				$versions[$row['group_name'].'/'.$row['template_name']] = $row['edit_date'];
-
-				if ($this->EE->config->item('save_tmpl_files') == 'y' AND $this->EE->config->item('tmpl_file_basepath') != '' AND $row['save_template_file'] == 'y')
+				foreach ($css_query->result_array() as $row)
 				{
-					$basepath = $this->EE->config->slash_item('tmpl_file_basepath').$this->EE->config->item('site_short_name').'/';
-					$basepath .= $row['group_name'].'.group/'.$row['template_name'].'.css';
-					
-					if (is_file($basepath))
+					$versions[$row['group_name'].'/'.$row['template_name']] = $row['edit_date'];
+	
+					if ($this->EE->config->item('save_tmpl_files') == 'y' AND $this->EE->config->item('tmpl_file_basepath') != '' AND $row['save_template_file'] == 'y')
 					{
-						$versions[$row['group_name'].'/'.$row['template_name']] = filemtime($basepath);
+						$basepath = $this->EE->config->slash_item('tmpl_file_basepath').$this->EE->config->item('site_short_name').'/';
+						$basepath .= $row['group_name'].'.group/'.$row['template_name'].'.css';
+						
+						if (is_file($basepath))
+						{
+							$versions[$row['group_name'].'/'.$row['template_name']] = filemtime($basepath);
+						}
 					}
 				}
-			}
-		}
+				
+				// now save our versions info to cache
+				$this->cache['stylesheet_versions'] = $versions;
 
-		// free memory where possible
-		unset($sql, $css_query);
+				Minimee_helper::log('Stylesheet templates found in DB, and saved to cache.', 3);
+			}
+			else
+			{
+				// record fact that no stylesheets were found
+				$this->cache['stylesheet_versions'] = FALSE;
+
+				Minimee_helper::log('No stylesheet templates were found in DB.', 2);
+			}
+			
+			// free memory where possible
+			unset($sql, $css_query, $versions);
+		}
 		
-		// return FALSE if none found
-		return ($versions) ? $versions : FALSE;
+		// return whatever we've saved in cache
+		return $this->cache['stylesheet_versions'];
 	}
 	// ------------------------------------------------------
 
@@ -661,7 +706,7 @@ class Minimee {
 			break;
 
 			default :
-				$this->log->info('Passed flightcheck.');
+				Minimee_helper::log('Passed flightcheck.', 3);
 			break;
 
 		endswitch;
@@ -687,7 +732,7 @@ class Minimee {
 				 ->_check_headers();
 			
 			// this is what we'd normally return to a template
-			$out = $this->_out();
+			$out = $this->_process();
 
 			// let's find the location of our cache files
 			switch (strtolower($this->type)) :
@@ -782,6 +827,12 @@ class Minimee {
 	 */
 	protected function _create_cache_name($name)
 	{
+		// remove any cache-busting strings so the cache name doesn't change with every edit.
+		// format: .v.1330213450
+		$name = preg_replace('/\.v\.(\d+)/i', '', $name);
+
+		Minimee_helper::log('Creating cache name from `' . $name . '`', 3);
+
 		// base cache name on config settings, so that changing config will create new cache!
 		return md5($name . serialize($this->config->to_array())) . '.' . $this->type;
 	}
@@ -806,9 +857,6 @@ class Minimee {
 			
 			// prepend for combined cache name
 			$this->cache_filename .= $file['name'];
-			
-			// singular cache name
-			$this->filesdata[$key]['cache_filename'] = $this->_create_cache_name($file['name']);
 		}
 
 		$this->cache_lastmodified = ($this->cache_lastmodified == 0) ? '0000000000' : $this->cache_lastmodified;
@@ -823,17 +871,17 @@ class Minimee {
 			if($lastmodified < $this->cache_lastmodified)
 			{
 				//Cache is old
-				$this->log->info('Cache file found but it was too old: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
+				Minimee_helper::log('Cache file found but it is too old: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename), 3);
 				return FALSE;
 			}
 
 			// if we make it this far, the cache is valid
-			$this->log->info('Cache file found: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
+			Minimee_helper::log('Cache file found: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename), 3);
 			$out = $this->_tag($this->config->cache_url, $this->cache_filename, $this->cache_lastmodified);
 		}
 		else
 		{
-			$this->log->info('Combined cache file not found.');
+			Minimee_helper::log('Cache file not found.', 3);
 			return FALSE;
 		}
 
@@ -991,36 +1039,50 @@ class Minimee {
 				return $this->_set_queue();
 			}
 
-			$this->_flightcheck()
-				 ->_check_headers();
+			return $this->_flightcheck()
+						->_check_headers()
+						->_process();
 			
-			// combining files?
-			if ($this->config->yes('combine') && $this->config->yes('combine_' . $this->type))
-			{
-				return $this->_out();
-			}
-			
-			// manual work to combine each file in turn
-			else
-			{
-				$filesdata = $this->filesdata;
-				$this->filesdata = array();
-				$return = '';
-				foreach($filesdata as $file)
-				{
-					$this->filesdata = array($file);
-					
-					$return .= $this->_out();
-				}
-				
-				return $return;
-			}
-
 		}
 		catch (Exception $e)
 		{
 			return $this->_abort($e);
 		}
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Process our filesdata
+	 *
+	 * The main purpose of this method is to handle combine="no" circumstances.
+	 * 
+	 */
+	protected function _process()
+	{
+			
+		// combining files?
+		if ($this->config->yes('combine') && $this->config->yes('combine_' . $this->type))
+		{
+			return $this->_out();
+		}
+		
+		// manual work to combine each file in turn
+		else
+		{
+			$filesdata = $this->filesdata;
+			$this->filesdata = array();
+			$return = '';
+			foreach($filesdata as $file)
+			{
+				$this->filesdata = array($file);
+				
+				$return .= $this->_out();
+			}
+			
+			return $return;
+		}
+
 	}
 	// ------------------------------------------------------
 
@@ -1054,13 +1116,11 @@ class Minimee {
 					'name' => $file,
 					'type' => NULL,
 					'runtime' => $this->config->runtime(),
-					'cache_filename' => '',
 					'lastmodified' => '0000000000',
 					'stylesheet' => NULL
 				);
 	
-				// from old _isURL() file from Carabiner Asset Management Library
-				if (preg_match('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)@', $this->filesdata[$key]['name']) > 0)
+				if (Minimee_helper::is_url($this->filesdata[$key]['name']))
 				{
 					$this->filesdata[$key]['type'] = 'remote';
 				}
@@ -1119,7 +1179,7 @@ class Minimee {
 			);
 		}
 		
-		// Append tagdata - used if diplay() is disabled
+		// Append tagdata - used if queueing ever aborts for any reason (disable or error)
 		$this->cache[$this->type][$this->queue]['tagdata'] .= $this->EE->TMPL->tagdata;
 
 		// Add all files to the queue cache
@@ -1151,18 +1211,18 @@ class Minimee {
 			// if 'auto', then we try curl first
 			if (preg_match('/auto|curl/i', $this->config->remote_mode) && in_array('curl', get_loaded_extensions()))
 			{
-				$this->log->info('Using CURL for remote files.');
+				Minimee_helper::log('Using CURL for remote files.', 3);
 				$this->cache['remote_mode'] = 'curl';
 			}
 	
 			// file_get_contents() is auto mode fallback
 			elseif (preg_match('/auto|fgc/i', $this->config->remote_mode) && ini_get('allow_url_fopen'))
 			{
-				$this->log->info('Using file_get_contents() for remote files.');
+				Minimee_helper::log('Using file_get_contents() for remote files.', 3);
 	
 				if ( ! defined('OPENSSL_VERSION_NUMBER'))
 				{
-					$this->log->debug('Your PHP compile does not appear to support file_get_contents() over SSL.');
+					Minimee_helper::log('Your PHP compile does not appear to support file_get_contents() over SSL.', 2);
 				}
 
 				$this->cache['remote_mode'] = 'fgc';
@@ -1171,7 +1231,7 @@ class Minimee {
 			// if we're here, then we cannot fetch remote files
 			else
 			{
-				$this->log->debug('Remote files cannot be fetched.', 2);
+				Minimee_helper::log('Remote files cannot be fetched.', 2);
 			}
 		}
 		

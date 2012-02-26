@@ -2,7 +2,6 @@
 
 require_once PATH_THIRD . 'minimee/config.php';
 require_once PATH_THIRD . 'minimee/models/Minimee_config.php';
-require_once PATH_THIRD . 'minimee/models/Minimee_logger.php';
 
 /**
  * Minimee Helper
@@ -12,6 +11,19 @@ require_once PATH_THIRD . 'minimee/models/Minimee_logger.php';
  */
 class Minimee_helper
 {
+	/**
+	 * Logging levels
+	 */
+	private static $_levels = array(
+		1 => 'ERROR',
+		2 => 'DEBUG',
+		3 => 'INFO'
+	);
+
+
+	// ----------------------------------------------
+
+
 	/**
 	 * Create an alias to our cache
 	 *
@@ -26,11 +38,26 @@ class Minimee_helper
 		{
 			$ee->session->cache['minimee'] = array();
 
-			Minimee_logger::log('Session cache has been set up.', 3);
+			self::log('Session cache has been created.', 3);
 		}
 		
 		// alias our cache for shorthand		
 		return $ee->session->cache['minimee'];
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Determine if string is valid URL
+	 *
+	 * @param 	string	String to test
+	 * @return 	bool	TRUE if yes, FALSE if no
+	 */
+	public static function is_url($string)
+	{
+		// from old _isURL() file from Carabiner Asset Management Library
+		// modified to support leading with double slashes
+		return (preg_match('@((https?:)?//([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)@', $string) > 0);
 	}
 	// ------------------------------------------------------
 
@@ -48,7 +75,7 @@ class Minimee_helper
 		// update our include_path only once
 		if ( ! isset(get_instance()->session->cache['include_path']))
 		{
-			Minimee_logger::log('include path has been updated.', 3);
+			self::log('PHP\'s include_path has been updated.', 3);
 
 			set_include_path(PATH_THIRD . 'minimee/libraries' . PATH_SEPARATOR . get_include_path());
 			
@@ -73,6 +100,41 @@ class Minimee_helper
 				require_once('Minify/HTML.php');
 			break;
 		}
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Log method
+	 *
+	 * By default will pass message to log_message();
+	 * Also will log to template if rendering a PAGE.
+	 *
+	 * @access  public
+	 * @param   string      $message        The log entry message.
+	 * @param   int         $severity       The log entry 'level'.
+	 * @return  void
+	 */
+	public static function log($message, $severity = 1)
+	{
+		// translate our severity number into text
+		$severity = (array_key_exists($severity, self::$_levels)) ? self::$_levels[$severity] : self::$_levels[1];
+
+		// basic logging
+		log_message($severity, $message);
+		
+		// If not in CP, let's also log to template
+		if (REQ == 'PAGE')
+		{
+			get_instance()->TMPL->log_item(MINIMEE_NAME . " [{$severity}]: {$message}");
+		}
+		
+		// If we are in CP and encounter an error, throw a nasty show_message()
+		if (REQ == 'CP' && $severity == self::$_levels[1])
+		{
+			show_error(MINIMEE_NAME . " [{$severity}]: {$message}");
+		}
+
 	}
 	// ------------------------------------------------------
 

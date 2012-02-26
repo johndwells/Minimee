@@ -117,7 +117,7 @@ class Minimee_config
 		}
 
 		// Nothing found. Something might be wrong so log a debug message
-		Minimee_logger::log('`' . $prop . '` is not a valid setting.', 2);
+		Minimee_helper::log('`' . $prop . '` is not a valid setting.', 2);
 
 		return NULL;
 	}
@@ -215,7 +215,7 @@ class Minimee_config
 	public function sanitise_settings($settings)
 	{
 		if( ! is_array($settings)) {
-			Minimee_logger::log('Trying to sanitise a non-array of settings.', 2);
+			Minimee_helper::log('Trying to sanitise a non-array of settings.', 2);
 			return array();
 		}
 
@@ -245,6 +245,7 @@ class Minimee_config
 
 			/* Booleans default NO */
 			case('disable') :
+			case('minify_html') :
 				return ($value === TRUE OR preg_match('/1|true|on|yes|y/i', $value)) ? 'yes' : 'no';
 			break;
 		
@@ -255,7 +256,6 @@ class Minimee_config
 			case('css_prepend_mode') :
 			case('minify') :
 			case('minify_css') :
-			case('minify_html') :
 			case('minify_js') :
 				return ($value === FALSE OR preg_match('/0|false|off|no|n/i', $value)) ? 'no' : 'yes';
 			break;
@@ -330,18 +330,18 @@ class Minimee_config
 	        {
 				$this->location = 'config';
 
-				Minimee_logger::log('Settings taken from EE config.', 3);
+				Minimee_helper::log('Settings taken from EE config.', 3);
 	        }
 	        else
 	        {
 	        	$settings = FALSE;
 
-				Minimee_logger::log('Settings taken from EE config must be an array.', 1);
+				Minimee_helper::log('Settings taken from EE config must be an array.', 1);
 	        }
 		}
 		else
 		{
-			Minimee_logger::log('No settings found in EE config.', 2);
+			Minimee_helper::log('No settings found in EE config.', 2);
 		}
 		
 		return $settings;
@@ -375,11 +375,11 @@ class Minimee_config
 
 				$this->location = 'db';
 
-				Minimee_logger::log('Settings retrieved from database.', 3);
+				Minimee_helper::log('Settings retrieved from database.', 3);
 			}
 			else
 			{
-				Minimee_logger::log('No settings found in database.', 2);
+				Minimee_helper::log('No settings found in database.', 2);
 			}
 			
 			$query->free_result();
@@ -433,7 +433,7 @@ class Minimee_config
 		{
 			$this->_default = $this->cache['config'];
 
-			Minimee_logger::log('Settings have been retrieved from session.', 3);
+			Minimee_helper::log('Settings have been retrieved from session.', 3);
 		}
 		else
 		{
@@ -469,7 +469,7 @@ class Minimee_config
 			 */
 			if( $settings === FALSE)
 			{
-				Minimee_logger::log('Could not find any settings to use. Using defaults.', 2);
+				Minimee_helper::log('Could not find any settings to use. Using defaults.', 2);
 				
 				$this->location = 'default';
 				
@@ -522,13 +522,13 @@ class Minimee_config
 				$ee->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('minify_html', '', MINIMEE_VER);
 		  		$ee->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
 
-				Minimee_logger::log('Manually injected into template_post_parse extension hook.', 3);
+				Minimee_helper::log('Manually injected into template_post_parse extension hook.', 3);
 			}
 
 			// set our settings to cache for retrieval later on
 			$this->cache['config'] = $this->_default;
 			
-			Minimee_logger::log('Settings have been saved in session cache.', 3);
+			Minimee_helper::log('Settings have been saved in session cache.', 3);
 		}
 
 	}

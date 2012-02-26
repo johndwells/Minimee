@@ -19,7 +19,6 @@ class Minimee_ext {
 
 	public $EE;
 
-	public $log;
 	public $cache;
 	public $config;
 
@@ -44,10 +43,7 @@ class Minimee_ext {
 		// create our config object
 		$this->config = new Minimee_config();
 		
-		// create our logger
-		$this->log = new Minimee_logger();
-
-		$this->log->info('Extension has been instantiated.');
+		Minimee_helper::log('Extension has been instantiated.', 3);
 	}
 	// ------------------------------------------------------
 
@@ -71,7 +67,7 @@ class Minimee_ext {
 		
 		$this->EE->db->insert('extensions', $data);
 
-		$this->log->info('Extension has been activated.');
+		Minimee_helper::log('Extension has been activated.', 3);
 	}
 	// ------------------------------------------------------
 
@@ -86,7 +82,7 @@ class Minimee_ext {
 		$this->EE->db->where('class', __CLASS__);
 		$this->EE->db->delete('extensions');
 
-		$this->log->info('Extension has been disabled.');
+		Minimee_helper::log('Extension has been disabled.', 3);
 	}
 	// ------------------------------------------------------
 
@@ -116,10 +112,18 @@ class Minimee_ext {
 		// do not run through HTML minifier?
 		if($this->config->no('minify') || $this->config->no('minify_html'))
 		{
+			Minimee_helper::log('HTML minification is disabled.', 3);
 			return $template;
 		}
 
-		$this->log->info('Running HTML minification.');
+		// is Minimee nonetheless disabled?
+		if($this->config->yes('disable'))
+		{
+			Minimee_helper::log('HTML minification aborted because Minimee is disabled via config.', 3);
+			return $template;
+		}
+
+		Minimee_helper::log('Running HTML minification.', 3);
 
 		// we've made it this far, so...
 		Minimee_helper::library('html');
@@ -137,7 +141,7 @@ class Minimee_ext {
 	{
 		if (empty($_POST))
 		{
-			$this->log->error($this->EE->lang->line('unauthorized_access'));
+			Minimee_helper::log($this->EE->lang->line('unauthorized_access'), 1);
 		}
 
 		// because our settings default to "yes", we need to ensure these values are in
@@ -176,7 +180,7 @@ class Minimee_ext {
 		 	$this->EE->lang->line('preferences_updated')
 		);
 
-		$this->log->info('Extension settings have been saved.');
+		Minimee_helper::log('Extension settings have been saved.', 3);
 		
 		unset($settings);
 	}
@@ -258,7 +262,7 @@ class Minimee_ext {
 						));
 			}
 			
-			$this->log->info('Upgraded to 2.0.0');
+			Minimee_helper::log('Upgraded to 2.0.0', 3);
 		}
 
 		// update table row with version
@@ -268,7 +272,7 @@ class Minimee_ext {
 					array('version' => $this->version)
 		);
 
-		$this->log->info('Upgrade complete. Now running ' . $this->version);
+		Minimee_helper::log('Upgrade complete. Now running ' . $this->version, 3);
 	}
 	// ------------------------------------------------------
 
