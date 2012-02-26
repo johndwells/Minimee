@@ -29,6 +29,7 @@ class Minimee_config
 		'minify_css'			=> '',
 
 		/* per run settings */
+		'cachebust'				=> '',
 		'disable'				=> '',
 		'minify_html'			=> '',
 		'remote_mode'			=> '',
