@@ -100,7 +100,7 @@ class Minimee_ext {
 	 * @param 	string	Site ID
 	 * @return 	string	Template string, possibly minified
 	 */
-	public function minify_html($template, $sub, $site_id)
+	public function template_post_parse($template, $sub, $site_id)
 	{
 		// play nice with others
 		if (isset($this->EE->extensions->last_call) && $this->EE->extensions->last_call)
@@ -262,7 +262,7 @@ class Minimee_ext {
 						->where('class', __CLASS__)
 						->update('extensions', array(
 							'hook'		=> 'template_post_parse',
-							'method'	=> 'minify_html',
+							'method'	=> 'template_post_parse',
 							'settings' => serialize($settings)
 						));
 			}

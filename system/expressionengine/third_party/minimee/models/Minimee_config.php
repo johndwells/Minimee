@@ -469,7 +469,7 @@ class Minimee_config
 			 */
 			if( $settings === FALSE)
 			{
-				Minimee_helper::log('Could not find any settings to use. Using defaults.', 2);
+				Minimee_helper::log('Could not find any settings to use. Trying defaults.', 2);
 				
 				$this->location = 'default';
 				
@@ -519,7 +519,7 @@ class Minimee_config
 			if($this->minify_html == 'yes' && $ee->config->item('allow_extensions') == 'y' &&  ! isset($ee->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
 			{
 				// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
-				$ee->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('minify_html', '', MINIMEE_VER);
+				$ee->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
 		  		$ee->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
 
 				Minimee_helper::log('Manually injected into template_post_parse extension hook.', 3);
