@@ -932,9 +932,18 @@ class Minimee {
 					case ('stylesheet');
 					case ('remote') :
 					
-						// no relative paths
+						// no relative paths for either types
 						$css_prepend_url = FALSE;
-
+						
+						// fgc & curl both need http(s): on front
+						// so if ommitted
+						if (strpos($file['name'], '//') === 0)
+						{
+							$prefix = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:';
+							Minimee_helper::log('Manually prepending protocol `' . $prefix . '` to front of file `' . $file['name'] . '`', 2);
+							$file['name'] = $prefix . $file['name'];
+						}
+						
 						// determine how to fetch contents
 						switch ($this->remote_mode)
 						{
@@ -959,7 +968,7 @@ class Minimee {
 									Minimee_helper::library('curl');
 									$epicurl = EpiCurl::getInstance();
 								}
-
+								
 								$ch = FALSE;
 								$ch = curl_init($file['name']);
 								curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -968,10 +977,16 @@ class Minimee {
 
 								if ($curls[$key]->code >= 400)
 								{
-									throw new Exception('Error encountered while fetching `' . $this->filesdata[$key]['name'] . '` over cURL.');
+									throw new Exception('Error encountered while fetching `' . $file['name'] . '` over cURL.');
 								}
-		
+								
+								if ( ! $curls[$key]->data)
+								{
+									throw new Exception('An unknown error encountered while fetching `' . $file['name'] . '` over cURL.');
+								}
+								
 								$contents = $curls[$key]->data;
+								
 							break;
 							
 							default :
