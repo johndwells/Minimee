@@ -255,7 +255,7 @@ class Minimee_ext {
 				$settings = unserialize($query->row()->settings);
 
 				// Sanitise & merge to get a complete up-to-date array of settings
-				$settings = $this->config->sanitise_settings(array_merge($this->config->allowed, $settings));
+				$settings = $this->config->sanitise_settings(array_merge($this->config->allowed(), $settings));
 				
 				// update db				
 				$this->EE->db
