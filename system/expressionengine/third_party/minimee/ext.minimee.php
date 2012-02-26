@@ -55,11 +55,16 @@ class Minimee_ext {
 	 */
 	public function activate_extension()
 	{
+		$settings = $this->config->allowed();
+		
+		// by assigning this empty array to $this->config->settings, we wipe any guess defaults
+		$this->config->settings = $settings;
+	
 		$data = array(
 			'class'		=> __CLASS__,
 			'hook'		=> 'template_post_parse',
-			'method'	=> 'minify_html',
-			'settings'	=> serialize(array()),
+			'method'	=> 'template_post_parse',
+			'settings'	=> serialize($this->config->to_array()),
 			'priority'	=> 10,
 			'version'	=> $this->version,
 			'enabled'	=> 'y'
