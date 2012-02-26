@@ -3,14 +3,15 @@
 $lang = array(
 
 	'cachebust' => 'Cache-Busting',
-	'cachebust_note' => 'Update this to a unique value to force Minimee to create a new cache file.<br />Optional, and for most scenarios unneccessary. Consult <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
+	'cachebust_note' => 'Update this to a unique string to force Minimee to create a new cache file.<br />Optional, and for most scenarios unneccessary. Consult <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
+	'cachebust_hint' => 'e.g. `1.0.0`.',
 
 	'base_path' => 'Base Path',
-	'base_path_note' => 'Optional, defaults to FCPATH constant.',
+	'base_path_note' => 'The base path from which your CSS and JS files reside.<br />Optional, defaults to FCPATH constant (the root path to your site).',
 	'base_path_hint' => 'e.g. ' . rtrim(FCPATH, '/'),
 
 	'base_url' => 'Base URL',
-	'base_url_note' => 'Optional, defaults to Site URL.',
+	'base_url_note' => 'The base URL from which your CSS and JS files serve.<br />Optional, defaults to Site URL.',
 	'base_url_hint' => 'e.g. ' . rtrim(get_instance()->config->item('base_url'), '/'),
 
 	'cache_path' => 'Cache Path',
@@ -28,7 +29,7 @@ $lang = array(
 	'css_prepend_mode_note' => 'By default when minifying CSS, Minimee will rewrite <strong>relative</strong> image & @import URLs into absolute URLs. Turn OFF to skip this step.',
 
 	'css_prepend_url' => 'CSS Prepend URL',
-	'css_prepend_url_note' => 'If `CSS Prepend Mode` is ON, the default URL to be prepended will be the Base URL.',
+	'css_prepend_url_note' => 'The URL to use when `CSS Prepend Mode` is ON.<br />Optional, by default uses the Base URL.',
 	'css_prepend_url_hint' => 'e.g. ' . rtrim(get_instance()->config->item('base_url'), '/'),
 
 	'disable' => 'Disable Minimee entirely?',

@@ -122,7 +122,8 @@
 	 * Cachebust
 	 */
 	$label = lang('cachebust', 'cachebust') . sprintf($note_format, lang('cachebust_note'));
-	$setting = form_input(array_merge($extra_array, array('name' => 'cachebust', 'id' => 'cachebust', 'value' => $settings['cachebust'])));
+	$setting = form_input(array_merge($extra_array, array('name' => 'cachebust', 'id' => 'cachebust', 'value' => $settings['cachebust'])))
+			 . sprintf($hint_format, lang('cachebust_hint'));
 	$this->table->add_row($label, $setting);
 
 
