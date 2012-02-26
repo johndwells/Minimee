@@ -139,6 +139,32 @@ class Minimee_helper
 	// ------------------------------------------------------
 
 
+	public static function preg_match_by_type($haystack, $type)
+	{
+		// let's find the location of our cache files
+		switch (strtolower($type)) :
+
+			case 'css' :
+				$pat = "/<link{1}.*?href=['|\"']{1}(.*?)['|\"]{1}[^>]*>/i";
+			break;
+
+			case 'js' :
+				$pat = "/<script{1}.*?src=['|\"]{1}(.*?)['|\"]{1}[^>]*>(.*?)<\/script>/i";
+			break;
+
+		endswitch;
+
+		if ( ! preg_match_all($pat, $haystack, $matches, PREG_PATTERN_ORDER))
+		{
+			return FALSE;
+		}
+		
+		// free memory where possible
+		unset($pat, $haystack);
+
+		return $matches;
+	}
+
 	/**
 	 * Modified remove_double_slashes()
 	 *
