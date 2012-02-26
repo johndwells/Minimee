@@ -21,15 +21,14 @@ $plugin_info = array(
 class Minimee {
 
 	/**
-	 * runtime config settings
-	 * 
-	 * Note: Any other configs will be per-file
+	 * EE, obviously
 	 */
-	public $disable;
-
+	public $EE;
+	
 	/**
 	 * runtime variables
 	 */
+	public $disable;
 	public $queue					= '';
 	public $filesdata				= array();
 	public $stylesheet_query		= array();
@@ -40,9 +39,8 @@ class Minimee {
 	public $remote_mode				= '';
 
 	/**
-	 * properties
+	 * Our magical config class
 	 */
-	public $EE;
 	public $config;
 
 
@@ -311,11 +309,13 @@ class Minimee {
 
 				/**
 				 * Remote files
+				 * All we can do for these is test if the file is in fact local
 				 */
 				case('remote') :
-	
-					// try replacing url with base path, and see if there's a file there
-					$local = str_ireplace($this->config->base_url, '', $file['name']);
+
+					// let's strip out all variants of our base url
+					$base_url = substr($this->config->base_url, strpos($this->config->base_url, '//') + 2, strlen($this->config->base_url));
+					$local = preg_replace('@(https?:)?\/\/' . $base_url . '@', '', $file['name']);
 	
 					// the filename needs to be without any cache-busting or otherwise $_GETs
 					if($position = strpos($local, '?'))
@@ -831,6 +831,11 @@ class Minimee {
 		// format: .v.1330213450
 		$name = preg_replace('/\.v\.(\d+)/i', '', $name);
 
+		// remove any variations of our base url
+		$base_url = substr($this->config->base_url, strpos($this->config->base_url, '//') + 2, strlen($this->config->base_url));
+		$name = preg_replace('@(https?:)?\/\/' . $base_url . '@', '', $name);
+
+
 		Minimee_helper::log('Creating cache name from `' . $name . '`', 3);
 
 		// base cache name on config settings, so that changing config will create new cache!
@@ -844,7 +849,7 @@ class Minimee {
 	 * 
 	 * @return mixed String of final tag output or FALSE if cache needs to be refreshed
 	 */
-	protected function _get_from_cache()
+	protected function _get_cache()
 	{
 		// our return variable
 		$out = '';
@@ -868,21 +873,27 @@ class Minimee {
 		{
 
 			$lastmodified = filemtime(Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
+
+			// Is cache old?
 			if($lastmodified < $this->cache_lastmodified)
 			{
-				//Cache is old
 				Minimee_helper::log('Cache file found but it is too old: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename), 3);
-				return FALSE;
+				$out = FALSE;
 			}
-
-			// if we make it this far, the cache is valid
-			Minimee_helper::log('Cache file found: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename), 3);
-			$out = $this->_tag($this->config->cache_url, $this->cache_filename, $this->cache_lastmodified);
+			
+			// the cache is valid!
+			else
+			{
+				Minimee_helper::log('Cache file found: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename), 3);
+				$out = $this->_tag($this->config->cache_url, $this->cache_filename, $this->cache_lastmodified);
+			}
 		}
+		
+		// No cache file found
 		else
 		{
 			Minimee_helper::log('Cache file not found.', 3);
-			return FALSE;
+			$out = FALSE;
 		}
 
 		// if we've made it this far...		
@@ -897,138 +908,136 @@ class Minimee {
 	 * 
 	 * @return string The final tag to be returned to template
 	 */	
-	protected function _out()
+	protected function _write_cache()
 	{
+		// set to empty string
+		$out = '';
 
-		// our return variable; will have tags for our cache, or FALSE if cache needs to be refreshed
-		$out = $this->_get_from_cache();
+		// the eventual contents of our cache
+		$cache = '';
 		
-		// proceed with creating new cache
-		if($out === FALSE) :
-
-			// reset to empty string
-			$out = '';
-
-			// the eventual contents of our cache
-			$cache = '';
-			
-			// the contents of each file
-			$contents = '';
-			
-			// the relative path for each file
-			$css_prepend_url = '';
-			
-			// save our runtime settings temporarily
-			$runtime = $this->config->runtime();
-			
-			foreach ($this->filesdata as $key => $file) :
-			
-				// adjust our runtime settings
-				$this->config->reset();
-				$this->config->settings = $file['runtime'];
-			
-				switch ($file['type']) :
+		// the contents of each file
+		$contents = '';
 		
-					case ('stylesheet');
-					case ('remote') :
-					
-						// no relative paths for either types
-						$css_prepend_url = FALSE;
-						
-						// fgc & curl both need http(s): on front
-						// so if ommitted
-						if (strpos($file['name'], '//') === 0)
-						{
-							$prefix = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:';
-							Minimee_helper::log('Manually prepending protocol `' . $prefix . '` to front of file `' . $file['name'] . '`', 2);
-							$file['name'] = $prefix . $file['name'];
-						}
-						
-						// determine how to fetch contents
-						switch ($this->remote_mode)
-						{
-
-							case ('fgc') :
-								// I hate to suppress errors, but it's only way to avoid one from a 404 response
-								$response = @file_get_contents($file['name']);
-								if ($response && isset($http_response_header) && (substr($http_response_header[0], 9, 3) < 400))
-								{
-									$contents = $response;
-								}
-								else
-								{
-									throw new Exception('A problem occurred while fetching the following over file_get_contents(): ' . $file['name']);
-								}
-							break;
-							
-							case ('curl') :
-
-								if ( ! isset($epicurl))
-								{
-									Minimee_helper::library('curl');
-									$epicurl = EpiCurl::getInstance();
-								}
-								
-								$ch = FALSE;
-								$ch = curl_init($file['name']);
-								curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-								@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-								$curls[$key] = $epicurl->addCurl($ch);
-
-								if ($curls[$key]->code >= 400)
-								{
-									throw new Exception('Error encountered while fetching `' . $file['name'] . '` over cURL.');
-								}
-								
-								if ( ! $curls[$key]->data)
-								{
-									throw new Exception('An unknown error encountered while fetching `' . $file['name'] . '` over cURL.');
-								}
-								
-								$contents = $curls[$key]->data;
-								
-							break;
-							
-							default :
-								throw new Exception('Could not fetch file `' . $file['name'] . '` because neither cURL or file_get_contents() appears available.');
-							break;
-						}
-
-
-					break;
-					
-					case ('local') :
-					default :
-					
-						// grab contents of file
-						$contents = file_get_contents(realpath(Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $file['name']))) . "\n";
-						
-						// determine css prepend url
-						$css_prepend_url = ($this->config->css_prepend_url) ? $this->config->css_prepend_url : $this->config->base_url;
-						$css_prepend_url = dirname(Minimee_helper::remove_double_slashes($css_prepend_url . '/' . $file['name'], TRUE));
-					break;
+		// the relative path for each file
+		$css_prepend_url = '';
 		
-				endswitch;
-				
-				// minify contents and append to $cache
-				$cache .= $this->_minify($contents, $css_prepend_url);
-
-			endforeach;
-
-			// return our settings to our runtime
+		// save our runtime settings temporarily
+		$runtime = $this->config->runtime();
+		
+		foreach ($this->filesdata as $key => $file) :
+		
+			// adjust our runtime settings
 			$this->config->reset();
-			$this->config->settings = $runtime;
+			$this->config->settings = $file['runtime'];
+		
+			switch ($file['type']) :
+	
+				case ('stylesheet');
+				case ('remote') :
+				
+					// no relative paths for either types
+					$css_prepend_url = FALSE;
+					
+					// fgc & curl both need http(s): on front
+					// so if ommitted, prepend it manually, based on requesting protocol
+					if (strpos($file['name'], '//') === 0)
+					{
+						$prefix = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:';
+						Minimee_helper::log('Manually prepending protocol `' . $prefix . '` to front of file `' . $file['name'] . '`', 2);
+						$file['name'] = $prefix . $file['name'];
+					}
+					
+					// determine how to fetch contents
+					switch ($this->remote_mode)
+					{
 
-			// write our cache file
-			$this->_cache($this->config->cache_path, $this->cache_filename, $cache);
+						case ('fgc') :
+							// I hate to suppress errors, but it's only way to avoid one from a 404 response
+							$response = @file_get_contents($file['name']);
+							if ($response && isset($http_response_header) && (substr($http_response_header[0], 9, 3) < 400))
+							{
+								$contents = $response;
+							}
+							else
+							{
+								throw new Exception('A problem occurred while fetching the following over file_get_contents(): ' . $file['name']);
+							}
+							
+						break;
+						
+						case ('curl') :
 
-			// create our output tag
-			$out = $this->_tag($this->config->cache_url, $this->cache_filename, $this->cache_lastmodified);
+							if ( ! isset($epicurl))
+							{
+								Minimee_helper::library('curl');
+								$epicurl = EpiCurl::getInstance();
+							}
+							
+							$ch = FALSE;
+							$ch = curl_init($file['name']);
+							curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+							@curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+							$curls[$key] = $epicurl->addCurl($ch);
 
-			// free memory where possible
-			unset($cache, $contents, $css_prepend_url, $runtime);
+							if ($curls[$key]->code >= 400)
+							{
+								throw new Exception('Error encountered while fetching `' . $file['name'] . '` over cURL.');
+							}
+							
+							if ( ! $curls[$key]->data)
+							{
+								throw new Exception('An unknown error encountered while fetching `' . $file['name'] . '` over cURL.');
+							}
+							
+							$contents = $curls[$key]->data;
+							
+						break;
+						
+						default :
+							throw new Exception('Could not fetch file `' . $file['name'] . '` because neither cURL or file_get_contents() appears available.');
+						break;
+					}
+
+
+				break;
+				
+				case ('local') :
+				default :
+				
+					// grab contents of file
+					$contents = file_get_contents(realpath(Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $file['name']))) . "\n";
+					
+					// determine css prepend url
+					$css_prepend_url = ($this->config->css_prepend_url) ? $this->config->css_prepend_url : $this->config->base_url;
+					$css_prepend_url = dirname(Minimee_helper::remove_double_slashes($css_prepend_url . '/' . $file['name'], TRUE));
+				break;
+	
+			endswitch;
 			
-		endif;
+			// Let's log a message if the contents of file are empty
+			if( ! $contents)
+			{
+				Minimee_helper::log('The contents from `' . $file['name'] . '` were empty.', 2);
+			}
+			
+			// minify contents and append to $cache
+			$cache .= $this->_minify($contents, $css_prepend_url);
+
+		endforeach;
+
+		// return our settings to our runtime
+		$this->config->reset();
+		$this->config->settings = $runtime;
+
+		// write our cache file
+		$this->_cache($this->config->cache_path, $this->cache_filename, $cache);
+
+		// create our output tag
+		$out = $this->_tag($this->config->cache_url, $this->cache_filename, $this->cache_lastmodified);
+
+		// free memory where possible
+		unset($cache, $contents, $css_prepend_url, $runtime);
 
 		// return output tag
 		return $out;
@@ -1079,21 +1088,39 @@ class Minimee {
 		// combining files?
 		if ($this->config->yes('combine') && $this->config->yes('combine_' . $this->type))
 		{
-			return $this->_out();
+			// first try to fetch from cache
+			$out = $this->_get_cache();
+			
+			if ($out === FALSE)
+			{
+				// write new cache
+				$out = $this->_write_cache();
+			}
 		}
-		
+
 		// manual work to combine each file in turn
 		else
 		{
 			$filesdata = $this->filesdata;
 			$this->filesdata = array();
-			$return = '';
+			$return = $out = '';
 			foreach($filesdata as $file)
 			{
 				$this->filesdata = array($file);
+
+				// first try to fetch from cache
+				$out = $this->_get_cache();
 				
-				$return .= $this->_out();
+				if ($out === FALSE)
+				{
+					// write new cache
+					$out = $this->_write_cache();
+				}
+	
+				$return .= $out;
 			}
+			
+			unset($out);
 			
 			return $return;
 		}
@@ -1265,8 +1292,11 @@ class Minimee {
 	 */
 	protected function _tag($cache_url, $filename, $lastmodified)
 	{
+		// if $lastmodified is zero, there's no point in using it right?
+		$suffix = ($lastmodified > 0) ? '?m=' . $lastmodified : '';
+
 		// construct url
-		$url = Minimee_helper::remove_double_slashes($cache_url . '/' . $filename . '?m=' . $lastmodified, TRUE);
+		$url = Minimee_helper::remove_double_slashes($cache_url . '/' . $filename . $suffix, TRUE);
 
 		return str_replace('{minimee}', $url, $this->template);
 	}
