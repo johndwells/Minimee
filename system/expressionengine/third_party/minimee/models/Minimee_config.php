@@ -10,6 +10,11 @@ class Minimee_config
 {
 
 	/**
+	 * EE, obviously
+	 */
+	public $EE;
+	
+	/**
 	 * Allowed settings - the master list
 	 */
 	protected $_allowed = array(
@@ -74,6 +79,8 @@ class Minimee_config
 	 */
 	public function __construct($runtime = array())
 	{
+		$this->EE =& get_instance();
+		
 		// grab alias of our cache
 		$this->cache =& Minimee_helper::cache();
 		
@@ -317,14 +324,12 @@ class Minimee_config
 	 */
 	protected function _from_config()
 	{
-		$ee =& get_instance();
-		
 		$settings = FALSE;
 
 		// check if Minimee is being set via config
-		if ($ee->config->item('minimee'))
+		if ($this->EE->config->item('minimee'))
 		{
-	        $settings = $ee->config->item('minimee');
+	        $settings = $this->EE->config->item('minimee');
 	        
 	        // better be an array!
 	        if(is_array($settings))
@@ -357,13 +362,11 @@ class Minimee_config
 	 */
 	protected function _from_db()
 	{
-		$ee =& get_instance();
-		
 		$settings = FALSE;
 
-		if ($ee->config->item('allow_extensions') == 'y')
+		if ($this->EE->config->item('allow_extensions') == 'y')
 		{
-			$query = $ee->db
+			$query = $this->EE->db
 						->select('settings')
 						->from('extensions')
 						->where(array( 'enabled' => 'y', 'class' => 'Minimee_ext' ))
@@ -399,14 +402,12 @@ class Minimee_config
 	 */
 	protected function _from_hook()
 	{
-		$ee =& get_instance();
-
 		$settings = FALSE;
 		
-		if ($ee->extensions->active_hook('minimee_get_settings'))
+		if ($this->EE->extensions->active_hook('minimee_get_settings'))
 		{
 			// Must return FALSE or array()
-			$settings = $ee->extensions->call('minimee_get_settings', $this);
+			$settings = $this->EE->extensions->call('minimee_get_settings', $this);
 
 			// Technically the hook has an opportunity to set location to whatever it wishes;
 			// so only set to 'hook' if still false
@@ -422,7 +423,7 @@ class Minimee_config
 
 
 	/**
-	 * Retrieves settings from session, minimee_get_settings hook, config OR database (and in that order).
+	 * Retrieves settings from: session, minimee_get_settings hook, config OR database (and in that order).
 	 *
 	 * @return void
 	 */
@@ -438,9 +439,6 @@ class Minimee_config
 		}
 		else
 		{
-			// need EE for this
-			$ee =& get_instance();
-	
 			// we are trying to turn this into an array full of goodness.
 			$settings = FALSE;
 	
@@ -490,7 +488,7 @@ class Minimee_config
 			if( ! array_key_exists('cache_url', $settings) || $settings['cache_url'] == '')
 			{
 				// use config base_url if nothing set
-				$settings['cache_url'] = $ee->config->item('base_url') . '/cache';
+				$settings['cache_url'] = $this->EE->config->item('base_url') . '/cache';
 			}
 			
 			if( ! array_key_exists('base_path', $settings) || $settings['base_path'] == '')
@@ -502,7 +500,7 @@ class Minimee_config
 			if( ! array_key_exists('base_url', $settings) || $settings['base_url'] == '')
 			{
 				// use config base_url if nothing set
-				$settings['base_url'] = $ee->config->item('base_url');
+				$settings['base_url'] = $this->EE->config->item('base_url');
 			}
 	
 			/*
@@ -517,11 +515,11 @@ class Minimee_config
 			 * See if we need to inject ourselves into extensions hook.
 			 * This allows us to bind to the template_post_parse hook without installing our extension
 			 */
-			if($this->minify_html == 'yes' && $ee->config->item('allow_extensions') == 'y' &&  ! isset($ee->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
+			if($this->minify_html == 'yes' && $this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
 			{
 				// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
-				$ee->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
-		  		$ee->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
+				$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
+		  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
 
 				Minimee_helper::log('Manually injected into template_post_parse extension hook.', 3);
 			}
