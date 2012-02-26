@@ -1084,17 +1084,19 @@ class Minimee {
 	 */
 	protected function _process()
 	{
-			
+		// what to eventually return
+		$return ='';
+
 		// combining files?
 		if ($this->config->yes('combine') && $this->config->yes('combine_' . $this->type))
 		{
 			// first try to fetch from cache
-			$out = $this->_get_cache();
+			$return = $this->_get_cache();
 			
-			if ($out === FALSE)
+			if ($return === FALSE)
 			{
 				// write new cache
-				$out = $this->_write_cache();
+				$return = $this->_write_cache();
 			}
 		}
 
@@ -1103,7 +1105,7 @@ class Minimee {
 		{
 			$filesdata = $this->filesdata;
 			$this->filesdata = array();
-			$return = $out = '';
+			$out = '';
 			foreach($filesdata as $file)
 			{
 				$this->filesdata = array($file);
@@ -1121,9 +1123,9 @@ class Minimee {
 			}
 			
 			unset($out);
-			
-			return $return;
 		}
+		
+		return $return;
 
 	}
 	// ------------------------------------------------------
