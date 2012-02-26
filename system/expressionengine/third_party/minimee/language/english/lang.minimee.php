@@ -1,30 +1,54 @@
 <?php
 
 $lang = array(
+
+	'cachebust' => 'Cache-Busting',
+	'cachebust_note' => 'Update this to a unique value to force Minimee to create a new cache file.<br />Optional, and for most scenarios unneccessary. Consult <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
+
 	'base_path' => 'Base Path',
-	'note_base_path' => 'Optional, defaults to FCPATH constant, e.g. /path/to/site.com',
+	'base_path_note' => 'Optional, defaults to FCPATH constant.',
+	'base_path_hint' => 'e.g. ' . rtrim(FCPATH, '/'),
+
 	'base_url' => 'Base URL',
-	'note_base_url' => 'Optional, defaults to Site URL.',
+	'base_url_note' => 'Optional, defaults to Site URL.',
+	'base_url_hint' => 'e.g. ' . rtrim(get_instance()->config->item('base_url'), '/'),
+
 	'cache_path' => 'Cache Path',
-	'note_cache_path' => 'e.g. /path/to/site.com/cache<br />Relative paths (without a leading slash) will be appended to the Base Path.',
+	'cache_path_note' => 'Relative paths (without a leading slash) will be appended to the Base Path.<br />If left blank, will guess `cache`.',
+	'cache_path_hint' => 'e.g. ' . rtrim(FCPATH, '/') . '/cache',
+
 	'cache_url' => 'Cache URL',
-	'note_cache_url' => 'e.g. http://site.com/cache<br />Relative paths (without a leading slash) will be appended to the Base URL.',
+	'cache_url_note' => 'Relative paths (without a leading slash) will be appended to the Base URL.<br />If left blank, will guess `cache`.',
+	'cache_url_hint' => 'e.g. ' . rtrim(get_instance()->config->item('base_url'), '/') . '/cache',
+
 	'combine' => 'Combine Assets',
-	'note_combine' => 'Specify which types of assets to combine. Useful for debugging.',
-	'disable' => 'Disable plugin entirely?',
-	'note_disable' => 'Disables Minimee entirely. Useful for debugging',
+	'combine_note' => 'Specify which types of assets to combine.',
+	
+	'css_prepend_mode' => 'CSS Prepend Mode',
+	'css_prepend_mode_note' => 'By default when minifying CSS, Minimee will rewrite <strong>relative</strong> image & @import URLs into absolute URLs. Turn OFF to skip this step.',
+
+	'css_prepend_url' => 'CSS Prepend URL',
+	'css_prepend_url_note' => 'If `CSS Prepend Mode` is ON, the default URL to be prepended will be the Base URL.',
+	'css_prepend_url_hint' => 'e.g. ' . rtrim(get_instance()->config->item('base_url'), '/'),
+
+	'disable' => 'Disable Minimee entirely?',
+
 	'minify' => 'Minify Assets',
-	'note_minify' => 'HTML minification only available for EE2.4+',
+	'minify_note' => 'Specify which types of assets to run through minification engine.<br />Note: HTML minification only available for EE2.4+',
+
 	'remote_mode' => 'Remote file mode?',
-	'note_remote_mode' => 'Specify how to fetch remote and {stylesheet=} URLs. \'Auto\' mode will try cURL first.',
+	'remote_mode_note' => 'Specify how to fetch remote and {stylesheet=} URLs. \'Auto\' mode will try cURL first.',
+
 	'save' => 'Save Settings',
 	'yes' => 'Yes',
 	'no' => 'No',
+	'on' => 'On',
+	'off' => 'Off',
 	'auto' => 'Auto',
 	'curl' => 'cURL',
 	'fgc' => 'file_get_contents()',
-	'config_loc_caution_config' => 'Minimee appears to be configured via your config.php file. There is no need to have this extension installed!',
-	'config_loc_caution_global' => 'Minimee appears to be configured via global variables. There is no need to have this extension installed!',
+
+	'config_loc_caution_config' => 'Minimee appears to be configured via your config.php file. There is no need to have this extension installed.',
 	'basic_config' => 'Basic Preferences',
 	'advanced_config' => 'Advanced Preferences'
 );
