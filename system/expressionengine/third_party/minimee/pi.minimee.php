@@ -296,7 +296,7 @@ class Minimee {
 						$this->filesdata[$key]['name'] = $this->EE->functions->fetch_site_index().QUERY_MARKER.'css='.$this->filesdata[$key]['stylesheet'].(($this->EE->config->item('send_headers') == 'y') && isset($stylesheet_versions[$this->filesdata[$key]['stylesheet']]) ? '.v.'.$stylesheet_versions[$this->filesdata[$key]['stylesheet']] : '');
 						$this->filesdata[$key]['lastmodified'] = $stylesheet_versions[$this->filesdata[$key]['stylesheet']];
 	
-						Minimee_helper::log('Found stylesheet template: `' . $this->filesdata[$key]['stylesheet'] . '`.', 3);
+						Minimee_helper::log('Processing stylesheet template: `' . $this->filesdata[$key]['stylesheet'] . '`.', 3);
 					}
 	
 					// couldn't find stylesheet in db
@@ -339,7 +339,7 @@ class Minimee {
 					// nope; keep as remote
 					else
 					{
-						Minimee_helper::log('Found remote file: `' . $file['name'] . '`.', 3);
+						Minimee_helper::log('Processing remote file: `' . $file['name'] . '`.', 3);
 					}
 	
 				break;
@@ -361,7 +361,7 @@ class Minimee {
 					{
 						$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
 		
-						Minimee_helper::log('Found local file: `' . $this->filesdata[$key]['name'] . '`.', 3);
+						Minimee_helper::log('Processing local file: `' . $this->filesdata[$key]['name'] . '`.', 3);
 					}
 					else
 					{
