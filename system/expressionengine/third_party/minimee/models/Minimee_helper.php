@@ -88,6 +88,10 @@ class Minimee_helper
 				require_once('Minify/CSS.php');
 			break;
 			
+			case('css_urirewriter') :
+				require_once('Minify/CSS/UriRewriter.php');
+			break;
+
 			case('curl') :
 				require_once('EpiCurl.php');
 			break;
