@@ -155,10 +155,10 @@
 	echo '</div> <!-- /.minimee_settings -->';
 
 
-	if ($config_loc == 'db')
-	{
-		echo '<p>' . form_submit('submit', lang('save'), 'class="submit"') . '</p>';
-	}
+	/**
+	 * finish form
+	 */
+	echo '<p>' . form_submit('submit', lang('save'), 'class="submit"') . '</p>';
 	$this->table->clear();
 	echo form_close();
 ?>
