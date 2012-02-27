@@ -143,6 +143,14 @@ class Minimee_helper
 	// ------------------------------------------------------
 
 
+	/**
+	 * Helper function to parse content looking for CSS and JS tags.
+	 * Returns array of links found.
+
+	 * @param 	string	String to search
+	 * @param 	string	Which type of tags to search for - CSS or JS
+	 * @return 	array	Array of found matches
+	 */
 	public static function preg_match_by_type($haystack, $type)
 	{
 		// let's find the location of our cache files
@@ -168,6 +176,8 @@ class Minimee_helper
 
 		return $matches;
 	}
+	// ------------------------------------------------------
+
 
 	/**
 	 * Modified remove_double_slashes()
