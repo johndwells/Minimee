@@ -1,3 +1,8 @@
+TODO:
+
+- for 2.4+, queue operates at template_post_parse hook
+- test combine on/off for other tag methods (embed, link, url, etc)
+
 #Minimee
 
 * Author: [John D Wells](http://johndwells.com)
