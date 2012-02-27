@@ -1,5 +1,7 @@
 TODO:
 
+- remove unused files from Minify folder
+- YUICompressor support?
 - for 2.4+, queue operates at template_post_parse hook
 - test combine on/off for other tag methods (embed, link, url, etc)
 
