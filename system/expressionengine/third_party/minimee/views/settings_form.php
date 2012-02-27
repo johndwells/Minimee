@@ -8,7 +8,7 @@
 	// only open form table if we have 'db' config settings
 	if ($config_loc != 'db')
 	{
-		echo '<p class="notice"><br />' . lang('config_loc_caution_' . $config_loc) . '<br /><br /></p>';
+		echo '<p><br />' . lang('config_loc_caution_' . $config_loc) . '<br /><br /></p>';
 	}
 
 	echo $form_open;
