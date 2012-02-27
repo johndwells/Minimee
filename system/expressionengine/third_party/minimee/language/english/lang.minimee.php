@@ -2,10 +2,17 @@
 
 $lang = array(
 
-	'cachebust' => 'Cache-Busting',
-	'cachebust_note' => 'Update this to a unique string to force Minimee to create a new cache file.<br />Optional, and for most scenarios unneccessary. Consult <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
-	'cachebust_hint' => 'e.g. `1.0.0`.',
+	'advanced_config' => 'Advanced Preferences',
+	'basic_config' => 'Basic Preferences',
+	'config_loc_caution_config' => 'Minimee appears to be configured elsewhere. There is likely no need to have this extension installed. Consult the <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
 
+	'save' => 'Save Settings',
+	'auto' => 'Auto',
+	'curl' => 'cURL',
+	'fgc' => 'file_get_contents()',
+
+
+	/* Settings */
 	'base_path' => 'Base Path',
 	'base_path_note' => 'The location on your webserver where your <i>source</i> CSS and JS files sit.<br />Optional, defaults to FCPATH constant (the root path to your site).',
 	'base_path_hint' => 'e.g. ' . rtrim(FCPATH, '/'),
@@ -21,6 +28,10 @@ $lang = array(
 	'cache_url' => 'Cache URL',
 	'cache_url_note' => 'Relative values (without a leading slash) will be appended to the Base URL.<br />If left blank, will guess `cache`.',
 	'cache_url_hint' => 'e.g. ' . rtrim(get_instance()->config->item('base_url'), '/') . '/cache',
+
+	'cachebust' => 'Cache-Busting',
+	'cachebust_note' => 'Update this to a unique string to force Minimee to create a new cache file.<br />Optional, and for most scenarios unneccessary. Consult the <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
+	'cachebust_hint' => 'e.g. `1.0.0`.',
 
 	'combine' => 'Combine Assets',
 	'combine_note' => 'Specify which types of assets to combine.',
@@ -39,13 +50,6 @@ $lang = array(
 
 	'remote_mode' => 'Remote file mode?',
 	'remote_mode_note' => 'Specify how to fetch remote and {stylesheet=} URLs. \'Auto\' mode will try cURL first.',
-
-	'save' => 'Save Settings',
-	'auto' => 'Auto',
-	'curl' => 'cURL',
-	'fgc' => 'file_get_contents()',
-
-	'config_loc_caution_config' => 'Minimee appears to be configured via your config.php file. There is no need to have this extension installed.',
-	'basic_config' => 'Basic Preferences',
-	'advanced_config' => 'Advanced Preferences'
+	
+	'' => ''
 );
