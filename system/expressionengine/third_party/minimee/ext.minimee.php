@@ -114,6 +114,36 @@ class Minimee_ext {
 			return $template;
 		}
 		
+		// see if we need to post-render any methods
+		if (isset($this->cache['template_post_parse']))
+		{
+			if ( ! class_exists('Minimee'))
+			{
+				include_once PATH_THIRD . 'minimee/pi.minimee.php';
+			}
+
+			$m = new Minimee();
+			
+			// this tells Minimee that we are calling it from hook
+			$m->calling_from_hook = TRUE;
+			
+			// for good measure, save our TMPL values to put back into place once finished
+			$tagparams = $this->EE->TMPL->tagparams;
+
+			// loop through each method, and call it now
+			foreach($this->cache['template_post_parse'] as $needle => $tag)
+			{
+				Minimee_helper::log('Calling Minimee::' . $tag['method'] . '() during template_post_parse: ' . serialize($tag['tagparams']), 3);
+
+				$this->EE->TMPL->tagparams = $tag['tagparams'];
+				$out = $m->{$tag['method']}();
+				$template = str_replace(LD.$needle.RD, $out, $template);
+			}
+			
+			// put things back into place
+			$this->EE->TMPL->tagparams = $tagparams;
+		}
+		
 		// do not run through HTML minifier?
 		if($this->config->no('minify') || $this->config->no('minify_html'))
 		{

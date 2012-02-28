@@ -36,6 +36,7 @@ class Minimee {
 	public $cache_lastmodified		= '';
 	public $cache_filename			= '';
 	public $remote_mode				= '';
+	public $calling_from_hook		= FALSE;
 
 	/**
 	 * Our magical config class
@@ -85,6 +86,12 @@ class Minimee {
 	 */
 	public function display()
 	{
+		// try to postpone until template_post_parse
+		if($out = $this->_postpone('display'))
+		{
+			return $out;
+		}
+	
 		// see which to display
 		$js = strtolower($this->EE->TMPL->fetch_param('js'));
 		$css = strtolower($this->EE->TMPL->fetch_param('css'));
@@ -119,6 +126,12 @@ class Minimee {
 	 */
 	public function embed()
 	{
+		// try to postpone until template_post_parse
+		if($out = $this->_postpone('embed'))
+		{
+			return $out;
+		}
+	
 		// make sure only one is being specified
 		if ($this->EE->TMPL->fetch_param('js') && $this->EE->TMPL->fetch_param('css'))
 		{
@@ -226,6 +239,12 @@ class Minimee {
 	 */
 	public function link()
 	{
+		// try to postpone until template_post_parse
+		if($out = $this->_postpone('link'))
+		{
+			return $out;
+		}
+	
 		// make sure only one is being specified
 		if ($this->EE->TMPL->fetch_param('js') && $this->EE->TMPL->fetch_param('css'))
 		{
@@ -775,7 +794,7 @@ class Minimee {
 		$this->filesdata = array();
 
 		$this->template = $this->cache[$this->type][$this->queue]['template'];
-
+		
 		// set our Minimee::filesdata array
 		$this->_set_filesdata($this->cache[$this->type][$this->queue]['filesdata'], TRUE);
 
@@ -1034,6 +1053,57 @@ class Minimee {
 	
 	
 	/**
+	 * Postpone processing our method until template_post_parse hook?
+	 * 
+	 * @param String	Method name (e.g. display, link or embed)
+	 * @return Mixed	TRUE if delay, FALSE if not
+	 */
+	public function _postpone($method)
+	{
+		// definitely do not postpone if EE is less than 2.4
+		if (version_compare(APP_VER, '2.4', '<'))
+		{
+			return FALSE;
+		}
+		
+		else
+		{
+			// if calling from our hook return FALSE
+			if($this->calling_from_hook)
+			{
+				return FALSE;
+			}
+			
+			// store TMPL settings and return our $needle to find later
+			else
+			{
+				// base our needle off the calling tag
+				$needle = md5($this->EE->TMPL->tagproper);
+				
+				// save our tagparams to re-instate during calling of hook
+				$tagparams = $this->EE->TMPL->tagparams;
+				
+				if ( ! isset($this->cache['template_post_parse']))
+				{
+					$this->cache['template_post_parse'] = array();
+				}
+				
+				$this->cache['template_post_parse'][$needle] = array(
+					'method' => $method,
+					'tagparams' => $tagparams
+				);
+				
+				Minimee_helper::log('Postponing process of Minimee::' . $method . '() until template_post_parse hook.', 3);
+				
+				// return needle so we can find it later
+				return LD.$needle.RD;
+			}
+		}
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Called by Minimee:css and Minimee:js, performs basic run command
 	 * 
 	 * @return mixed string or empty
@@ -1287,6 +1357,11 @@ class Minimee {
 		if ($success === FALSE)
 		{ 
 			throw new Exception('There was an error writing cache file ' . $this->cache_filename . ' to ' . $this->config->cache_path);
+		}
+		
+		if ($success === 0)
+		{
+			Minimee_helper:log('The new cache file is empty.', 2);
 		}
 
 		// borrowed from /system/expressionengine/libraries/Template.php

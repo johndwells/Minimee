@@ -1,8 +1,6 @@
 TODO:
 
 - remove unused files from Minify folder
-- YUICompressor support?
-- for 2.4+, queue operates at template_post_parse hook
 - test combine on/off for other tag methods (embed, link, url, etc)
 
 #Minimee
@@ -16,6 +14,22 @@ TODO:
 * PHP5
 * ExpressionEngine 2.1 or later
 * For HTML Minification, EE2.4 or later is required
+
+## Upgrading from 1.x
+
+If you have Minimee 1x installed and are using the Extension, there is nothing you will need to do prior to overwriting
+system/expressionengine/third_party/minimee.  However if you have configured Minimee via config or global variables, note:
+
+* Global Variables are no longer supported
+* Config options have changed to be a single array config, e.g.
+
+	$config['minimee'] = array(
+		'cache_path' => '/path/to/domain.com/cache',
+		'cache_url' => 'http://domain.com/cache',
+	);
+* For a complete list of new configuration settings, see below.
+
+
 
 ## Description
 
