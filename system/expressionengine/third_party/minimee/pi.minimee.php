@@ -1354,7 +1354,7 @@ class Minimee {
 		
 		if ($success === 0)
 		{
-			Minimee_helper:log('The new cache file is empty.', 2);
+			Minimee_helper::log('The new cache file is empty.', 2);
 		}
 
 		// borrowed from /system/expressionengine/libraries/Template.php
