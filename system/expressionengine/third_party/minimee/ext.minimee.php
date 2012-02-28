@@ -17,18 +17,30 @@ class Minimee_ext {
 	public $docs_url		= MINIMEE_DOCS;
 	public $settings_exist	= 'y';
 
+	/**
+	 * EE, obviously
+	 */
 	public $EE;
 
-	public $cache;
+	/**
+	 * Our magical config class
+	 */
 	public $config;
+
+	/**
+	 * Reference to our cache
+	 */
+	public $cache;
+
+
+	// ------------------------------------------------------
+
 
 	/**
 	 * Constructor
 	 *
 	 * NOTE: We never use the $settings variable passed to us,
 	 * because we want our Minimee_config object to always be in charge.
-	 * There is an edge case where someone has configured Minimee via an extension,
-	 * and then moved to config bootstrap. The bootstrap takes precedence.
 	 *
 	 * @param 	mixed	Settings array - only passed when activating a hook
 	 * @return void
@@ -55,6 +67,7 @@ class Minimee_ext {
 	 */
 	public function activate_extension()
 	{
+		// grab an empty key=>val array of allowed settings
 		$settings = $this->config->allowed();
 		
 		// by assigning this empty array to $this->config->settings, we wipe any guess defaults
@@ -179,37 +192,34 @@ class Minimee_ext {
 			Minimee_helper::log($this->EE->lang->line('unauthorized_access'), 1);
 		}
 
-		// because our settings default to "yes", we need to ensure these values are in
+		// grab our posted form
 		$settings = $_POST;
 		
-		// a non-existent key means "no"
-		if( ! isset($settings['combine_css']))
+		// checkboxes are funny: if they don't exist in post, they must be explicitly added and set to "no"
+		$checkboxes = array(
+			'combine_css',
+			'combine_js',
+			'minify_css',
+			'minify_html',
+			'minify_js'
+		);
+		
+		foreach($checkboxes as $key)
 		{
-			$settings['combine_css'] = 'no';
-		}
-		if( ! isset($settings['combine_js']))
-		{
-			$settings['combine_js'] = 'no';
-		}
-		if( ! isset($settings['minify_css']))
-		{
-			$settings['minify_css'] = 'no';
-		}
-		if( ! isset($settings['minify_html']))
-		{
-			$settings['minify_html'] = 'no';
-		}
-		if( ! isset($settings['minify_js']))
-		{
-			$settings['minify_js'] = 'no';
+			if( ! isset($settings[$key]))
+			{
+				$settings[$key] = 'no';
+			}
 		}
 
-		// Protected by our sanitise_settings() method, we are safe to pass all of $_POST
+		// run our $settings through sanitise_settings()
 		$settings = $this->config->sanitise_settings(array_merge($this->config->allowed(), $settings));
 		
+		// update db
 		$this->EE->db->where('class', __CLASS__)
 					 ->update('extensions', array('settings' => serialize($settings)));
 		
+		// let frontend know we succeeeded
 		$this->EE->session->set_flashdata(
 			'message_success',
 		 	$this->EE->lang->line('preferences_updated')
