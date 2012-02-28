@@ -60,8 +60,7 @@ class Minimee {
 		$this->cache =& Minimee_helper::cache();
 
 		// create our config
-		$this->config = new Minimee_config();
-
+		$this->config = Minimee_helper::config();
 	}
 	// ------------------------------------------------------
 
@@ -1013,12 +1012,7 @@ class Minimee {
 				if ($this->config->yes('minify') && $this->config->yes('minify_js'))
 				{
 					Minimee_helper::library('js');
-					return JSMin::minify($contents);
-				}
-				else
-				{
-					// un-minified
-					return $contents;
+					$contents = JSMin::minify($contents);
 				}
 			break;
 			
@@ -1035,7 +1029,7 @@ class Minimee {
 				{
 					Minimee_helper::library('css');
 
-					return Minify_CSS::minify($contents, $options);
+					$contents = Minify_CSS::minify($contents, $options);
 				}
 
 				// un-minified, but still urirewritten contents
@@ -1043,11 +1037,14 @@ class Minimee {
 				{
 					Minimee_helper::library('css_urirewriter');
 
-					return Minify_CSS_UriRewriter::prepend($contents, $options['prependRelativePath']);
+					$contents = Minify_CSS_UriRewriter::prepend($contents, $options['prependRelativePath']);
 				}
 			break;
 
 		endswitch;
+		
+		// return our (maybe) minified contents
+		return $contents . "\n";
 	}
 	// ------------------------------------------------------
 	

@@ -77,7 +77,7 @@ class Minimee_config
 	 * Constructor function
 	 *
 	 */
-	public function __construct($runtime = array())
+	public function __construct()
 	{
 		$this->EE =& get_instance();
 		
@@ -86,10 +86,6 @@ class Minimee_config
 		
 		// grab our config settings, will become our defaults
 		$this->_init();
-		
-		// Runtime settings? Use magic __set()
-		$this->settings = $runtime;
-		
 	}
 	// ------------------------------------------------------
 
@@ -429,7 +425,6 @@ class Minimee_config
 	 */
 	protected function _init()
 	{
-
 		// see if we have already configured our defaults
 		if(isset($this->cache['config']))
 		{

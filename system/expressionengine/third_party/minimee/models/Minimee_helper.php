@@ -19,6 +19,8 @@ class Minimee_helper
 		2 => 'DEBUG',
 		3 => 'INFO'
 	);
+	
+	private static $_config = FALSE;
 
 
 	// ----------------------------------------------
@@ -43,6 +45,23 @@ class Minimee_helper
 		
 		// alias our cache for shorthand		
 		return $ee->session->cache['minimee'];
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Fetch singleton instance of config
+	 *
+	 * @return 	Array	Instance Minimee_config
+	 */
+	public static function config()
+	{
+		if (self::$_config === FALSE)
+		{
+			self::$_config = new Minimee_config();
+		}
+		
+		return self::$_config;
 	}
 	// ------------------------------------------------------
 
@@ -124,21 +143,20 @@ class Minimee_helper
 		// translate our severity number into text
 		$severity = (array_key_exists($severity, self::$_levels)) ? self::$_levels[$severity] : self::$_levels[1];
 
-		// basic logging
+		// basic EE logging
 		log_message($severity, $message);
-		
+
 		// If not in CP, let's also log to template
 		if (REQ == 'PAGE')
 		{
 			get_instance()->TMPL->log_item(MINIMEE_NAME . " [{$severity}]: {$message}");
 		}
-		
+
 		// If we are in CP and encounter an error, throw a nasty show_message()
 		if (REQ == 'CP' && $severity == self::$_levels[1])
 		{
 			show_error(MINIMEE_NAME . " [{$severity}]: {$message}");
 		}
-
 	}
 	// ------------------------------------------------------
 

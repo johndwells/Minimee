@@ -40,8 +40,8 @@ class Minimee_ext {
 		// grab alias of our cache
 		$this->cache =& Minimee_helper::cache();
 
-		// create our config object
-		$this->config = new Minimee_config();
+		// grab instance of our config object
+		$this->config = Minimee_helper::config();
 		
 		Minimee_helper::log('Extension has been instantiated.', 3);
 	}
