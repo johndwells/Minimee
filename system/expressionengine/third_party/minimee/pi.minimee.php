@@ -28,15 +28,15 @@ class Minimee {
 	/**
 	 * runtime variables
 	 */
-	public $queue					= '';
-	public $filesdata				= array();
-	public $stylesheet_query		= array();
-	public $template				= '';
-	public $type					= '';
-	public $cache_lastmodified		= '';
-	public $cache_filename			= '';
-	public $remote_mode				= '';
-	public $calling_from_hook		= FALSE;
+	public $cache_lastmodified		= '';		// lastmodified value for cache
+	public $cache_filename			= '';		// eventual filename of cache
+	public $calling_from_hook		= FALSE;	// Boolean of whether calling from template_post_parse
+	public $filesdata				= array();	// array of assets to process
+	public $queue					= '';		// name of queue, if running
+	public $remote_mode				= '';		// 'fgc' or 'curl'
+	public $stylesheet_query		= FALSE;	// Boolean of whether to fetch stylesheets from DB
+	public $template				= '';		// the template with which to render css link or js script tags
+	public $type					= '';		// 'css' or 'js'
 
 	/**
 	 * Our magical config class
@@ -323,8 +323,8 @@ class Minimee {
 
 
 	/**
-	 * Abort and return original or reconstructed tagdata.
-	 * Attempts to handle any exceptions thrown.
+	 * Abort and return original tagdata.
+	 * Logs the error message.
 	 *
 	 * @param mixed The caught exception or empty string
 	 * @return string The un-Minimeed tagdata
@@ -818,7 +818,7 @@ class Minimee {
 	 */
 	protected function _fetch_stylesheet_versions() {
 	
-		// nothing to do if Minimee::stylesheet_query is empty
+		// nothing to do if Minimee::stylesheet_query is FALSE
 		if ( ! $this->stylesheet_query) return FALSE;
 
 		// let's only do this once per session
@@ -831,7 +831,7 @@ class Minimee {
 					AND    t.template_type = 'css'
 					AND    t.site_id = '".$this->EE->db->escape_str($this->EE->config->item('site_id'))."'";
 		
-			$css_query = $this->EE->db->query($sql.' AND ('.implode(' OR ', $this->stylesheet_query) .')');
+			$css_query = $this->EE->db->query($sql);
 			
 			if ($css_query->num_rows() > 0)
 			{
@@ -1239,14 +1239,10 @@ class Minimee {
 				}
 			}
 
-			// prepare part of our SQL query for later
+			// flag to see if we need to run SQL query later
 			if($this->filesdata[$key]['type'] == 'stylesheet')
 			{
-				$ex = explode('/', $this->filesdata[$key]['stylesheet'], 2);
-				if (isset($ex[1]))
-				{
-					$this->stylesheet_query[] = "(t.template_name = '".$this->EE->db->escape_str($ex[1])."' AND tg.group_name = '".$this->EE->db->escape_str($ex[0])."')";
-				}
+				$this->stylesheet_query = TRUE;
 			}
 
 		}
