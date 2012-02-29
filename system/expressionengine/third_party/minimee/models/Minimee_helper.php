@@ -20,6 +20,9 @@ class Minimee_helper
 		3 => 'INFO'
 	);
 	
+	/**
+	 * Our 'Singleton' config
+	 */
 	private static $_config = FALSE;
 
 
@@ -43,22 +46,28 @@ class Minimee_helper
 			self::log('Session cache has been created.', 3);
 		}
 		
-		// alias our cache for shorthand		
 		return $ee->session->cache['minimee'];
 	}
 	// ------------------------------------------------------
 
 
 	/**
-	 * Fetch singleton instance of config
+	 * Fetch/create singleton instance of config
 	 *
 	 * @return 	Array	Instance Minimee_config
 	 */
-	public static function config()
+	public static function config($extend = array())
 	{
 		if (self::$_config === FALSE)
 		{
 			self::$_config = new Minimee_config();
+		}
+		
+		// by 'extend' we mean merge runtime with defaults
+		if ($extend)
+		{
+			// clear out any previous runtime settings & extend
+			self::$_config->extend($extend);
 		}
 		
 		return self::$_config;

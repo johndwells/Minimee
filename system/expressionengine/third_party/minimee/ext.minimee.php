@@ -67,11 +67,8 @@ class Minimee_ext {
 	 */
 	public function activate_extension()
 	{
-		// grab an empty key=>val array of allowed settings
-		$settings = $this->config->allowed();
-		
-		// by assigning this empty array to $this->config->settings, we wipe any guess defaults
-		$this->config->settings = $settings;
+		// by assigning this value-less array to $this->config->settings, we wipe all settings and obtain "factory" defaults
+		$this->config->reset()->extend($this->config->get_allowed());
 	
 		$data = array(
 			'class'		=> __CLASS__,
@@ -140,10 +137,10 @@ class Minimee_ext {
 			// this tells Minimee that we are calling it from hook
 			$m->calling_from_hook = TRUE;
 			
-			// for good measure, save our TMPL values to put back into place once finished
+			// save our TMPL values to put back into place once finished
 			$tagparams = $this->EE->TMPL->tagparams;
 
-			// loop through each method, and call it now
+			// loop through & call each method
 			foreach($this->cache['template_post_parse'] as $needle => $tag)
 			{
 				Minimee_helper::log('Calling Minimee::' . $tag['method'] . '() during template_post_parse: ' . serialize($tag['tagparams']), 3);
@@ -158,14 +155,14 @@ class Minimee_ext {
 		}
 		
 		// do not run through HTML minifier?
-		if($this->config->no('minify') || $this->config->no('minify_html'))
+		if($this->config->is_no('minify') || $this->config->is_no('minify_html'))
 		{
 			Minimee_helper::log('HTML minification is disabled.', 3);
 			return $template;
 		}
 
 		// is Minimee nonetheless disabled?
-		if($this->config->yes('disable'))
+		if($this->config->is_yes('disable'))
 		{
 			Minimee_helper::log('HTML minification aborted because Minimee is disabled via config.', 3);
 			return $template;
@@ -213,7 +210,7 @@ class Minimee_ext {
 		}
 
 		// run our $settings through sanitise_settings()
-		$settings = $this->config->sanitise_settings(array_merge($this->config->allowed(), $settings));
+		$settings = $this->config->sanitise_settings(array_merge($this->config->get_allowed(), $settings));
 		
 		// update db
 		$this->EE->db->where('class', __CLASS__)
@@ -244,7 +241,7 @@ class Minimee_ext {
 		$this->EE->load->library('table');
 
 		// Merge the contents of our db with the allowed
-		$current = array_merge($this->config->allowed(), $current);
+		$current = array_merge($this->config->get_allowed(), $current);
 
 		// view vars		
 		$vars = array(
@@ -295,7 +292,7 @@ class Minimee_ext {
 				$settings = unserialize($query->row()->settings);
 
 				// Sanitise & merge to get a complete up-to-date array of settings
-				$settings = $this->config->sanitise_settings(array_merge($this->config->allowed(), $settings));
+				$settings = $this->config->sanitise_settings(array_merge($this->config->get_allowed(), $settings));
 				
 				// update db				
 				$this->EE->db

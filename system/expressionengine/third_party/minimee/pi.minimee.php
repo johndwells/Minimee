@@ -43,6 +43,11 @@ class Minimee {
 	 */
 	public $config;
 
+	/**
+	 * Reference to our cache
+	 */
+	public $cache;
+
 
 	// ------------------------------------------------------
 
@@ -396,14 +401,13 @@ class Minimee {
 		$stylesheet_versions = $this->_fetch_stylesheet_versions();
 		
 		// temporarily store runtime settings
-		$runtime = $this->config->runtime();
+		$runtime = $this->config->get_runtime();
 
 		// now, loop through our filesdata and set all headers	
 		foreach ($this->filesdata as $key => $file) :
 		
-			// adjust our runtime settings
-			$this->config->reset();
-			$this->config->settings = $this->filesdata[$key]['runtime'];
+			// file runtime settings can be overridden by tag runtime settings
+			$this->config->reset()->extend($this->filesdata[$key]['runtime'])->extend($runtime);
 
 			switch ($this->filesdata[$key]['type']) :
 			
@@ -496,8 +500,7 @@ class Minimee {
 		endforeach;
 
 		// return our settings to our runtime
-		$this->config->reset();
-		$this->config->settings = $runtime;
+		$this->config->reset()->extend($runtime);
 
 		// free memory where possible
 		unset($runtime, $stylesheet_versions);
@@ -528,13 +531,12 @@ class Minimee {
 		$css_prepend_url = '';
 		
 		// save our runtime settings temporarily
-		$runtime = $this->config->runtime();
+		$runtime = $this->config->get_runtime();
 		
 		foreach ($this->filesdata as $key => $file) :
 		
-			// adjust our runtime settings
-			$this->config->reset();
-			$this->config->settings = $file['runtime'];
+			// file runtime settings can be overridden by tag runtime settings
+			$this->config->reset()->extend($file['runtime'])->extend($runtime);
 		
 			switch ($file['type']) :
 	
@@ -602,8 +604,7 @@ class Minimee {
 							throw new Exception('Could not fetch file `' . $file['name'] . '` because neither cURL or file_get_contents() appears available.');
 						break;
 					}
-
-
+					
 				break;
 				
 				case ('local') :
@@ -618,8 +619,10 @@ class Minimee {
 				break;
 	
 			endswitch;
-			
-			// Let's log a message if the contents of file are empty
+
+			Minimee_helper::log('Fetched the contents of file `' . $file['name'] . '`.', 3);
+
+			// Let's log a warning message if the contents of file are empty
 			if( ! $contents)
 			{
 				Minimee_helper::log('The contents from `' . $file['name'] . '` were empty.', 2);
@@ -627,12 +630,11 @@ class Minimee {
 			
 			// minify contents and append to $cache
 			$cache .= $this->_minify($contents, $css_prepend_url);
-
+			
 		endforeach;
 
 		// return our settings to our runtime
-		$this->config->reset();
-		$this->config->settings = $runtime;
+		$this->config->reset()->extend($runtime);
 
 		// write our cache file
 		$this->_write_cache($cache);
@@ -761,7 +763,7 @@ class Minimee {
 		}
 		
 		// pass all params through our config, will magically pick up what's needed
-		$this->config->settings = $tagparams;
+		$this->config->reset()->extend($tagparams);
 
 		// fetch queue if it hasn't already been set via Minimee::_display()
 		if ( ! $this->queue)
@@ -905,9 +907,9 @@ class Minimee {
 		// Flightcheck: determine if we can continue or disable permanently
 		switch ('flightcheck') :
 
-			case ($this->config->yes('disable')) :
+			case ($this->config->is_yes('disable')) :
 				// we can actually figure out if it's a runtime setting or default
-				$runtime = $this->config->runtime();
+				$runtime = $this->config->get_runtime();
 				
 				if(isset($runtime['disable']) && $runtime['disable'] == 'yes')
 				{
@@ -1009,7 +1011,7 @@ class Minimee {
 			case 'js':
 			
 				// be sure we want to minify
-				if ($this->config->yes('minify') && $this->config->yes('minify_js'))
+				if ($this->config->is_yes('minify') && $this->config->is_yes('minify_js'))
 				{
 					Minimee_helper::library('js');
 					$contents = JSMin::minify($contents);
@@ -1019,13 +1021,13 @@ class Minimee {
 			case 'css':
 				
 				// set a relative path if exists
-				$relativePath = ($rel !== FALSE && $this->config->yes('css_prepend_mode')) ? $rel . '/' : NULL;
+				$relativePath = ($rel !== FALSE && $this->config->is_yes('css_prepend_mode')) ? $rel . '/' : NULL;
 
 				// options for CSS Minify				
 				$options = array('prependRelativePath' => $relativePath);
 
 				// be sure we want to minify
-				if ($this->config->yes('minify') && $this->config->yes('minify_css'))
+				if ($this->config->is_yes('minify') && $this->config->is_yes('minify_css'))
 				{
 					Minimee_helper::library('css');
 
@@ -1143,7 +1145,7 @@ class Minimee {
 		$return ='';
 
 		// combining files?
-		if ($this->config->yes('combine') && $this->config->yes('combine_' . $this->type))
+		if ($this->config->is_yes('combine') && $this->config->is_yes('combine_' . $this->type))
 		{
 			// first try to fetch from cache
 			$return = $this->_get_cache();
@@ -1214,7 +1216,7 @@ class Minimee {
 				$this->filesdata[$key] = array(
 					'name' => $file,
 					'type' => NULL,
-					'runtime' => $this->config->runtime(),
+					'runtime' => $this->config->get_runtime(),
 					'lastmodified' => '0000000000',
 					'stylesheet' => NULL
 				);

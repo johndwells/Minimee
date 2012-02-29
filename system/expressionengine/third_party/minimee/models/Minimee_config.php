@@ -10,42 +10,16 @@ class Minimee_config
 {
 
 	/**
-	 * EE, obviously
-	 */
-	public $EE;
-	
-	/**
-	 * Allowed settings - the master list
-	 */
-	protected $_allowed = array(
-	
-		/* per file settings */
-		'base_path'				=> '',
-		'base_url'				=> '',
-		'cache_path'			=> '',
-		'cache_url'				=> '',
-		'combine'				=> '',
-		'combine_css'			=> '',
-		'combine_js'			=> '',
-		'css_prepend_mode'		=> '',
-		'css_prepend_url'		=> '',
-		'minify'				=> '',
-		'minify_js'				=> '',
-		'minify_css'			=> '',
-
-		/* per run settings */
-		'cachebust'				=> '',
-		'disable'				=> '',
-		'minify_html'			=> '',
-		'remote_mode'			=> '',
-	);
-	
-	
-	/**
 	 * Alias of our EE session cache
 	 */
 	public $cache = FALSE;
 
+
+	/**
+	 * EE, obviously
+	 */
+	public $EE;
+	
 
 	/**
 	 * Where we find our config - 'db', 'config', 'hook' or 'default'.
@@ -54,6 +28,30 @@ class Minimee_config
 	public $location = FALSE;
 
 
+	/**
+	 * Allowed settings - the master list
+	 * If it isn't listed here, it won't exist during runtime
+	 */
+	protected $_allowed = array(
+		'base_path'				=> '',
+		'base_url'				=> '',
+		'cachebust'				=> '',
+		'cache_path'			=> '',
+		'cache_url'				=> '',
+		'combine'				=> '',
+		'combine_css'			=> '',
+		'combine_js'			=> '',
+		'css_prepend_mode'		=> '',
+		'css_prepend_url'		=> '',
+		'disable'				=> '',
+		'minify'				=> '',
+		'minify_css'			=> '',
+		'minify_html'			=> '',
+		'minify_js'				=> '',
+		'remote_mode'			=> ''
+	);
+	
+	
 	/**
 	 * Default settings
 	 *
@@ -77,7 +75,7 @@ class Minimee_config
 	 * Constructor function
 	 *
 	 */
-	public function __construct()
+	public function __construct($extend = array())
 	{
 		$this->EE =& get_instance();
 		
@@ -86,6 +84,12 @@ class Minimee_config
 		
 		// grab our config settings, will become our defaults
 		$this->_init();
+
+		// by 'extend' we mean merge runtime with defaults
+		if ($extend)
+		{
+			$this->extend($extend);
+		}
 	}
 	// ------------------------------------------------------
 
@@ -159,11 +163,45 @@ class Minimee_config
 
 
 	/**
+	 * Explicit method for setting/modifying runtime settings
+	 * __set() still does heavy lifting
+	 *
+	 * @param 	array
+	 * @return 	Object	$this
+	 */
+	public function extend($extend = array())
+	{
+		// must be an array
+		if (is_array($extend))
+		{
+			$this->settings = $extend;
+		}
+		
+		//chaining
+		return $this;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Return copy of 'factory' settings
+	 *
+	 * @return 	Object	$this
+	 */
+	public function factory()
+	{
+		// reset & extend to our empty allowed
+		return $this->reset()->extend($this->get_allowed());
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Return copy of allowed settings
 	 *
 	 * @return 	array
 	 */
-	public function allowed()
+	public function get_allowed()
 	{
 		return $this->_allowed;
 	}
@@ -171,29 +209,13 @@ class Minimee_config
 
 
 	/**
-	 * Utility method
+	 * Return copy of default settings
 	 *
-	 * Usage: if($Minimee_config->no('disable')) {...}
+	 * @return 	array
 	 */
-	public function no($setting)
+	public function get_default()
 	{
-		return ($this->$setting == 'no') ? TRUE : FALSE;
-	}
-	// ------------------------------------------------------
-
-
-	/**
-	 * Reset runtime settings to empty array
-	 * Same as doing $Minimee_config->settings = array();
-	 *
-	 * @return 	void
-	 */
-	public function reset()
-	{
-		$this->_runtime = array();
-
-		// chaining
-		return $this;
+		return $this->_default;
 	}
 	// ------------------------------------------------------
 
@@ -203,9 +225,49 @@ class Minimee_config
 	 *
 	 * @return 	array
 	 */
-	public function runtime()
+	public function get_runtime()
 	{
 		return $this->_runtime;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Utility method
+	 *
+	 * Usage: if($Minimee_config->is_no('disable')) {...}
+	 */
+	public function is_no($setting)
+	{
+		return ($this->$setting == 'no') ? TRUE : FALSE;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Utility method
+	 *
+	 * Usage: if($Minimee_config->is_yes('disable')) {...}
+	 */
+	public function is_yes($setting)
+	{
+		return ($this->$setting == 'yes') ? TRUE : FALSE;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Reset runtime settings to empty array
+	 * Same as doing $Minimee_config->settings = array();
+	 *
+	 * @return 	Object	$this
+	 */
+	public function reset()
+	{
+		$this->_runtime = array();
+
+		// chaining
+		return $this;
 	}
 	// ------------------------------------------------------
 
@@ -299,18 +361,6 @@ class Minimee_config
 	{
 		// merge with defaults first
 		return array_merge($this->_default, $this->_runtime);
-	}
-	// ------------------------------------------------------
-
-
-	/**
-	 * Utility method
-	 *
-	 * Usage: if($Minimee_config->yes('disable')) {...}
-	 */
-	public function yes($setting)
-	{
-		return ($this->$setting == 'yes') ? TRUE : FALSE;
 	}
 	// ------------------------------------------------------
 
