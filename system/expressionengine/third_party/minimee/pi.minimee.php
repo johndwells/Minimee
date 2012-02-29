@@ -423,7 +423,7 @@ class Minimee {
 						$this->filesdata[$key]['name'] = $this->EE->functions->fetch_site_index().QUERY_MARKER.'css='.$this->filesdata[$key]['stylesheet'].(($this->EE->config->item('send_headers') == 'y') && isset($stylesheet_versions[$this->filesdata[$key]['stylesheet']]) ? '.v.'.$stylesheet_versions[$this->filesdata[$key]['stylesheet']] : '');
 						$this->filesdata[$key]['lastmodified'] = $stylesheet_versions[$this->filesdata[$key]['stylesheet']];
 	
-						Minimee_helper::log('Processing stylesheet template: `' . $this->filesdata[$key]['stylesheet'] . '`.', 3);
+						Minimee_helper::log('Headers checked for stylesheet template: `' . $this->filesdata[$key]['stylesheet'] . '`.', 3);
 					}
 	
 					// couldn't find stylesheet in db
@@ -488,7 +488,7 @@ class Minimee {
 					{
 						$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
 		
-						Minimee_helper::log('Processing local file: `' . $this->filesdata[$key]['name'] . '`.', 3);
+						Minimee_helper::log('Headers checked for file: `' . $this->filesdata[$key]['name'] . '`.', 3);
 					}
 					else
 					{
@@ -620,16 +620,19 @@ class Minimee {
 	
 			endswitch;
 
-			Minimee_helper::log('Fetched the contents of file `' . $file['name'] . '`.', 3);
-
 			// Let's log a warning message if the contents of file are empty
 			if( ! $contents)
 			{
 				Minimee_helper::log('The contents from `' . $file['name'] . '` were empty.', 2);
 			}
 			
+			else
+			{
+				Minimee_helper::log('Fetched contents of `' . $file['name'] . '`.', 3);
+			}
+			
 			// minify contents and append to $cache
-			$cache .= $this->_minify($contents, $css_prepend_url);
+			$cache .= $this->_minify($contents, $file['name'], $css_prepend_url);
 			
 		endforeach;
 
@@ -1004,22 +1007,49 @@ class Minimee {
 	 * @param	mixed A relative path to use, if provided
 	 * @return	String (maybe) minified contents of file
 	 */
-	protected function _minify($contents, $rel = FALSE)
+	protected function _minify($contents, $filename, $rel = FALSE)
 	{
 		switch ($this->type) :
 			
 			case 'js':
 			
+				if ($this->EE->extensions->active_hook('minimee_pre_minify_js'))
+				{
+					Minimee_helper::log('Hook `minimee_pre_minify_js` has been activated.', 3);
+		
+					// pass contents to be minified, and instance of self
+					$contents = $this->EE->extensions->call('minimee_pre_minify_js', $contents, $filename, $this);
+					
+					if ($this->EE->extensions->end_script === TRUE)
+					{
+						return $contents;
+					}
+				}
+
 				// be sure we want to minify
 				if ($this->config->is_yes('minify') && $this->config->is_yes('minify_js'))
 				{
 					Minimee_helper::library('js');
 					$contents = JSMin::minify($contents);
 				}
+
 			break;
 			
 			case 'css':
 				
+				if ($this->EE->extensions->active_hook('minimee_pre_minify_css'))
+				{
+					Minimee_helper::log('Hook `minimee_pre_minify_css` has been activated.', 3);
+		
+					// pass contents to be minified, relative path, and instance of self
+					$contents = $this->EE->extensions->call('minimee_pre_minify_css', $contents, $filename, $rel, $this);
+					
+					if ($this->EE->extensions->end_script === TRUE)
+					{
+						return $contents;
+					}
+				}
+
 				// set a relative path if exists
 				$relativePath = ($rel !== FALSE && $this->config->is_yes('css_prepend_mode')) ? $rel . '/' : NULL;
 
@@ -1034,13 +1064,17 @@ class Minimee {
 					$contents = Minify_CSS::minify($contents, $options);
 				}
 
-				// un-minified, but still urirewritten contents
+				// un-minified, but (maybe) uri-rewritten contents
 				else
 				{
-					Minimee_helper::library('css_urirewriter');
-
-					$contents = Minify_CSS_UriRewriter::prepend($contents, $options['prependRelativePath']);
+					if ($relativePath !== NULL)
+					{
+						Minimee_helper::library('css_urirewriter');
+	
+						$contents = Minify_CSS_UriRewriter::prepend($contents, $options['prependRelativePath']);
+					}
 				}
+
 			break;
 
 		endswitch;
@@ -1346,6 +1380,19 @@ class Minimee {
 	 */
 	protected function _write_cache($file_data)
 	{
+		if ($this->EE->extensions->active_hook('minimee_pre_write_cache'))
+		{
+			Minimee_helper::log('Hook `minimee_pre_write_cache` has been activated.', 3);
+
+			// pass contents of file, and instance of self
+			$file_data = $this->EE->extensions->call('minimee_pre_write_cache', $file_data, $this);
+			
+			if ($this->EE->extensions->end_script === TRUE)
+			{
+				return;
+			}
+		}
+
 		$filepath = Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename);
 		$success = file_put_contents($filepath, $file_data);
 		
