@@ -232,6 +232,23 @@ class Minimee_helper
 		}
 	}
 	// ------------------------------------------------------
+	
+	
+	/**
+	 * A protocol-agnostic function to replace URL with path
+	 *
+	 * @param 	string	base url
+	 * @param 	boolean	base path
+	 * @return 	string	String to perform replacement upon
+	 */
+	public static function replace_url_with_path($url, $path, $haystack)
+	{
+		// protocol-agnostic URL
+		$agnostic_url = substr($url, strpos($url, '//') + 2, strlen($url));
+
+		// pattern search & replace
+		return $path . preg_replace('@(https?:)?\/\/' . $agnostic_url . '@', '', $haystack);
+	}
 }
 // END CLASS
 

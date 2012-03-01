@@ -181,7 +181,7 @@ class Minimee {
 			}
 			
 			// replace the url with path
-			$paths = str_replace($this->config->cache_url, $this->config->cache_path, $matches[1]);
+			$paths = Minimee_helper::replace_url_with_path($M->config->cache_url, $M->config->cache_path, $matches[1]);
 	
 			// clear $out so we can replace with code to embed
 			$out = '';
@@ -441,8 +441,7 @@ class Minimee {
 				case('remote') :
 
 					// let's strip out all variants of our base url
-					$base_url = substr($this->config->base_url, strpos($this->config->base_url, '//') + 2, strlen($this->config->base_url));
-					$local = preg_replace('@(https?:)?\/\/' . $base_url . '@', '', $file['name']);
+					$local = Minimee_helper::replace_url_with_path($M->config->base_url, $M->config->base_path, $file['name']);
 	
 					// the filename needs to be without any cache-busting or otherwise $_GETs
 					if($position = strpos($local, '?'))
