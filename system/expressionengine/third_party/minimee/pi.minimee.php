@@ -1234,13 +1234,7 @@ class Minimee {
 
 		foreach ($files as $key => $file)
 		{
-			// flag to see if we need to run SQL query later
-			if($this->filesdata[$key]['type'] == 'stylesheet')
-			{
-				$this->stylesheet_query = TRUE;
-			}
-
-			// if we are receiving these from the queue, skip the below as we've already been through it
+			// if we are receiving these from the queue, no need to calculate ALL of the below
 			if($from_queue === TRUE)
 			{
 				$this->filesdata[$key] = $file;
@@ -1277,6 +1271,13 @@ class Minimee {
 					$this->filesdata[$key]['type'] = 'local';
 				}
 			}
+
+			// flag to see if we need to run SQL query later
+			if($this->filesdata[$key]['type'] == 'stylesheet')
+			{
+				$this->stylesheet_query = TRUE;
+			}
+
 		}
 
 		// free memory where possible
