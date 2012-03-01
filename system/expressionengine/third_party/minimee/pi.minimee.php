@@ -794,7 +794,7 @@ class Minimee {
 			throw new Exception('Could not find a queue of files by the name of \'' . $this->queue . '\'.');
 		}
 
-		// clear queue just in case
+		// clear filesdata just in case
 		$this->filesdata = array();
 
 		$this->template = $this->cache[$this->type][$this->queue]['template'];
@@ -1234,7 +1234,13 @@ class Minimee {
 
 		foreach ($files as $key => $file)
 		{
-			// if we are receiving these from the queue, no need to calculate ALL of the below
+			// flag to see if we need to run SQL query later
+			if($this->filesdata[$key]['type'] == 'stylesheet')
+			{
+				$this->stylesheet_query = TRUE;
+			}
+
+			// if we are receiving these from the queue, skip the below as we've already been through it
 			if($from_queue === TRUE)
 			{
 				$this->filesdata[$key] = $file;
@@ -1271,13 +1277,6 @@ class Minimee {
 					$this->filesdata[$key]['type'] = 'local';
 				}
 			}
-
-			// flag to see if we need to run SQL query later
-			if($this->filesdata[$key]['type'] == 'stylesheet')
-			{
-				$this->stylesheet_query = TRUE;
-			}
-
 		}
 
 		// free memory where possible
