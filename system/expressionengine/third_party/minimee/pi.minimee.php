@@ -797,16 +797,30 @@ class Minimee {
 		// clear filesdata just in case
 		$this->filesdata = array();
 
+		// set our tag template
 		$this->template = $this->cache[$this->type][$this->queue]['template'];
 		
+		// order by priority
+		ksort($this->cache[$this->type][$this->queue]['filesdata']);
+		
+		// now reduce down to one array
+		$filesdata = array();
+		foreach($this->cache[$this->type][$this->queue]['filesdata'] as $fdata)
+		{
+			$filesdata = array_merge($filesdata, $fdata);
+		}
+		
 		// set our Minimee::filesdata array
-		$this->_set_filesdata($this->cache[$this->type][$this->queue]['filesdata'], TRUE);
+		$this->_set_filesdata($filesdata, TRUE);
 
 		// No files found?
 		if ( ! is_array($this->filesdata) OR count($this->filesdata) == 0)
 		{
 			throw new Exception('No files found in the queue named \'' . $this->type . '\'.');
 		}
+		
+		// cleanup
+		unset($filesdata);
 		
 		// chaining
 		return $this;
@@ -1310,15 +1324,21 @@ class Minimee {
 			);
 		}
 		
-		// Append tagdata - used if queueing ever aborts for any reason (disable or error)
+		// be sure we have a priority key in place
+		$priority = (int) $this->EE->TMPL->fetch_param('priority', 0);
+		if ( ! array_key_exists($priority, $this->cache[$this->type][$this->queue]['filesdata']))
+		{
+			$this->cache[$this->type][$this->queue]['filesdata'][$priority] = array();
+		}
+		
+		// Append tagdata - used if queueing ever aborts from an error
 		$this->cache[$this->type][$this->queue]['tagdata'] .= $this->EE->TMPL->tagdata;
 
 		// Add all files to the queue cache
 		foreach($this->filesdata as $filesdata)
 		{
-			$this->cache[$this->type][$this->queue]['filesdata'][] = $filesdata;
+			$this->cache[$this->type][$this->queue]['filesdata'][$priority][] = $filesdata;
 		}
-		
 	}
 	// ------------------------------------------------------
 	
