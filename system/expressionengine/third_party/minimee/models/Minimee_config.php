@@ -334,14 +334,14 @@ class Minimee_config
 			/* String - Paths */
 			case('cache_path') :
 			case('base_path') :
-				return rtrim(Minimee_helper::remove_double_slashes($value));
+				return rtrim(Minimee_helper::remove_double_slashes($value), '/');
 			break;
 
 			/* String - URLs */
 			case('cache_url') :
 			case('base_url') :
 			case('css_prepend_url') :
-				return rtrim(Minimee_helper::remove_double_slashes($value, TRUE));
+				return rtrim(Minimee_helper::remove_double_slashes($value, TRUE), '/');
 			break;
 
 			/* Default */			
