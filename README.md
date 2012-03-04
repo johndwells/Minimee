@@ -117,7 +117,7 @@ _Note: **All settings are now optional**. Out of the box and left un-configured,
 		'css_prepend_url'	=> '/path/to/site.com',			// defaults to $EE->config->item('base_url')
 		'minify'			=> 'yes',						// 'yes' or 'no'
 		'minify_css'		=> 'yes',						// 'yes' or 'no'
-		'minify_html'		=> 'yes',						// 'yes' or 'no'
+		'minify_html'		=> 'no',						// 'yes' or 'no'
 		'minify_js'			=> 'yes',						// 'yes' or 'no'
 		'remote_mode'		=> 'auto'						// 'auto', 'fgc', or 'curl'
 	);
