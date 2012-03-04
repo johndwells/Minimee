@@ -13,7 +13,21 @@ $plugin_info = array(
 );
 
 /**
- * Minimee: minimize & combine your CSS and JS files. For EE2 only.
+ * ExpressionEngine - by EllisLab
+ *
+ * @package		ExpressionEngine
+ * @author		ExpressionEngine Dev Team
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @license		http://expressionengine.com/user_guide/license.html
+ * @link		http://expressionengine.com
+ * @since		Version 2.0
+ * @filesource
+ */
+ 
+// ------------------------------------------------------------------------
+
+/**
+ * Minimee: minimize & combine your CSS and JS files. Minify your HTML. For EE2 only.
  * @author John D Wells <http://johndwells.com>
  * @license http://www.opensource.org/licenses/bsd-license.php BSD license
  * @link	http://johndwells.com/software/minimee
@@ -23,8 +37,9 @@ class Minimee {
 	/**
 	 * EE, obviously
 	 */
-	public $EE;
-	
+	private $EE;
+
+
 	/**
 	 * runtime variables
 	 */
@@ -38,10 +53,12 @@ class Minimee {
 	public $template				= '';		// the template with which to render css link or js script tags
 	public $type					= '';		// 'css' or 'js'
 
+
 	/**
 	 * Our magical config class
 	 */
 	public $config;
+
 
 	/**
 	 * Reference to our cache
@@ -59,12 +76,13 @@ class Minimee {
 	 */
 	public function __construct()
 	{
+		// got EE?
 		$this->EE =& get_instance();
 		
-		// grab alias of our cache
+		// grab reference to our cache
 		$this->cache =& Minimee_helper::cache();
 
-		// create our config
+		// grab instance of our config object
 		$this->config = Minimee_helper::config();
 	}
 	// ------------------------------------------------------
@@ -882,7 +900,8 @@ class Minimee {
 			}
 			
 			// free memory where possible
-			unset($sql, $css_query, $versions);
+			$css_query->free_result();			
+			unset($sql, $versions);
 		}
 		
 		// return whatever we've saved in cache

@@ -6,20 +6,19 @@
  * @license http://www.opensource.org/licenses/bsd-license.php BSD license
  * @link	http://johndwells.com/software/minimee
  */
-class Minimee_config
-{
+class Minimee_config {
+
+	/**
+	 * EE, obviously
+	 */
+	private $EE;
+	
 
 	/**
 	 * Alias of our EE session cache
 	 */
 	public $cache = FALSE;
 
-
-	/**
-	 * EE, obviously
-	 */
-	public $EE;
-	
 
 	/**
 	 * Where we find our config - 'db', 'config', 'hook' or 'default'.
@@ -184,14 +183,17 @@ class Minimee_config
 
 
 	/**
-	 * Return copy of 'factory' settings
+	 * Reset our runtime to 'factory' defaults
 	 *
 	 * @return 	Object	$this
 	 */
 	public function factory()
 	{
 		// reset & extend to our empty allowed
-		return $this->reset()->extend($this->get_allowed());
+		$this->reset()->extend($this->get_allowed());
+		
+		//chaining
+		return $this;
 	}
 	// ------------------------------------------------------
 

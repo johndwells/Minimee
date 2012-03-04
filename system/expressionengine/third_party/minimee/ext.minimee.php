@@ -4,28 +4,49 @@
 require_once PATH_THIRD . 'minimee/models/Minimee_helper.php';
 
 /**
- * Minimee: minimize & combine your CSS and JS files. For EE2 only.
+ * ExpressionEngine - by EllisLab
+ *
+ * @package		ExpressionEngine
+ * @author		ExpressionEngine Dev Team
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @license		http://expressionengine.com/user_guide/license.html
+ * @link		http://expressionengine.com
+ * @since		Version 2.0
+ * @filesource
+ */
+ 
+// ------------------------------------------------------------------------
+
+/**
+ * Minimee: minimize & combine your CSS and JS files. Minify your HTML. For EE2 only.
  * @author John D Wells <http://johndwells.com>
  * @license http://www.opensource.org/licenses/bsd-license.php BSD license
  * @link	http://johndwells.com/software/minimee
  */
 class Minimee_ext {
 
+	/**
+	 * EE, obviously
+	 */
+	private $EE;
+
+
+	/**
+	 * Standard Extension stuff
+	 */
 	public $name			= MINIMEE_NAME;
 	public $version			= MINIMEE_VER;
 	public $description		= MINIMEE_DESC;
 	public $docs_url		= MINIMEE_DOCS;
+	public $settings 		= array();
 	public $settings_exist	= 'y';
 
-	/**
-	 * EE, obviously
-	 */
-	public $EE;
 
 	/**
 	 * Our magical config class
 	 */
 	public $config;
+
 
 	/**
 	 * Reference to our cache
@@ -47,9 +68,10 @@ class Minimee_ext {
 	 */
 	public function __construct($settings = array())
 	{
+		// Got EE?
 		$this->EE =& get_instance();
 
-		// grab alias of our cache
+		// grab a reference to our cache
 		$this->cache =& Minimee_helper::cache();
 
 		// grab instance of our config object
@@ -67,14 +89,14 @@ class Minimee_ext {
 	 */
 	public function activate_extension()
 	{
-		// by assigning this value-less array to $this->config->settings, we wipe all settings and obtain "factory" defaults
-		$this->config->reset()->extend($this->config->get_allowed());
+		// reset our runtime to 'factory' defaults, and return as array
+		$settings = $this->config->factory()->to_array();
 	
 		$data = array(
 			'class'		=> __CLASS__,
 			'hook'		=> 'template_post_parse',
 			'method'	=> 'template_post_parse',
-			'settings'	=> serialize($this->config->to_array()),
+			'settings'	=> serialize($settings),
 			'priority'	=> 10,
 			'version'	=> $this->version,
 			'enabled'	=> 'y'
@@ -124,7 +146,7 @@ class Minimee_ext {
 			return $template;
 		}
 		
-		// see if we need to post-render any methods
+		// see if we need to post-render any plugin methods
 		if (isset($this->cache['template_post_parse']))
 		{
 			if ( ! class_exists('Minimee'))
@@ -154,7 +176,7 @@ class Minimee_ext {
 			$this->EE->TMPL->tagparams = $tagparams;
 		}
 		
-		// do not run through HTML minifier?
+		// Are we configured to run through HTML minifier?
 		if($this->config->is_no('minify') || $this->config->is_no('minify_html'))
 		{
 			Minimee_helper::log('HTML minification is disabled.', 3);
@@ -168,10 +190,11 @@ class Minimee_ext {
 			return $template;
 		}
 
+		// we've made it this far, so...
 		Minimee_helper::log('Running HTML minification.', 3);
 
-		// we've made it this far, so...
 		Minimee_helper::library('html');
+
 		return Minify_HTML::minify($template);
 	}
 	// ------------------------------------------------------
@@ -310,7 +333,9 @@ class Minimee_ext {
 							'settings' => serialize($settings)
 						));
 			}
-			
+
+			$query->free_result();			
+
 			Minimee_helper::log('Upgraded to 2.0.0', 3);
 		}
 

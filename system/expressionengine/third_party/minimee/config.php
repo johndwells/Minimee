@@ -5,7 +5,7 @@ if (! defined('MINIMEE_VER'))
 	define('MINIMEE_VER',  '2.0.0');
 	define('MINIMEE_AUTHOR',  'John D Wells');
 	define('MINIMEE_DOCS',  'http://johndwells.com/software/minimee');
-	define('MINIMEE_DESC',  'Minimee: minimize & combine your CSS and JS files. For EE2 only.');
+	define('MINIMEE_DESC',  'Minimee: minimize & combine your CSS and JS files. Minify your HTML. For EE2 only.');
 }
 
 $config['name'] = MINIMEE_NAME;
