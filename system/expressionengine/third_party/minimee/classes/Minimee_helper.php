@@ -9,8 +9,8 @@ require_once PATH_THIRD . 'minimee/classes/Minimee_config.php';
  * @license http://www.opensource.org/licenses/bsd-license.php BSD license
  * @link	http://johndwells.com/software/minimee
  */
-class Minimee_helper
-{
+class Minimee_helper {
+
 	/**
 	 * Logging levels
 	 */

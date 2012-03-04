@@ -42,6 +42,8 @@ Complete and up-to-date documentation can be found on [Minimee's homepage](http:
 * New `exp:minimee:link` tag returns just the URL to your minimee'd asset
 * Hooks for 3rd party integration (see [Minimee+LESS](https://github.com/johndwells/Minimee-LESS))
 * ALL settings can be specified via config or extension, and then overridden at the tag level
+* Path & URL settings can now be relative to site root
+* Technique available to have different settings for each CSS/JS file
 * Ability to disable or override the URLs prepended to relative image & @import paths in CSS
 * New 'priority' parameter allows you to queue assets into a specific order
 * For EE2.4 and above, assets may be queue'd after exp:minimee:display is parsed
