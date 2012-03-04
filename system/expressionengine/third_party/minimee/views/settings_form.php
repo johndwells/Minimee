@@ -166,6 +166,10 @@
 	<script type="text/javascript">
 		jQuery(function($) {
 		
+			<?php if ($flashdata_success) : ?>
+				$.ee_notice( '<?php echo $flashdata_success; ?>' , {type: "success", open:false}); 
+			<?php endif; ?>
+		
 			var MINIMEE = MINIMEE || [];
 
 			MINIMEE.$settings = $('.minimee_settings');

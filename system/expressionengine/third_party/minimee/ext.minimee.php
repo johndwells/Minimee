@@ -188,43 +188,49 @@ class Minimee_ext {
 		{
 			Minimee_helper::log($this->EE->lang->line('unauthorized_access'), 1);
 		}
-
-		// grab our posted form
-		$settings = $_POST;
 		
-		// checkboxes are funny: if they don't exist in post, they must be explicitly added and set to "no"
-		$checkboxes = array(
-			'combine_css',
-			'combine_js',
-			'minify_css',
-			'minify_html',
-			'minify_js'
-		);
-		
-		foreach($checkboxes as $key)
+		else
 		{
-			if( ! isset($settings[$key]))
+			// grab our posted form
+			$settings = $_POST;
+			
+			// checkboxes are funny: if they don't exist in post, they must be explicitly added and set to "no"
+			$checkboxes = array(
+				'combine_css',
+				'combine_js',
+				'minify_css',
+				'minify_html',
+				'minify_js'
+			);
+			
+			foreach($checkboxes as $key)
 			{
-				$settings[$key] = 'no';
+				if( ! isset($settings[$key]))
+				{
+					$settings[$key] = 'no';
+				}
 			}
+	
+			// run our $settings through sanitise_settings()
+			$settings = $this->config->sanitise_settings(array_merge($this->config->get_allowed(), $settings));
+			
+			// update db
+			$this->EE->db->where('class', __CLASS__)
+						 ->update('extensions', array('settings' => serialize($settings)));
+			
+			Minimee_helper::log('Extension settings have been saved.', 3);
+
+			// save the environment			
+			unset($settings);
+
+			// let frontend know we succeeeded
+			$this->EE->session->set_flashdata(
+				'message_success',
+			 	$this->EE->lang->line('preferences_updated')
+			);
+
+			$this->EE->functions->redirect(BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=minimee');
 		}
-
-		// run our $settings through sanitise_settings()
-		$settings = $this->config->sanitise_settings(array_merge($this->config->get_allowed(), $settings));
-		
-		// update db
-		$this->EE->db->where('class', __CLASS__)
-					 ->update('extensions', array('settings' => serialize($settings)));
-		
-		// let frontend know we succeeeded
-		$this->EE->session->set_flashdata(
-			'message_success',
-		 	$this->EE->lang->line('preferences_updated')
-		);
-
-		Minimee_helper::log('Extension settings have been saved.', 3);
-		
-		unset($settings);
 	}
 	// ------------------------------------------------------
 
@@ -248,7 +254,8 @@ class Minimee_ext {
 			'config_loc' => $this->config->location,
 			'disabled' => ($this->config->location != 'db'),
 			'form_open' => form_open('C=addons_extensions'.AMP.'M=save_extension_settings'.AMP.'file=minimee'),
-			'settings' => $current
+			'settings' => $current,
+			'flashdata_success' => $this->EE->session->flashdata('message_success')
 			);
 
 		// return our view
