@@ -771,7 +771,7 @@ class Minimee {
 	{
 		$tagparams = $this->EE->TMPL->tagparams;
 		
-		// we do need to account for the fact that minify="no" is assumed to be pertaining to the tag…
+		// we do need to account for the fact that minify="no" is assumed to be pertaining to the tag
 		if (isset($tagparams['combine']))
 		{
 			$tagparams['combine_' . $this->type] = $tagparams['combine'];
