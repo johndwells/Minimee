@@ -26,9 +26,9 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 
 # Description
 
-Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size DOES matter.
+Minimee watches your filesystem for changes to your CSS & JS assets, and automatically combines, minifies & caches these assets whenever changes are detected. Use Minimee to effortlessly improve the speed of your site by delivering fewer, smaller CSS & JS assets.
 
-Version 2 has enjoyed a substantial re-write, ushering in a host of changes big and small. __Depending on your setup, you may need to make some adjustments prior to installing Minimee 2__.
+Version 2's substantial re-write has ushered in a host of changes big and small. __Depending on your setup, you may need to make some adjustments prior to _upgrading_ from Minimee 1.x.__ See 'Upgrading from 1.x' below for more.
 
 Minimee is inspired and influenced by [SL Combinator](http://experienceinternet.co.uk/software/sl-combinator/) from Experience Internet, and [Carabiner Asset Management Library](http://codeigniter.com/wiki/Carabiner/) from Tony Dewan. It is released under a BSD License.
 
@@ -43,7 +43,7 @@ Complete and up-to-date documentation can be found on [Minimee's homepage](http:
 * Hooks for 3rd party integration (see [Minimee+LESS](https://github.com/johndwells/Minimee-LESS))
 * ALL settings can be specified via config or extension, and then overridden at the tag level
 * Path & URL settings can now be relative to site root
-* Technique available to have different settings for each CSS/JS file
+* Technique available to have different settings for each CSS/JS asset
 * Ability to disable or override the URLs prepended to relative image & @import paths in CSS
 * New 'priority' parameter allows you to queue assets into a specific order
 * For EE2.4 and above, assets may be queue'd after exp:minimee:display is parsed
@@ -66,18 +66,18 @@ Configuring via Global Variables is no longer supported, and configuring via EE'
 
 The 'debug' setting has been removed. Now, simply turn on EE's "Template Debugging", visit your front end and search the page for "Minimee [" - all Notice, Warning and Error messages will be reported.
 
-With Minimee 1.x if you were to set both combine="no" and minify="no", Minimee would disable itself and not run at all.  Now, Minimee will still create cached files of what assets it parses, yet they will simply not be combined into a single file, and not be minified.
+With Minimee 1.x if you were to set both `combine="no"` and `minify="no"`, Minimee would disable itself and not run at all.  Now, Minimee will still create cached files of what assets it parses, yet they will simply not be combined into a single file, and not be minified.
 
-A new "Cachebust" setting allows you to manually trigger Minimee to create new cache files. For most setups this is unneccessary, however edge cases (such as when Minimee+LESS needs to be re-run due to a modified `@import`'ed file that Minimee can't detect) will find this setting useful.
+A new "Cachebust" setting allows you to manually trigger Minimee to create new cache files. For most setups this is unneccessary, however edge cases will find this useful - such as when [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) needs to be re-run due to a modified `@import` file which Minimee is unable to detect.
 
 
 # Upgrading from 1.x
 
 ## Filename Case Sensitivity
 
-There is a file who's name has changed case, which may go unrecognised with versioning systems such as SVN/Git; this will cause EE to throw big nasty errors if 1.x is overwritten with 2.x and this case change is not maintained. The file is:
+There is a file who's name has **_changed case_**, which may go unrecognised with versioning systems such as SVN/Git; this will cause EE to throw big nasty errors if 1.x is overwritten with 2.x and this case change is not maintained. The file is:
 
-/system/expressionengine/third_party/minimee/libraries/JSMin.php
+/system/expressionengine/third_party/minimee/libraries/**JSM**in.php
 
 Once you have upgraded Minimee on your server, either through deployment or FTP, you should make sure that this file has its proper case as above.
 
@@ -104,37 +104,204 @@ _Note: **All settings are now optional**. Out of the box and left un-configured,
 
 ## Config via Extension
 
+content soon
+
 ## Config via EE's `$config`
 
+Configuring Minimee via EE's `$config` has the advantage of not requiring any DB calls to initialise or run, saving precious time on your page loads. Going this route requires editing your /system/expressionengine/config/config.php file; alternatively you are encouraged to adopt any of the community-developed "bootstrap" methods, such as:
+
+* [NSM Config Boostrap](http://ee-garage.com/nsm-config-bootstrap) from EE-Garage
+* [EE Master Config](https://github.com/focuslabllc/ee-master-config) from Focus Lab LLC
+* [This little-known gist](https://gist.github.com/1329538) from @airways
+
+To configure Minimee via EE's `$config` array, the following values are available:
+
 	$config['minimee'] = array(
-		'base_path'			=> '/path/to/site.com',			// defaults to site's FCPATH
-		'base_url'			=> 'http://site.com',			// defaults to $EE->config->item('base_url')
-		'cachebust'			=> '',							// unique string to force a new cache
-		'cache_path'		=> '/path/to/site.com/cache',	// defaults to site's FCPATH + '/cache'
-		'cache_url'			=> 'http://site.com/cache',		// defaults to $EE->config->item('base_url') + '/cache'
-		'combine'			=> 'yes',						// 'yes' or 'no'
-		'combine_css'		=> 'yes',						// 'yes' or 'no'
-		'combine_js'		=> 'yes',						// 'yes' or 'no'
-		'css_prepend_mode'	=> 'yes',						// 'yes' or 'no'
-		'css_prepend_url'	=> '/path/to/site.com',			// defaults to $EE->config->item('base_url')
-		'minify'			=> 'yes',						// 'yes' or 'no'
-		'minify_css'		=> 'yes',						// 'yes' or 'no'
-		'minify_html'		=> 'no',						// 'yes' or 'no'
-		'minify_js'			=> 'yes',						// 'yes' or 'no'
-		'remote_mode'		=> 'auto'						// 'auto', 'fgc', or 'curl'
+		
+		/**
+		 * The base path of your local source assets.
+		 * Defaults to site's FCPATH
+		 */
+		'base_path'			=> '/path/to/site.com',
+
+		/**
+		 * The base URL of your local source assets.
+		 * Defaults to $EE->config->item('base_url')
+		 */
+		'base_url'			=> 'http://site.com',
+		
+		/**
+		 * An optional unique 'cachebusting' string to force Minimee to generate a new cache.
+		 */
+		'cachebust'			=> '',
+		
+		/**
+		 * The path to the cache folder.
+		 * Defaults to site's FCPATH + '/cache'
+		 */
+		'cache_path'		=> '/path/to/site.com/cache',
+		
+		/**
+		 * The URL to the cache folder.
+		 * Defaults to $EE->config->item('base_url') + '/cache'
+		 */
+		'cache_url'			=> 'http://site.com/cache',
+		
+		/**
+		 * Turn on or off ALL combining of assets. 'yes' or 'no'.
+		 * Not to be mixed with 'combine_css' or 'combine_js'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'combine'			=> 'yes',
+
+		/**
+		 * Turn on or off combining of CSS assets only. 'yes' or 'no'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'combine_css'		=> 'yes',
+
+		/**
+		 * Turn on or off combining of JS assets only. 'yes' or 'no'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'combine_js'		=> 'yes',
+		
+		/**
+		 * Whether or not to prepend the base URL to relative @import and image paths in CSS. 'yes' or 'no'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'css_prepend_mode'	=> 'yes',
+		
+		/**
+		 * Override the URL used when prepending URL to relative @import and image paths in CSS.
+		 * Defaults to Base URL.
+		 */
+		'css_prepend_url'	=> '/path/to/site.com',
+
+		/**
+		 * Turn on or off ALL minifying. 'yes' or 'no'.
+		 * Not to be mixed with 'minify_css', 'minify_html' or 'minify_js'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'minify'			=> 'yes',
+
+		/**
+		 * Turn on or off minifying of CSS assets. 'yes' or 'no'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'minify_css'		=> 'yes',
+
+		/**
+		 * Turn on or off minifying of JS assets.
+		 * Values: 'yes' or 'no'
+		 * Default: no
+		 */
+		'minify_html'		=> 'no',
+
+		/**
+		 * Turn on or off minifying of JS assets.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'minify_js'			=> 'yes',
+		
+		/**
+		 * Specify the method with which Minimee should fetch external & {stylesheet=} assets.
+		 * Values: 'auto', 'fgc', or 'curl'
+		 * Default: auto
+		 */
+		'remote_mode'		=> 'auto'
 	);
+
+# Usage
+
+## CSS:
+
+	{exp:minimee:css}
+		<link href="css/reset.css" rel="stylesheet" type="text/css" />
+		<link href="css/webfonts.css" rel="stylesheet" type="text/css" />
+		<link href="css/global.css" rel="stylesheet" type="text/css" />
+		<link href="css/forms.css" rel="stylesheet" type="text/css" />
+	{/exp:minimee:css}
+	
+	{!-- will render something like: --}
+	<link href="http://site.com/cache/fbcff33e698e21d577744cf663ad5653.css?m=1298784510" rel="stylesheet" type="text/css" />
+
+## JS:
+
+	{exp:minimee:js}
+		<script src="/js/mylibs/jquery.easing.js" type="text/javascript"></script>
+		<script src="/js/mylibs/jquery.cycle.js" type="text/javascript"></script>
+		<script src="/js/mylibs/jquery.forms.js" type="text/javascript"></script>
+		<script src="/js/scripts.js" type="text/javascript"></script>
+		<script src="/js/plugins.js" type="text/javascript"></script>
+	{/exp:minimee:js}
+	
+	{!- will render something like: --}
+	<script src="http://site.com/cache/16b6345ae6f4b24dd2b1cba102cbf2fa.js?m=1298784512" type="text/javascript"></script>
 
 
 # Special Notes / FAQs
 
 ## How Minimee creates cache filenames
 
+content soon
+
 ## Cleaning your Cache folder
+
+content soon
 
 ## Manual 'Cachebusting'
 
+content soon
+
 ## The 'Croxton Queue' for EE2.4+
+
+[Mark Croxton](https://github.com/croxton) submitted this [feature request](http://devot-ee.com/add-ons/support/minimee/viewthread/4552#15417) to delay the processing of `exp:minimee:display` until all other template parsing has been completed, by way of leveraging EE2.4's new `template_post_parse` hook. It was a brilliant idea and indication of his mad scientist skills. In his wise words:
+
+> _"Then you would never need worry about parse order when injecting assets into the header or footer of your page using queues."_
+
+This, combined with the new `priority=""` parameter, means you can do something like:
+
+	{exp:minimee:display css="header_css"}
+	
+	{!-- sometime LATER in EE's parse order --}
+	
+	{exp:minimee:css queue="header_css" priority="10"}
+		<link href="css/forms.css" rel="stylesheet" type="text/css" />
+	{/exp:minimee:css}
+	
+	{!-- and even later in parse order, also note the priority --}
+	
+	{exp:minimee:css queue="header_css" priority="0"}
+		<link href="css/reset.css" rel="stylesheet" type="text/css" />
+	{/exp:minimee:css}
+
+And then what ends up happening is that `exp:minimee:display` outputs a cached css that contains, in this order:
+
+1. css/reset.css (first because of priority="0")
+2. css/forms.css (second because of priority="10")
+
+
 
 ## SSL: mixing `http` & `https`
 
+content soon
+
 ## Different settings for different files
+
+content soon
+
+## Specifying the template/format of Minimee's cached link/script tags
+
+content soon
+
+## Does Minimee process any `@import` CSS assets?
+
+No. But [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) does.
