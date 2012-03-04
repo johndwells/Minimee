@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 // our helper will require_once() everything else we need
-require_once PATH_THIRD . 'minimee/models/Minimee_helper.php';
+require_once PATH_THIRD . 'minimee/classes/Minimee_helper.php';
 
 $plugin_info = array(
 	'pi_name'			=> MINIMEE_NAME,
@@ -109,7 +109,7 @@ class Minimee {
 	public function display()
 	{
 		// try to postpone until template_post_parse
-		if($out = $this->_postpone('display'))
+		if ($out = $this->_postpone('display'))
 		{
 			return $out;
 		}
@@ -149,7 +149,7 @@ class Minimee {
 	public function embed()
 	{
 		// try to postpone until template_post_parse
-		if($out = $this->_postpone('embed'))
+		if ($out = $this->_postpone('embed'))
 		{
 			return $out;
 		}
@@ -208,7 +208,7 @@ class Minimee {
 			foreach ($paths as $path)
 			{
 				// strip timestamp
-				if(strpos($path, '?') !== FALSE)
+				if (strpos($path, '?') !== FALSE)
 				{
 					$name = substr($path, 0, strpos($path, '?'));
 				}
@@ -262,7 +262,7 @@ class Minimee {
 	public function link()
 	{
 		// try to postpone until template_post_parse
-		if($out = $this->_postpone('link'))
+		if ($out = $this->_postpone('link'))
 		{
 			return $out;
 		}
@@ -387,7 +387,7 @@ class Minimee {
 	protected function _cache_tag()
 	{
 		// for clarity, use manual cachebust if provided
-		if($this->config->cachebust)
+		if ($this->config->cachebust)
 		{
 			$cachebust = '?m=' . $this->config->cachebust;
 		}
@@ -462,7 +462,7 @@ class Minimee {
 					$local = Minimee_helper::replace_url_with_path($M->config->base_url, $M->config->base_path, $file['name']);
 	
 					// the filename needs to be without any cache-busting or otherwise $_GETs
-					if($position = strpos($local, '?'))
+					if ($position = strpos($local, '?'))
 					{
 						$local = substr($local, 0, $position);
 					}
@@ -494,7 +494,7 @@ class Minimee {
 				default:
 
 					// the filename needs to be without any cache-busting or otherwise $_GETs
-					if($position = strpos($this->filesdata[$key]['name'], '?'))
+					if ($position = strpos($this->filesdata[$key]['name'], '?'))
 					{
 						$this->filesdata[$key]['name'] = substr($this->filesdata[$key]['name'], 0, $position);
 					}
@@ -638,7 +638,7 @@ class Minimee {
 			endswitch;
 
 			// Let's log a warning message if the contents of file are empty
-			if( ! $contents)
+			if ( ! $contents)
 			{
 				Minimee_helper::log('The contents from `' . $file['name'] . '` were empty.', 2);
 			}
@@ -772,12 +772,12 @@ class Minimee {
 		$tagparams = $this->EE->TMPL->tagparams;
 		
 		// we do need to account for the fact that minify="no" is assumed to be pertaining to the tag…
-		if(isset($tagparams['combine']))
+		if (isset($tagparams['combine']))
 		{
 			$tagparams['combine_' . $this->type] = $tagparams['combine'];
 		}
 		
-		if(isset($tagparams['minify']))
+		if (isset($tagparams['minify']))
 		{
 			$tagparams['minify_' . $this->type] = $tagparams['minify'];
 		}
@@ -946,7 +946,7 @@ class Minimee {
 				// we can actually figure out if it's a runtime setting or default
 				$runtime = $this->config->get_runtime();
 				
-				if(isset($runtime['disable']) && $runtime['disable'] == 'yes')
+				if (isset($runtime['disable']) && $runtime['disable'] == 'yes')
 				{
 					throw new Exception('Disabled via tag parameter.');
 				}
@@ -1005,7 +1005,7 @@ class Minimee {
 			$lastmodified = filemtime(Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
 
 			// Is cache old?
-			if($lastmodified < $this->cache_lastmodified)
+			if ($lastmodified < $this->cache_lastmodified)
 			{
 				Minimee_helper::log('Cache file found but it is too old: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename), 3);
 				$out = FALSE;
@@ -1134,7 +1134,7 @@ class Minimee {
 		else
 		{
 			// if calling from our hook return FALSE
-			if($this->calling_from_hook)
+			if ($this->calling_from_hook)
 			{
 				return FALSE;
 			}
@@ -1267,7 +1267,7 @@ class Minimee {
 		foreach ($files as $key => $file)
 		{
 			// if we are receiving these from the queue, no need to calculate ALL of the below
-			if($from_queue === TRUE)
+			if ($from_queue === TRUE)
 			{
 				$this->filesdata[$key] = $file;
 			}
@@ -1305,7 +1305,7 @@ class Minimee {
 			}
 
 			// flag to see if we need to run SQL query later
-			if($this->filesdata[$key]['type'] == 'stylesheet')
+			if ($this->filesdata[$key]['type'] == 'stylesheet')
 			{
 				$this->stylesheet_query = TRUE;
 			}

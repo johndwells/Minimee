@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 require_once PATH_THIRD . 'minimee/config.php';
-require_once PATH_THIRD . 'minimee/models/Minimee_config.php';
+require_once PATH_THIRD . 'minimee/classes/Minimee_config.php';
 
 /**
  * Minimee Helper
@@ -218,7 +218,7 @@ class Minimee_helper
 	public static function remove_double_slashes($string, $url = FALSE)
 	{
 		// is our string a URL?
-		if($url)
+		if ($url)
 		{
 			// regex pattern removes all double slashes, preserving http:// and '//' at start
 			return preg_replace("#([^:])//+#", "\\1/", $string);

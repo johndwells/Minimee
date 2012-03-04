@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 // our helper will require_once() everything else we need
-require_once PATH_THIRD . 'minimee/models/Minimee_helper.php';
+require_once PATH_THIRD . 'minimee/classes/Minimee_helper.php';
 
 /**
  * ExpressionEngine - by EllisLab
@@ -141,7 +141,7 @@ class Minimee_ext {
 		}
 
 		// do nothing if not final template
-		if($sub !== FALSE)
+		if ($sub !== FALSE)
 		{
 			return $template;
 		}
@@ -177,14 +177,14 @@ class Minimee_ext {
 		}
 		
 		// Are we configured to run through HTML minifier?
-		if($this->config->is_no('minify') || $this->config->is_no('minify_html'))
+		if ($this->config->is_no('minify') || $this->config->is_no('minify_html'))
 		{
 			Minimee_helper::log('HTML minification is disabled.', 3);
 			return $template;
 		}
 
 		// is Minimee nonetheless disabled?
-		if($this->config->is_yes('disable'))
+		if ($this->config->is_yes('disable'))
 		{
 			Minimee_helper::log('HTML minification aborted because Minimee is disabled via config.', 3);
 			return $template;
@@ -228,7 +228,7 @@ class Minimee_ext {
 			
 			foreach($checkboxes as $key)
 			{
-				if( ! isset($settings[$key]))
+				if ( ! isset($settings[$key]))
 				{
 					$settings[$key] = 'no';
 				}

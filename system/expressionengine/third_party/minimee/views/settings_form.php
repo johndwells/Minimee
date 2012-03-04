@@ -176,7 +176,7 @@
 			
 			MINIMEE.toggleSettings = function(val) {
 			
-				if(val == 'no')
+				if (val == 'no')
 				{
 					MINIMEE.$settings.slideDown(600);
 				}

@@ -105,19 +105,19 @@ class Minimee_config {
 	public function __get($prop)
 	{
 		// Find & retrieve the runtime setting
-		if(array_key_exists($prop, $this->_runtime))
+		if (array_key_exists($prop, $this->_runtime))
 		{
 			return $this->_runtime[$prop];
 		}
 		
 		// Find & retrieve the default setting
-		if(array_key_exists($prop, $this->_default))
+		if (array_key_exists($prop, $this->_default))
 		{
 			return $this->_default[$prop];
 		}
 		
 		// I guess it's OK to ask for a raw copy of our settings
-		if($prop == 'settings')
+		if ($prop == 'settings')
 		{
 			// merge with defaults first
 			return array_merge($this->_default, $this->_runtime);
@@ -140,10 +140,10 @@ class Minimee_config {
 	public function __set($prop, $value)
 	{
 		// are we setting the entire Minimee_config::settings array?
-		if($prop == 'settings' && is_array($value))
+		if ($prop == 'settings' && is_array($value))
 		{
 			// is our array empty? if so, consider it "reset"
-			if(count($value) === 0)
+			if (count($value) === 0)
 			{
 				$this->_runtime = array();
 			}
@@ -153,7 +153,7 @@ class Minimee_config {
 			}
 		}
 		// just set an individual setting
-		elseif(array_key_exists($prop, $this->_allowed))
+		elseif (array_key_exists($prop, $this->_allowed))
 		{
 			$this->_runtime[$prop] = $this->sanitise_setting($prop, $value);
 		}
@@ -237,7 +237,7 @@ class Minimee_config {
 	/**
 	 * Utility method
 	 *
-	 * Usage: if($Minimee_config->is_no('disable')) {...}
+	 * Usage: if ($Minimee_config->is_no('disable')) {...}
 	 */
 	public function is_no($setting)
 	{
@@ -249,7 +249,7 @@ class Minimee_config {
 	/**
 	 * Utility method
 	 *
-	 * Usage: if($Minimee_config->is_yes('disable')) {...}
+	 * Usage: if ($Minimee_config->is_yes('disable')) {...}
 	 */
 	public function is_yes($setting)
 	{
@@ -282,7 +282,7 @@ class Minimee_config {
 	 */
 	public function sanitise_settings($settings)
 	{
-		if( ! is_array($settings)) {
+		if ( ! is_array($settings)) {
 			Minimee_helper::log('Trying to sanitise a non-array of settings.', 2);
 			return array();
 		}
@@ -380,7 +380,7 @@ class Minimee_config {
 	        $settings = $this->EE->config->item('minimee');
 	        
 	        // better be an array!
-	        if(is_array($settings))
+	        if (is_array($settings))
 	        {
 				$this->location = 'config';
 
@@ -459,7 +459,7 @@ class Minimee_config {
 
 			// Technically the hook has an opportunity to set location to whatever it wishes;
 			// so only set to 'hook' if still false
-			if(is_array($settings) && $this->location === FALSE)
+			if (is_array($settings) && $this->location === FALSE)
 			{
 				$this->location = 'hook';
 			}
@@ -478,7 +478,7 @@ class Minimee_config {
 	protected function _init()
 	{
 		// see if we have already configured our defaults
-		if(isset($this->cache['config']))
+		if (isset($this->cache['config']))
 		{
 			$this->_default = $this->cache['config'];
 
@@ -497,7 +497,7 @@ class Minimee_config {
 			/*
 			 * Test 2: Look in config
 			 */
-			if($settings === FALSE)
+			if ($settings === FALSE)
 			{
 				$settings = $this->_from_config();
 			}
@@ -505,7 +505,7 @@ class Minimee_config {
 			/*
 			 * Test 3: Look in db
 			 */
-			if($settings === FALSE)
+			if ($settings === FALSE)
 			{
 				$settings = $this->_from_db();
 			}
@@ -513,7 +513,7 @@ class Minimee_config {
 			/*
 			 * Set some defaults
 			 */
-			if( $settings === FALSE)
+			if ( $settings === FALSE)
 			{
 				Minimee_helper::log('Could not find any settings to use. Trying defaults.', 2);
 				
@@ -526,25 +526,25 @@ class Minimee_config {
 			/*
 			 * Set some defaults
 			 */
-			if( ! array_key_exists('cache_path', $settings) || $settings['cache_path'] == '')
+			if ( ! array_key_exists('cache_path', $settings) || $settings['cache_path'] == '')
 			{
 				// use global FCPATH if nothing set
 				$settings['cache_path'] = FCPATH . '/cache';
 			}
 
-			if( ! array_key_exists('cache_url', $settings) || $settings['cache_url'] == '')
+			if ( ! array_key_exists('cache_url', $settings) || $settings['cache_url'] == '')
 			{
 				// use config base_url if nothing set
 				$settings['cache_url'] = $this->EE->config->item('base_url') . '/cache';
 			}
 			
-			if( ! array_key_exists('base_path', $settings) || $settings['base_path'] == '')
+			if ( ! array_key_exists('base_path', $settings) || $settings['base_path'] == '')
 			{
 				// use global FCPATH if nothing set
 				$settings['base_path'] = FCPATH;
 			}
 			
-			if( ! array_key_exists('base_url', $settings) || $settings['base_url'] == '')
+			if ( ! array_key_exists('base_url', $settings) || $settings['base_url'] == '')
 			{
 				// use config base_url if nothing set
 				$settings['base_url'] = $this->EE->config->item('base_url');
@@ -562,7 +562,7 @@ class Minimee_config {
 			 * See if we need to inject ourselves into extensions hook.
 			 * This allows us to bind to the template_post_parse hook without installing our extension
 			 */
-			if($this->minify_html == 'yes' && $this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
+			if ($this->minify_html == 'yes' && $this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
 			{
 				// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
 				$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
