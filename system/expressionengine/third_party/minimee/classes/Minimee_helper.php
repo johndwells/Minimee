@@ -61,6 +61,7 @@ class Minimee_helper {
 		if (self::$_config === FALSE)
 		{
 			self::$_config = new Minimee_config();
+			self::$_config->init();
 		}
 		
 		// by 'extend' we mean merge runtime with defaults
@@ -253,4 +254,4 @@ class Minimee_helper {
 // END CLASS
 
 /* End of file Minimee_helper.php */
-/* Location: ./system/expressionengine/third_party/minimee/models/Minimee_helper.php */
+/* Location: ./system/expressionengine/third_party/minimee/classes/Minimee_helper.php */

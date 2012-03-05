@@ -5,7 +5,7 @@
 	$note_format = '<small style="display:block;font-size:.95em;font-weight:normal;margin-top:0.5em">%s</small>';
 	$hint_format = '<small style="display:block;font-size:.9em;font-weight:normal;margin-top:0.5em">%s</small>';
 
-	// only open form table if we have 'db' config settings
+	// display our warning?
 	if ($config_loc != 'db')
 	{
 		echo '<p><br />' . lang('config_loc_caution_' . $config_loc) . '<br /><br /></p>';

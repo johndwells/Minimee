@@ -1,5 +1,8 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+// just in case
+require_once PATH_THIRD . 'minimee/classes/Minimee_helper.php';
+
 /**
  * Minimee Config settings
  * @author John D Wells <http://johndwells.com>
@@ -73,20 +76,20 @@ class Minimee_config {
 	/**
 	 * Constructor function
 	 *
+	 * If an array is passed, then we clearly expect to init itself
+	 * 
+	 * @param Array	An array of settings to extend runtime
 	 */
 	public function __construct($extend = array())
 	{
 		$this->EE =& get_instance();
 		
-		// grab alias of our cache
-		$this->cache =& Minimee_helper::cache();
-		
-		// grab our config settings, will become our defaults
-		$this->_init();
-
 		// by 'extend' we mean merge runtime with defaults
 		if ($extend)
 		{
+			// grab our config settings, will become our defaults
+			$this->init();
+	
 			$this->extend($extend);
 		}
 	}
@@ -230,6 +233,122 @@ class Minimee_config {
 	public function get_runtime()
 	{
 		return $this->_runtime;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Initialise / Initialize.
+	 *
+	 * Retrieves settings from: session, minimee_get_settings hook, config OR database (and in that order).
+	 *
+	 * @return void
+	 */
+	public function init()
+	{
+		// grab alias of our cache
+		$this->cache =& Minimee_helper::cache();
+
+		// see if we have already configured our defaults
+		if (isset($this->cache['config']))
+		{
+			$this->_default = $this->cache['config'];
+
+			Minimee_helper::log('Settings have been retrieved from session.', 3);
+		}
+		else
+		{
+			// we are trying to turn this into an array full of goodness.
+			$settings = FALSE;
+	
+			/*
+			 * Test 1: See if anyone is hooking in
+			 */
+			$settings = $this->_from_hook();
+			
+			/*
+			 * Test 2: Look in config
+			 */
+			if ($settings === FALSE)
+			{
+				$settings = $this->_from_config();
+			}
+			
+			/*
+			 * Test 3: Look in db
+			 */
+			if ($settings === FALSE)
+			{
+				$settings = $this->_from_db();
+			}
+			
+			/*
+			 * Set some defaults
+			 */
+			if ( $settings === FALSE)
+			{
+				Minimee_helper::log('Could not find any settings to use. Trying defaults.', 2);
+				
+				$this->location = 'default';
+				
+				// start with an empty array
+				$settings = array();
+			}
+
+			/*
+			 * Set some defaults
+			 */
+			if ( ! array_key_exists('cache_path', $settings) || $settings['cache_path'] == '')
+			{
+				// use global FCPATH if nothing set
+				$settings['cache_path'] = FCPATH . '/cache';
+			}
+
+			if ( ! array_key_exists('cache_url', $settings) || $settings['cache_url'] == '')
+			{
+				// use config base_url if nothing set
+				$settings['cache_url'] = $this->EE->config->item('base_url') . '/cache';
+			}
+			
+			if ( ! array_key_exists('base_path', $settings) || $settings['base_path'] == '')
+			{
+				// use global FCPATH if nothing set
+				$settings['base_path'] = FCPATH;
+			}
+			
+			if ( ! array_key_exists('base_url', $settings) || $settings['base_url'] == '')
+			{
+				// use config base_url if nothing set
+				$settings['base_url'] = $this->EE->config->item('base_url');
+			}
+	
+			/*
+			 * Now make a complete & sanitised settings array, and set as our default
+			 */
+			$this->_default = $this->sanitise_settings(array_merge($this->_allowed, $settings));
+	
+			// cleanup
+			unset($settings);
+	
+			/*
+			 * See if we need to inject ourselves into extensions hook.
+			 * This allows us to bind to the template_post_parse hook without installing our extension
+			 */
+			if ($this->minify_html == 'yes' && $this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
+			{
+				// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
+				$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
+		  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
+
+				Minimee_helper::log('Manually injected into template_post_parse extension hook.', 3);
+			}
+
+			// set our settings to cache for retrieval later on
+			$this->cache['config'] = $this->_default;
+			
+			Minimee_helper::log('Settings have been saved in session cache.', 3);
+		}
+
 	}
 	// ------------------------------------------------------
 
@@ -468,120 +587,8 @@ class Minimee_config {
 		return $settings;
 	}
 	// ------------------------------------------------------
-
-
-	/**
-	 * Retrieves settings from: session, minimee_get_settings hook, config OR database (and in that order).
-	 *
-	 * @return void
-	 */
-	protected function _init()
-	{
-		// see if we have already configured our defaults
-		if (isset($this->cache['config']))
-		{
-			$this->_default = $this->cache['config'];
-
-			Minimee_helper::log('Settings have been retrieved from session.', 3);
-		}
-		else
-		{
-			// we are trying to turn this into an array full of goodness.
-			$settings = FALSE;
-	
-			/*
-			 * Test 1: See if anyone is hooking in
-			 */
-			$settings = $this->_from_hook();
-			
-			/*
-			 * Test 2: Look in config
-			 */
-			if ($settings === FALSE)
-			{
-				$settings = $this->_from_config();
-			}
-			
-			/*
-			 * Test 3: Look in db
-			 */
-			if ($settings === FALSE)
-			{
-				$settings = $this->_from_db();
-			}
-			
-			/*
-			 * Set some defaults
-			 */
-			if ( $settings === FALSE)
-			{
-				Minimee_helper::log('Could not find any settings to use. Trying defaults.', 2);
-				
-				$this->location = 'default';
-				
-				// start with an empty array
-				$settings = array();
-			}
-
-			/*
-			 * Set some defaults
-			 */
-			if ( ! array_key_exists('cache_path', $settings) || $settings['cache_path'] == '')
-			{
-				// use global FCPATH if nothing set
-				$settings['cache_path'] = FCPATH . '/cache';
-			}
-
-			if ( ! array_key_exists('cache_url', $settings) || $settings['cache_url'] == '')
-			{
-				// use config base_url if nothing set
-				$settings['cache_url'] = $this->EE->config->item('base_url') . '/cache';
-			}
-			
-			if ( ! array_key_exists('base_path', $settings) || $settings['base_path'] == '')
-			{
-				// use global FCPATH if nothing set
-				$settings['base_path'] = FCPATH;
-			}
-			
-			if ( ! array_key_exists('base_url', $settings) || $settings['base_url'] == '')
-			{
-				// use config base_url if nothing set
-				$settings['base_url'] = $this->EE->config->item('base_url');
-			}
-	
-			/*
-			 * Now make a complete & sanitised settings array, and set as our default
-			 */
-			$this->_default = $this->sanitise_settings(array_merge($this->_allowed, $settings));
-	
-			// cleanup
-			unset($settings);
-	
-			/*
-			 * See if we need to inject ourselves into extensions hook.
-			 * This allows us to bind to the template_post_parse hook without installing our extension
-			 */
-			if ($this->minify_html == 'yes' && $this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
-			{
-				// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
-				$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
-		  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
-
-				Minimee_helper::log('Manually injected into template_post_parse extension hook.', 3);
-			}
-
-			// set our settings to cache for retrieval later on
-			$this->cache['config'] = $this->_default;
-			
-			Minimee_helper::log('Settings have been saved in session cache.', 3);
-		}
-
-	}
-	// ------------------------------------------------------
-	
 }
 // END CLASS
 
 /* End of file Minimee_config.php */
-/* Location: ./system/expressionengine/third_party/minimee/models/Minimee_config.php */
+/* Location: ./system/expressionengine/third_party/minimee/classes/Minimee_config.php */

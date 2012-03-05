@@ -43,18 +43,18 @@ Complete and up-to-date documentation can be found on [Minimee's homepage](http:
 * Hooks for 3rd party integration (see [Minimee+LESS](https://github.com/johndwells/Minimee-LESS))
 * ALL settings can be specified via config or extension, and then overridden at the tag level
 * Path & URL settings can now be relative to site root
-* Technique available to have different settings for each CSS/JS asset
-* Ability to disable or override the URLs prepended to relative image & @import paths in CSS
-* New 'priority' parameter allows you to queue assets into a specific order
-* For EE2.4 and above, assets may be queue'd after exp:minimee:display is parsed
-* Verbose template debugging messages to help easily track down problems
+* Have different settings for each CSS/JS asset
+* Disable or override the URLs which are prepended to image & @import paths in CSS
+* New `priority=""` parameter allows you to queue assets into a specific order
+* For EE2.4 and above, assets may be queue'd _after_ the exp:minimee:display tag is parsed
+* Verbose template debugging messages to help easily track down errors
 * Can detect when fully-qualified URLs are in fact local files, and process them as such
 * Individually turn off and on minification & combining for all assets (CSS, JS and HTML)
 
 ## Since 1.x:
 
 * For EE2.4 and above, can minify your HTML
-* Works with the global variables, even {stylesheet}
+* Works with EE global variables and `{stylesheet=""}`
 * Works with external files, over cURL or file_get_contents()
 * Embed combined & minified content directly inline to your template
 * Compatible with server-side compression & caching
@@ -62,18 +62,22 @@ Complete and up-to-date documentation can be found on [Minimee's homepage](http:
 
 # Behaviour Changes in 2.x
 
-Configuring via Global Variables is no longer supported, and configuring via EE's $config variable has changed; consult the Upgrade notes for more.
+### Configuration
+Configuring via Global Variables is no longer supported, and __configuring via EE's $config variable has changed__; consult the Upgrade notes for more.
 
-The 'debug' setting has been removed. Now, simply turn on EE's "Template Debugging", visit your front end and search the page for "Minimee [" - all Notice, Warning and Error messages will be reported.
+### Debug
+The `debug="yes"` setting has been removed. Now, simply turn on EE's "Template Debugging", visit your front end and search the page for "Minimee [" - all Notice, Warning and Error messages will be reported.
 
-With Minimee 1.x if you were to set both `combine="no"` and `minify="no"`, Minimee would disable itself and not run at all.  Now, Minimee will still create cached files of what assets it parses, yet they will simply not be combined into a single file, and not be minified.
+### combine="no" and minify="no"
+With Minimee 1.x if you were to set both `combine="no"` and `minify="no"`, Minimee would disable itself and not run at all.  Now, Minimee will still create cached files of what assets it parses, yet they will simply not be combined into a single file, and/or not be minified.
 
+### Cachebusting
 A new "Cachebust" setting allows you to manually trigger Minimee to create new cache files. For most setups this is unneccessary, however edge cases will find this useful - such as when [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) needs to be re-run due to a modified `@import` file which Minimee is unable to detect.
 
 
 # Upgrading from 1.x
 
-## Filename Case Sensitivity
+### Filename Case Sensitivity
 
 There is a file who's name has **_changed case_**, which may go unrecognised with versioning systems such as SVN/Git; this will cause EE to throw big nasty errors if 1.x is overwritten with 2.x and this case change is not maintained. The file is:
 
@@ -82,7 +86,7 @@ There is a file who's name has **_changed case_**, which may go unrecognised wit
 Once you have upgraded Minimee on your server, either through deployment or FTP, you should make sure that this file has its proper case as above.
 
 
-## Configuration Changes
+### Configuration Changes
 
 If you have Minimee 1x installed and are using the Extension, there is nothing you will need to do prior to overwriting system/expressionengine/third_party/minimee.
 
@@ -104,7 +108,7 @@ _Note: **All settings are now optional**. Out of the box and left un-configured,
 
 ## Config via Extension
 
-content soon
+Coming soon.
 
 ## Config via EE's `$config`
 
@@ -251,15 +255,15 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 ## How Minimee creates cache filenames
 
-content soon
+Coming soon.
 
 ## Cleaning your Cache folder
 
-content soon
+Coming soon.
 
 ## Manual 'Cachebusting'
 
-content soon
+Coming soon.
 
 ## The 'Croxton Queue' for EE2.4+
 
@@ -288,20 +292,25 @@ And then what ends up happening is that `exp:minimee:display` outputs a cached c
 1. css/reset.css (first because of priority="0")
 2. css/forms.css (second because of priority="10")
 
+Note that this parse-order-be-damned technique is available for all of Minimee's tags which harness "queueing", namely:
+
+* `{exp:minimee:display}`
+* `{exp:minimee:embed}`
+* `{exp:minimee:link}`
 
 
 ## SSL: mixing `http` & `https`
 
-content soon
+Coming soon.
 
-## Different settings for different files
+## Different settings for different assets
 
-content soon
+Coming soon.
 
-## Specifying the template/format of Minimee's cached link/script tags
+## Specifying the format of Minimee's link & script tags
 
-content soon
+Coming soon.
 
-## Does Minimee process any `@import` CSS assets?
+## Does Minimee process `@import`'ed CSS assets?
 
 No. But [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) does.
