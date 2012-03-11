@@ -994,8 +994,10 @@ HEREDOC;
 	 */
 	protected function _get_cache()
 	{
-		// our return variable
+		// (re)set our usage vars
 		$out = '';
+		$this->cache_filename = '';
+		$this->cache_lastmodified = '';
 
 		// loop through our files once
 		foreach ($this->filesdata as $key => $file)
