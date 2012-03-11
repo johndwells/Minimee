@@ -350,7 +350,7 @@ class Minimee_config {
 			// set our settings to cache for retrieval later on
 			$this->cache['config'] = $this->_default;
 			
-			Minimee_helper::log('Settings have been saved in session cache.', 3);
+			Minimee_helper::log('Settings have been saved in session cache. Settings came from: ' . $this->location, 3);
 		}
 
 	}
