@@ -329,17 +329,30 @@ class Minimee {
 	 */	
 	public function usage()
 	{
-		// the following 'hack' is courtesy of: http://expressionengine.com/forums/viewthread/160486/#773142
-		$ee =& get_instance();
-		
-		$temp = $ee->load->_ci_view_path;
-		$ee->load->_ci_view_path = PATH_THIRD . 'minimee/views/';
-		
-		$out = $ee->load->view('usage', array(), true);
-		
-		$ee->load->_ci_view_path = $temp;
+		return <<<HEREDOC
 
-		return $out;
+Complete and up-to-date documentation: http://johndwells.com/software/minimee
+
+=====================================================
+Basic Usage
+=====================================================
+
+CSS:
+{exp:minimee:css}
+	<link type="text/css" rel="stylesheet" href="/css/reset.css" />
+	<link type="text/css" rel="stylesheet" href="/css/fonts.css" />
+	<link type="text/css" rel="stylesheet" href="/css/screen.css" />
+{/exp:minimee:css}
+
+JS:
+{exp:minimee:js}
+	<script type="text/javascript" src="scripts/jquery.form.js"></script>
+	<script type="text/javascript" src="scripts/jquery.easing.1.3.js"></script>
+{/exp:minimee:js}
+
+HTML (for EE2.4+):
+See documentation for details.
+HEREDOC;
 	}
 	// ------------------------------------------------------
 
