@@ -260,11 +260,15 @@ class Minimee_config {
 		{
 			// we are trying to turn this into an array full of goodness.
 			$settings = FALSE;
-	
+
 			/*
 			 * Test 1: See if anyone is hooking in
+			 * Skip this if we're doing anything with our own extension settings
 			 */
-			$settings = $this->_from_hook();
+			if ( ! (isset($_GET['M']) && $_GET['M'] == 'extension_settings' && $_GET['file'] == 'minimee'))
+			{
+				$settings = $this->_from_hook();
+			}
 			
 			/*
 			 * Test 2: Look in config
