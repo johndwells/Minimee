@@ -274,7 +274,7 @@ class Minimee_ext {
 
 		// view vars		
 		$vars = array(
-			'config_loc' => $this->config->location,
+			'config_warning' => ($this->config->location != 'db') ? lang('config_location_warning') : '',
 			'form_open' => form_open('C=addons_extensions'.AMP.'M=save_extension_settings'.AMP.'file=minimee'),
 			'settings' => $current,
 			'flashdata_success' => $this->EE->session->flashdata('message_success')

@@ -1,18 +1,17 @@
 <?php
 
+	// display a warning?
+	if ($config_warning)
+	{
+		echo '<p><br />' . $config_warning . '<br /><br /></p>';
+	}
+
 	// some variables to use along the way
 	$label = $setting = $hint = '';
 	$note_format = '<small style="display:block;font-size:.95em;font-weight:normal;margin-top:0.5em">%s</small>';
 	$hint_format = '<small style="display:block;font-size:.9em;font-weight:normal;margin-top:0.5em">%s</small>';
 
-	// display our warning?
-	if ($config_loc != 'db')
-	{
-		echo '<p><br />' . lang('config_loc_caution_' . $config_loc) . '<br /><br /></p>';
-	}
-
 	echo $form_open;
-
 
 	/**
 	 * Disable
