@@ -257,6 +257,8 @@ class Minimee {
 
 
 	/**
+	 * Plugin function: exp:minimee:link
+	 * 
 	 * Rather than returning the tags or cache contents, simply return a link to cache(s)
 	 */
 	public function link()
@@ -1011,7 +1013,6 @@ HEREDOC;
 
 		$this->cache_lastmodified = ($this->cache_lastmodified == 0) ? '0000000000' : $this->cache_lastmodified;
 		$this->cache_filename = $this->_create_cache_name($this->cache_filename);
-
 
 		// check for cache file
 		if (file_exists(Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename)))

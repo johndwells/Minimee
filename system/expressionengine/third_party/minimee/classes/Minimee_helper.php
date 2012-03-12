@@ -64,10 +64,9 @@ class Minimee_helper {
 			self::$_config->init();
 		}
 		
-		// by 'extend' we mean merge runtime with defaults
+		// 'extend' our defaults with runtime settings?
 		if ($extend)
 		{
-			// clear out any previous runtime settings & extend
 			self::$_config->extend($extend);
 		}
 		
