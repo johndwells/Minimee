@@ -78,11 +78,11 @@
 	 * Spit our our 'basic' table
 	 */
 	echo $this->table->generate();
+	$this->table->clear();
 
 	/**
 	 * Begin building our 'advanced' table
 	 */
-	$this->table->clear();
 	$this->table->set_template($cp_pad_table_template);
 	$this->table->set_heading(
 	    array('data' => lang('advanced_config'), 'style' => 'width:50%;'),
