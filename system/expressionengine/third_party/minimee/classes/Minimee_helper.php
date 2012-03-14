@@ -125,7 +125,18 @@ class Minimee_helper {
 			break;
 			
 			case('js') :
-				require_once('JSMin.php');
+			
+				// this sucks, but it's a case-insensitivity issue that we need to protect ourselves against
+				if (glob(PATH_THIRD . 'minimee/libraries/JSM*n.php'))
+				{
+					require_once('JSMin.php');
+				}
+			
+				else
+				{
+					self::log('jsmin.php in minimee/libraries needs to be renamed to the proper capitalisation of "JSMin.php".', 2);
+					require_once('jsmin.php');
+				}
 			break;
 			
 			case('html') :
