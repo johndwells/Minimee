@@ -289,7 +289,7 @@ class Minimee_config {
 			 */
 			if ( $settings === FALSE)
 			{
-				Minimee_helper::log('Could not find any settings to use. Trying defaults.', 2);
+				Minimee_helper::log('Could not find any settings to use. Trying defaults.', 3);
 				
 				$this->location = 'default';
 				
@@ -519,7 +519,7 @@ class Minimee_config {
 		}
 		else
 		{
-			Minimee_helper::log('No settings found in EE config.', 2);
+			Minimee_helper::log('No settings found in EE config.', 3);
 		}
 		
 		return $settings;
@@ -555,7 +555,7 @@ class Minimee_config {
 			}
 			else
 			{
-				Minimee_helper::log('No settings found in database.', 2);
+				Minimee_helper::log('No settings found in database.', 3);
 			}
 			
 			$query->free_result();
