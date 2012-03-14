@@ -26,7 +26,9 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 
 # Description
 
-Minimee watches your filesystem for changes to your CSS & JS assets, and automatically combines, minifies & caches these assets whenever changes are detected. Use Minimee to effortlessly improve the speed of your site by delivering fewer, smaller CSS & JS assets.
+"Minimee combines and compresses JavaScript and CSS files, thereby reducing file sizes and HTTP requests, and turning your puddle of online molasses into a digital fire hose." _- Stephen Lewis, founder, [Experience Internet](http://experienceinternet.co.uk/)_
+
+Minimee watches your filesystem for changes to your CSS & JS assets, and automatically combines, minifies & caches these assets whenever changes are detected. It can also detect changes to stylesheet templates (whether saved as files or not).
 
 Version 2's substantial re-write has ushered in a host of changes big and small. __Depending on your setup, you may need to make some adjustments prior to _upgrading_ from Minimee 1.x.__ See 'Upgrading from 1.x' below for more.
 
@@ -39,16 +41,16 @@ Complete and up-to-date documentation can be found on [Minimee's homepage](http:
 
 ## New for 2.x:
 
-* New `exp:minimee:link` tag returns just the URL to your minimee'd asset
 * Hooks for 3rd party integration (see [Minimee+LESS](https://github.com/johndwells/Minimee-LESS))
 * ALL settings can be specified via config or extension, and then overridden at the tag level
 * Path & URL settings can now be relative to site root
-* Have different settings for each CSS/JS asset
+* New `exp:minimee:link` tag returns just the URL to your minimee'd asset
+* Allow for different settings for each CSS/JS asset
 * Disable or override the URLs which are prepended to image & @import paths in CSS
 * New `priority=""` parameter allows you to queue assets into a specific order
-* For EE2.4 and above, assets may be queue'd _after_ the exp:minimee:display tag is parsed
+* For EE2.4 and above, assets are queue'd **after** the `exp:minimee:display` tag is parsed
 * Verbose template debugging messages to help easily track down errors
-* Can detect when fully-qualified URLs are in fact local files, and process them as such
+* Improved handling of fully-qualified URLs of local assets
 * Individually turn off and on minification & combining for all assets (CSS, JS and HTML)
 
 ## Since 1.x:
@@ -60,26 +62,30 @@ Complete and up-to-date documentation can be found on [Minimee's homepage](http:
 * Compatible with server-side compression & caching
 
 
-# Behaviour Changes in 2.x
+# Significant Changes in 2.x
 
 ### Configuration
 Configuring via Global Variables is no longer supported, and __configuring via EE's $config variable has changed__; consult the Upgrade notes for more.
 
 ### Debug
-The `debug="yes"` setting has been removed. Now, simply turn on EE's "Template Debugging", visit your front end and search the page for "Minimee [" - all Notice, Warning and Error messages will be reported.
+The `debug="yes"` setting has been removed. Instead, simply turn on EE's "Template Debugging", visit your front end and search the debugging content for messages to appear as:
+
+* __Minimee [INFO]:__ Debugging messages at important stages in Minimee's processing
+* __Minimee [DEBUG]:__ Indicates a potential issue to resolve
+* __Minimee [ERROR]:__ Something has gone wrong, and Minimee has failed
 
 ### combine="no" and minify="no"
-With Minimee 1.x if you were to set both `combine="no"` and `minify="no"`, Minimee would disable itself and not run at all.  Now, Minimee will still create cached files of what assets it parses, yet they will simply not be combined into a single file, and/or not be minified.
+With Minimee 1.x if you were to set both `combine="no"` and `minify="no"`, Minimee would disable itself and not run at all.  Now, Minimee will continue to run, and still create cached files of what assets it parses (they will simply not be combined into a single file, and/or not be minified).
 
 ### Cachebusting
-A new "Cachebust" setting allows you to manually trigger Minimee to create new cache files. For most setups this is unneccessary, however edge cases will find this useful - such as when [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) needs to be re-run due to a modified `@import` file which Minimee is unable to detect.
+A new "Cachebust" setting allows you to manually trigger Minimee to create new cache files. For most setups this is unneccessary, however edge cases will find this useful - such as when [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) needs to be re-run due to a modified `@import` file,  which Minimee is unable to detect.
 
 
 # Upgrading from 1.x
 
 ### Filename Case Sensitivity
 
-There is a file who's name has **_changed case_**, which may go unrecognised with versioning systems such as SVN/Git; this will cause EE to throw big nasty errors if 1.x is overwritten with 2.x and this case change is not maintained. The file is:
+There is a file who's name has **_changed case_**, which may go unrecognised with versioning systems such as SVN/Git; while a check is in place to account for this, it is recommended that you double-check the filename's casing has been properly maintained. The file is:
 
 /system/expressionengine/third_party/minimee/libraries/**JSM**in.php
 
@@ -88,12 +94,12 @@ Once you have upgraded Minimee on your server, either through deployment or FTP,
 
 ### Configuration Changes
 
-If you have Minimee 1x installed and are using the Extension, there is nothing you will need to do prior to overwriting system/expressionengine/third_party/minimee.
+If you have Minimee 1x installed and are using it's Extension, there is nothing you will need to do prior to overwriting system/expressionengine/third_party/minimee.
 
 However **if you have configured Minimee via EE's `$config` or Global Variables**, please note:
 
 * Configuring via global variables is **no longer supported**
-* When configuring via EE's `$config`, setting keys have changed to be a single array. See below for details.
+* When configuring via EE's `$config`, **setting keys have changed to be a single array**. See below for details.
 
 # Installation
 
@@ -104,19 +110,19 @@ However **if you have configured Minimee via EE's `$config` or Global Variables*
 
 # Configuration
 
-_Note: **All settings are now optional**. Out of the box and left un-configured, Minimee 2.x will look for a 'cache' folder at the root of your site, e.g. `http://yoursite.com/cache`. If you would like to change the cache location, then at a minimum you must specify "Cache Path" and "Cache URL" values._
+_Out-of-the-box and left un-configured, Minimee 2.x will look for a 'cache' folder at the root of your site, e.g. `http://yoursite.com/cache`. However this is not recommended in a production setting, as Minimee will first make a database query to check if the Extension is installed. Therefore it is recommended at a minimum to specify Minimee's "Cache Path" and "Cache URL" values._
 
 ## Config via Extension
 
-Coming soon.
+For a visual guide of Minimee's Extension, visit the [Full Documentation](http://johndwells.com/software/minimee).
 
 ## Config via EE's `$config`
 
 Configuring Minimee via EE's `$config` has the advantage of not requiring any DB calls to initialise or run, saving precious time on your page loads. Going this route requires editing your /system/expressionengine/config/config.php file; alternatively you are encouraged to adopt any of the community-developed "bootstrap" methods, such as:
 
-* [NSM Config Boostrap](http://ee-garage.com/nsm-config-bootstrap) from EE-Garage
-* [EE Master Config](https://github.com/focuslabllc/ee-master-config) from Focus Lab LLC
-* [This little-known gist](https://gist.github.com/1329538) from @airways
+* [NSM Config Boostrap](http://ee-garage.com/nsm-config-bootstrap) from [EE-Garage](http://ee-garage.com)
+* [EE Master Config](https://github.com/focuslabllc/ee-master-config) from [Focus Lab LLC](http://focuslabllc.com)
+* [This little-known gist](https://gist.github.com/1329538) from [@airways](https://twitter.com/airways)
 
 To configure Minimee via EE's `$config` array, the following values are available:
 
@@ -135,7 +141,7 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		'base_url'			=> 'http://site.com',
 		
 		/**
-		 * An optional unique 'cachebusting' string to force Minimee to generate a new cache.
+		 * An optional unique 'cachebusting' string to force Minimee to generate a new cache whenever updated.
 		 */
 		'cachebust'			=> '',
 		
@@ -255,13 +261,15 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 ## How Minimee creates cache filenames
 
-Coming soon.
+A cache filename is a combination of Minimee's settings during runtime, and the list of files being cached together. It then appends its a cachebusting string in the format of `?m=0123456789`, representing the last modified timestamp.
+
+This means that every time you add or remove an asset to be combined, OR change any of Minimee's settings, all cache filenames will be changed.
 
 ## Cleaning your Cache folder
 
-Coming soon.
+To put it simply, this is up to you.
 
-## Manual 'Cachebusting'
+## How to use the 'cachebust'
 
 Coming soon.
 
