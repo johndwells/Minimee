@@ -504,7 +504,7 @@ class Minimee_config {
 	        $settings = $this->EE->config->item('minimee');
 	        
 	        // better be an array!
-	        if (is_array($settings))
+	        if (is_array($settings) && count($settings) > 0)
 	        {
 				$this->location = 'config';
 
@@ -514,7 +514,7 @@ class Minimee_config {
 	        {
 	        	$settings = FALSE;
 
-				Minimee_helper::log('Settings taken from EE config must be an array.', 1);
+				Minimee_helper::log('Settings taken from EE config must be a non-empty array.', 1);
 	        }
 		}
 		else
