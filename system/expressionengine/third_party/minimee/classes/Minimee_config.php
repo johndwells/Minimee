@@ -88,9 +88,7 @@ class Minimee_config {
 		if ($extend)
 		{
 			// grab our config settings, will become our defaults
-			$this->init();
-	
-			$this->extend($extend);
+			$this->init()->extend($extend);
 		}
 	}
 	// ------------------------------------------------------
@@ -352,6 +350,9 @@ class Minimee_config {
 			
 			Minimee_helper::log('Settings have been saved in session cache. Settings came from: ' . $this->location, 3);
 		}
+		
+		// chaining
+		return $this;
 
 	}
 	// ------------------------------------------------------
