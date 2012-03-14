@@ -199,7 +199,7 @@ class Minimee {
 			}
 			
 			// replace the url with path
-			$paths = Minimee_helper::replace_url_with_path($M->config->cache_url, $M->config->cache_path, $matches[1]);
+			$paths = Minimee_helper::replace_url_with_path($this->config->cache_url, $this->config->cache_path, $matches[1]);
 	
 			// clear $out so we can replace with code to embed
 			$out = '';
@@ -474,7 +474,7 @@ HEREDOC;
 				case('remote') :
 
 					// let's strip out all variants of our base url
-					$local = Minimee_helper::replace_url_with_path($M->config->base_url, $M->config->base_path, $file['name']);
+					$local = Minimee_helper::replace_url_with_path($this->config->base_url, $this->config->base_path, $file['name']);
 	
 					// the filename needs to be without any cache-busting or otherwise $_GETs
 					if ($position = strpos($local, '?'))
@@ -492,7 +492,7 @@ HEREDOC;
 						
 						$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
 	
-						Minimee_helper::log('Treating `' . $file['name'] . '` as a local file: `' . $this->filesdata[$key]['name'] . '`', 2);
+						Minimee_helper::log('Treating `' . $file['name'] . '` as a local file: `' . $this->filesdata[$key]['name'] . '`', 3);
 					}
 					
 					// nope; keep as remote
@@ -583,7 +583,7 @@ HEREDOC;
 					if (strpos($file['name'], '//') === 0)
 					{
 						$prefix = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:';
-						Minimee_helper::log('Manually prepending protocol `' . $prefix . '` to front of file `' . $file['name'] . '`', 2);
+						Minimee_helper::log('Manually prepending protocol `' . $prefix . '` to front of file `' . $file['name'] . '`', 3);
 						$file['name'] = $prefix . $file['name'];
 					}
 					
