@@ -474,7 +474,7 @@ HEREDOC;
 				case('remote') :
 
 					// let's strip out all variants of our base url
-					$local = Minimee_helper::replace_url_with_path($this->config->base_url, $this->config->base_path, $file['name']);
+					$local = Minimee_helper::replace_url_with_path($this->config->base_url, '', $file['name']);
 	
 					// the filename needs to be without any cache-busting or otherwise $_GETs
 					if ($position = strpos($local, '?'))
