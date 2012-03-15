@@ -1078,7 +1078,13 @@ HEREDOC;
 				if ($this->config->is_yes('minify') && $this->config->is_yes('minify_js'))
 				{
 					Minimee_helper::library('js');
+
+					$before = strlen($contents);
 					$contents = JSMin::minify($contents);
+					$after = strlen($contents);
+					$change = round((($before - $after) / $before) * 100, 2);
+					
+					Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $change . '%.', 3);
 				}
 
 			break;
@@ -1109,7 +1115,12 @@ HEREDOC;
 				{
 					Minimee_helper::library('css');
 
+					$before = strlen($contents);
 					$contents = Minify_CSS::minify($contents, $options);
+					$after = strlen($contents);
+					$change = round((($before - $after) / $before) * 100, 2);
+
+					Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $change . '%.', 3);
 				}
 
 				// un-minified, but (maybe) uri-rewritten contents
