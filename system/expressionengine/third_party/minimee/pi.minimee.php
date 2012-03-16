@@ -440,7 +440,7 @@ HEREDOC;
 		foreach ($this->filesdata as $key => $file) :
 		
 			// file runtime settings can be overridden by tag runtime settings
-			$this->config->reset()->extend($this->filesdata[$key]['runtime'])->extend($runtime);
+			$this->config->reset()->extend($runtime)->extend($this->filesdata[$key]['runtime']);
 
 			switch ($this->filesdata[$key]['type']) :
 			
@@ -568,7 +568,7 @@ HEREDOC;
 		foreach ($this->filesdata as $key => $file) :
 		
 			// file runtime settings can be overridden by tag runtime settings
-			$this->config->reset()->extend($file['runtime'])->extend($runtime);
+			$this->config->reset()->extend($runtime)->extend($file['runtime']);
 		
 			switch ($file['type']) :
 	
