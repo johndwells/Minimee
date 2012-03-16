@@ -2,13 +2,15 @@
 
 Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size DOES matter.
 
-* Author: [John D Wells](http://johndwells.com)
 * [Full Documentation](http://johndwells.com/software/minimee)
 * [On @devot-ee](http://devot-ee.com/add-ons/minimee)
 * [Forum Support](http://devot-ee.com/add-ons/support/minimee/)
 
 
-# Version 2.x
+# Version 2.x (current BETA)
+
+_Beta means be wary of using in production environments. Beta also means your feedback is hugely appreciated._
+
 
 ## Requirements:
 
@@ -23,6 +25,16 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 * If using `{stylesheet=}` or external URLs, either cURL or file_get_contents() is required
 * If using `file_get_contents()`, PHP must be compiled with support for fopen wrappers (allow_url_fopen must be set to true in PHP.ini)
 * If using `file_get_contents()` and combining/minifying files over https, PHP must be compiled with OpenSSL support
+
+
+## Companion Add-Ons
+
+The architecture of Minimee2 has given me the opportunity to build other add-ons that extend Minimee's capabilities.  So if you're curious, have a look at:
+
+* [MSMinimee](https://github.com/johndwells/MSMinimee) - a module that brings full MSM-compatibility to Minimee
+* [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) - adds LESS processing to Minimee
+
+
 
 # Description
 
@@ -267,7 +279,7 @@ This means that every time you add or remove an asset to be combined, OR change 
 
 ## Cleaning your Cache folder
 
-To put it simply, this is up to you.
+To put it simply, this is up to you - BUT, things are much improved since Minimee 1.x, and the new way that Minimee2 calculates cache filenames means that your cache folder will not be nearly as littered with out of date files as before.
 
 ## How to use the 'cachebust'
 
