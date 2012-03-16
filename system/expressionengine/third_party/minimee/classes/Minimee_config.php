@@ -336,7 +336,7 @@ class Minimee_config {
 			 * See if we need to inject ourselves into extensions hook.
 			 * This allows us to bind to the template_post_parse hook without installing our extension
 			 */
-			if ($this->minify_html == 'yes' && $this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
+			if ($this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
 			{
 				// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
 				$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
