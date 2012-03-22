@@ -206,7 +206,6 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 		/**
 		 * Turn on or off ALL minifying. 'yes' or 'no'.
-		 * Not to be mixed with 'minify_css', 'minify_html' or 'minify_js'.
 		 * Values: 'yes' or 'no'
 		 * Default: yes
 		 */
@@ -220,11 +219,11 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		'minify_css'		=> 'yes',
 
 		/**
-		 * Turn on or off minifying of JS assets.
+		 * Turn on or off minifying of the template HTML.
 		 * Values: 'yes' or 'no'
-		 * Default: no
+		 * Default: yes
 		 */
-		'minify_html'		=> 'no',
+		'minify_html'		=> 'yes',
 
 		/**
 		 * Turn on or off minifying of JS assets.
