@@ -54,5 +54,15 @@ $lang = array(
 	'remote_mode' => 'Remote file mode?',
 	'remote_mode_note' => 'Specify how to fetch remote and {stylesheet=} URLs. \'Auto\' mode will try cURL first.',
 	
+	'css_library' => 'CSS Library',
+	'css_library_note' => 'Specify which library to use for CSS minification. Defaults to Minify.',
+	'minify' => 'Minify',
+	'cssmin' => 'CSSMin',
+	
+	'js_library' => 'JS Library',
+	'js_library_note' => 'Specify which library to use for JS minification. Defaults to JSMin.',
+	'jsmin' => 'JSMin',
+	'jsminplus' => 'JSMinPlus',
+	
 	'' => ''
 );

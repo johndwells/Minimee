@@ -44,9 +44,11 @@ class Minimee_config {
 		'combine'				=> '',
 		'combine_css'			=> '',
 		'combine_js'			=> '',
+		'css_library'			=> '',
 		'css_prepend_mode'		=> '',
 		'css_prepend_url'		=> '',
 		'disable'				=> '',
+		'js_library'			=> '',
 		'minify'				=> '',
 		'minify_css'			=> '',
 		'minify_html'			=> '',
@@ -457,6 +459,14 @@ class Minimee_config {
 			/* ENUM */
 			case('remote_mode') :
 				return preg_match('/auto|curl|fgc/i', $value) ? $value : 'auto';
+			break;
+			
+			case('js_library') :
+				return preg_match('/jsmin|jsminplus/i', $value) ? $value : 'jsmin';
+			break;
+			
+			case('css_library') :
+				return preg_match('/cssmin|minify/i', $value) ? $value : 'minify';
 			break;
 			
 			/* String - Paths */

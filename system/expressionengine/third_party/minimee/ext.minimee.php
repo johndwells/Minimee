@@ -186,7 +186,7 @@ class Minimee_ext {
 		// is Minimee nonetheless disabled?
 		if ($this->config->is_yes('disable'))
 		{
-			Minimee_helper::log('HTML minification aborted because Minimee is disabled via config.', 3);
+			Minimee_helper::log('HTML minification aborted because Minimee has been disabled.', 3);
 			return $template;
 		}
 

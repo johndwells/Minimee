@@ -694,14 +694,12 @@ HEREDOC;
 		// base cache name on config settings, so that changing config will create new cache!
 		$cf_array = $this->config->to_array();
 		
-		// unset any array keys who's function does not effect contents of cache
-		unset($cf_array['cachebust']);
-		unset($cf_array['cleanup']);
-		unset($cf_array['disable']);
+		// unset any array keys that shouldn't effect file naming
+		unset($cf_array['cachebust'], $cf_array['cleanup']);
 		
 		// md5 hash of name + serialised config array
 		$this->cache_filename_md5 = md5($name . serialize($cf_array));
-		
+
 		// cleanup
 		unset($cf_array);
 
@@ -1005,6 +1003,7 @@ HEREDOC;
 		// (re)set our usage vars
 		$out = '';
 		$this->cache_filename = '';
+		$this->cache_filename_md5 = '';
 		$this->cache_lastmodified = '';
 
 		// loop through our files once
@@ -1044,15 +1043,21 @@ HEREDOC;
 	 * Internal function for (maybe) minifying assets
 	 * 
 	 * @param	Contents to be minified
+	 * @param	The name of the file being minified
 	 * @param	mixed A relative path to use, if provided
 	 * @return	String (maybe) minified contents of file
 	 */
 	protected function _minify($contents, $filename, $rel = FALSE)
 	{
+		$before = strlen($contents);
+	
 		switch ($this->type) :
 			
 			case 'js':
 			
+				/**
+				 * JS pre-minify hook
+				 */
 				if ($this->EE->extensions->active_hook('minimee_pre_minify_js'))
 				{
 					Minimee_helper::log('Hook `minimee_pre_minify_js` has been activated.', 3);
@@ -1065,24 +1070,41 @@ HEREDOC;
 						return $contents;
 					}
 				}
+				// HOOK END
+
 
 				// be sure we want to minify
 				if ($this->config->is_yes('minify') && $this->config->is_yes('minify_js'))
 				{
-					Minimee_helper::library('js');
 
-					$before = strlen($contents);
-					$contents = JSMin::minify($contents);
-					$after = strlen($contents);
-					$change = round((($before - $after) / $before) * 100, 2);
-					
-					Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $change . '%.', 3);
+					// See if JSMinPlus was explicitly requested
+					if ($this->config->js_library == 'jsminplus')
+					{
+						Minimee_helper::log('Running minification with JSMinPlus.', 3);
+
+						Minimee_helper::library('jsminplus');
+	
+						$contents = JSMinPlus::minify($contents);
+					}
+
+					// Running JSMin is default
+					else if ($this->config->js_library == 'jsmin')
+					{
+						Minimee_helper::log('Running minification with JSMin.', 3);
+
+						Minimee_helper::library('jsmin');
+	
+						$contents = JSMin::minify($contents);
+					}
 				}
 
 			break;
 			
 			case 'css':
 				
+				/**
+				 * CSS pre-minify hook
+				 */
 				if ($this->EE->extensions->active_hook('minimee_pre_minify_css'))
 				{
 					Minimee_helper::log('Hook `minimee_pre_minify_css` has been activated.', 3);
@@ -1095,24 +1117,47 @@ HEREDOC;
 						return $contents;
 					}
 				}
+				// HOOK END
+
 
 				// set a relative path if exists
 				$relativePath = ($rel !== FALSE && $this->config->is_yes('css_prepend_mode')) ? $rel . '/' : NULL;
 
-				// options for CSS Minify				
-				$options = array('prependRelativePath' => $relativePath);
-
 				// be sure we want to minify
 				if ($this->config->is_yes('minify') && $this->config->is_yes('minify_css'))
 				{
-					Minimee_helper::library('css');
 
-					$before = strlen($contents);
-					$contents = Minify_CSS::minify($contents, $options);
-					$after = strlen($contents);
-					$change = round((($before - $after) / $before) * 100, 2);
+					// See if CSSMin was explicitly requested
+					if ($this->config->css_library == 'cssmin')
+					{
+						Minimee_helper::log('Running minification with CSSMin.', 3);
 
-					Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $change . '%.', 3);
+						Minimee_helper::library('cssmin');
+
+						$cssmin = new CSSmin(FALSE);
+						
+						$contents = $cssmin->run($contents);
+						
+						unset($cssmin);
+
+						// cssmin does not rewrite URLs, so we may need to do so here
+						if ($relativePath !== NULL)
+						{
+							Minimee_helper::library('css_urirewriter');
+		
+							$contents = Minify_CSS_UriRewriter::prepend($contents, $relativePath);
+						}
+					}
+
+					// the default is to run Minify_CSS
+					else if ($this->config->css_library == 'minify')
+					{
+						Minimee_helper::log('Running minification with Minify_CSS.', 3);
+					
+						Minimee_helper::library('minify');
+	
+						$contents = Minify_CSS::minify($contents, array('prependRelativePath' => $relativePath));
+					}
 				}
 
 				// un-minified, but (maybe) uri-rewritten contents
@@ -1122,13 +1167,21 @@ HEREDOC;
 					{
 						Minimee_helper::library('css_urirewriter');
 	
-						$contents = Minify_CSS_UriRewriter::prepend($contents, $options['prependRelativePath']);
+						$contents = Minify_CSS_UriRewriter::prepend($contents, $relativePath);
 					}
 				}
 
 			break;
 
 		endswitch;
+
+		// calculate weight loss
+		$after = strlen($contents);
+		$change = round((($before - $after) / $before) * 100, 2);
+		Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $change . '%.', 3);
+
+		// cleanup		
+		unset($before, $after, $change);
 		
 		// return our (maybe) minified contents
 		return $contents . "\n";

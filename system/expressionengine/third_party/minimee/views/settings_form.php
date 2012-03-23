@@ -143,6 +143,22 @@
 
 
 	/**
+	 * CSS Library
+	 */
+	$label = lang('css_library', 'css_library') . sprintf($note_format, lang('css_library_note'));
+	$setting = form_dropdown('css_library', array('minify' => lang('minify'),'cssmin' => lang('cssmin')), $settings['css_library'], 'id="css_library"');
+	$this->table->add_row($label, $setting);
+
+
+	/**
+	 * JS Library
+	 */
+	$label = lang('js_library', 'js_library') . sprintf($note_format, lang('js_library_note'));
+	$setting = form_dropdown('js_library', array('jsmin' => lang('jsmin'),'jsminplus' => lang('jsminplus')), $settings['js_library'], 'id="js_library"');
+	$this->table->add_row($label, $setting);
+
+
+	/**
 	 * Remote mode
 	 */
 	$label = lang('remote_mode', 'remote_mode') . sprintf($note_format, lang('remote_mode_note'));

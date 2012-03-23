@@ -103,28 +103,43 @@ class Minimee_helper {
 		// update our include_path only once
 		if ( ! isset(get_instance()->session->cache['include_path']))
 		{
-			self::log('PHP\'s include_path has been updated.', 3);
-
+			// set our include path
 			set_include_path(PATH_THIRD . 'minimee/libraries' . PATH_SEPARATOR . get_include_path());
+
+			self::log('PHP\'s include_path has been updated.', 3);
 			
+			// for good measure, let's attempt to increase our memory limits
+			@ini_set('memory_limit', '12M');
+			@ini_set('memory_limit', '16M');
+			@ini_set('memory_limit', '32M');
+			@ini_set('memory_limit', '64M');
+			@ini_set('memory_limit', '128M');
+			@ini_set('memory_limit', '256M');
+
+			// don't do this again
 			get_instance()->session->cache['include_path'] = TRUE;
 		}
 
 		// require_once our library
-		switch($which) {
-			case('css') :
+		switch ($which) :
+
+			case ('minify') :
 				require_once('Minify/CSS.php');
 			break;
+
+			case ('cssmin') :
+				require_once('CSSMin.php');
+			break;
 			
-			case('css_urirewriter') :
+			case ('css_urirewriter') :
 				require_once('Minify/CSS/UriRewriter.php');
 			break;
 
-			case('curl') :
+			case ('curl') :
 				require_once('EpiCurl.php');
 			break;
 			
-			case('js') :
+			case ('jsmin') :
 			
 				// this sucks, but it's a case-insensitivity issue that we need to protect ourselves against
 				if (glob(PATH_THIRD . 'minimee/libraries/JSM*n.php'))
@@ -139,10 +154,15 @@ class Minimee_helper {
 				}
 			break;
 			
-			case('html') :
+			case ('jsminplus') :
+				require_once('JSMinPlus.php');
+			break;
+			
+			case ('html') :
 				require_once('Minify/HTML.php');
 			break;
-		}
+
+		endswitch;
 	}
 	// ------------------------------------------------------
 
