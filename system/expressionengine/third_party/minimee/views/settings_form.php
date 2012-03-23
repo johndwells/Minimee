@@ -118,6 +118,14 @@
 
 
 	/**
+	 * Cleanup
+	 */
+	$label = lang('cleanup', 'cleanup') . sprintf($note_format, lang('cleanup_note'));
+	$setting = form_dropdown('cleanup', array('no' => lang('No'),'yes' => lang('Yes')), $settings['cleanup'], 'id="cleanup"');
+	$this->table->add_row($label, $setting);
+	
+
+	/**
 	 * CSS Prepend Mode
 	 */
 	$label = lang('css_prepend_mode', 'css_prepend_mode') . sprintf($note_format, lang('css_prepend_mode_note'));

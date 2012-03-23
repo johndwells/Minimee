@@ -44,6 +44,7 @@ class Minimee {
 	 * runtime variables
 	 */
 	public $cache_lastmodified		= '';		// lastmodified value for cache
+	public $cache_filename_md5		= '';		// an md5 of settings & filenames
 	public $cache_filename			= '';		// eventual filename of cache
 	public $calling_from_hook		= FALSE;	// Boolean of whether calling from template_post_parse
 	public $filesdata				= array();	// array of assets to process
@@ -199,7 +200,7 @@ class Minimee {
 			}
 			
 			// replace the url with path
-			$paths = Minimee_helper::replace_url_with_path($this->config->cache_url, $this->config->cache_path, $matches[1]);
+			$paths = Minimee_helper::replace_url_with($this->config->cache_url, $this->config->cache_path, $matches[1]);
 	
 			// clear $out so we can replace with code to embed
 			$out = '';
@@ -401,21 +402,8 @@ HEREDOC;
 	 */
 	protected function _cache_tag()
 	{
-		// for clarity, use manual cachebust if provided
-		if ($this->config->cachebust)
-		{
-			$cachebust = '?m=' . $this->config->cachebust;
-		}
-		
-		// create cachebust from lastmodified
-		else
-		{
-			// if $lastmodified is zero, there's no point in using it right?
-			$cachebust = ($this->cache_lastmodified > 0) ? '?m=' . $this->cache_lastmodified : '';
-		}
-
 		// construct url
-		$url = Minimee_helper::remove_double_slashes($this->config->cache_url . '/' . $this->cache_filename . $cachebust, TRUE);
+		$url = Minimee_helper::remove_double_slashes($this->config->cache_url . '/' . $this->cache_filename, TRUE);
 
 		return str_replace('{minimee}', $url, $this->template);
 	}
@@ -474,7 +462,7 @@ HEREDOC;
 				case('remote') :
 
 					// let's strip out all variants of our base url
-					$local = Minimee_helper::replace_url_with_path($this->config->base_url, '', $file['name']);
+					$local = Minimee_helper::replace_url_with($this->config->base_url, '', $file['name']);
 	
 					// the filename needs to be without any cache-busting or otherwise $_GETs
 					if ($position = strpos($local, '?'))
@@ -699,14 +687,29 @@ HEREDOC;
 		$name = preg_replace('/\.v\.(\d+)/i', '', $name);
 
 		// remove any variations of our base url
-		$base_url = substr($this->config->base_url, strpos($this->config->base_url, '//') + 2, strlen($this->config->base_url));
-		$name = preg_replace('@(https?:)?\/\/' . $base_url . '@', '', $name);
+		$name = Minimee_helper::replace_url_with($this->config->base_url, '', $name);
 
-
-		Minimee_helper::log('Creating cache name from `' . $name . '`', 3);
-
+		Minimee_helper::log('Creating cache name from `' . $name . '`.', 3);
+		
 		// base cache name on config settings, so that changing config will create new cache!
-		return md5($name . serialize($this->config->to_array())) . '.' . $this->type;
+		$cf_array = $this->config->to_array();
+		
+		// unset any array keys who's function does not effect contents of cache
+		unset($cf_array['cachebust']);
+		unset($cf_array['cleanup']);
+		unset($cf_array['disable']);
+		
+		// md5 hash of name + serialised config array
+		$this->cache_filename_md5 = md5($name . serialize($cf_array));
+		
+		// cleanup
+		unset($cf_array);
+
+		// for clarity, include cachebust if provided
+		$cachebust = ($this->config->cachebust) ? '.' . $this->EE->security->sanitize_filename($this->config->cachebust) : '';
+
+		// put it all together
+		return $this->cache_filename_md5 . '.' . $this->cache_lastmodified . $cachebust . '.' . $this->type;
 	}
 	// ------------------------------------------------------
 	
@@ -973,8 +976,11 @@ HEREDOC;
 			break;
 
 			case ( ! file_exists($this->config->cache_path)) :
-			case ( ! is_writable($this->config->cache_path)) :
-				throw new Exception('Not configured correctly: your cache folder `' . $this->config->cache_path . '` does not exist or is not writable.');
+				throw new Exception('Not configured correctly: your cache folder `' . $this->config->cache_path . '` does not exist.');
+			break;
+
+			case ( ! is_really_writable($this->config->cache_path)) :
+				throw new Exception('Not configured correctly: your cache folder `' . $this->config->cache_path . '` is not writable.');
 			break;
 
 			default :
@@ -1017,22 +1023,8 @@ HEREDOC;
 		// check for cache file
 		if (file_exists(Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename)))
 		{
-
-			$lastmodified = filemtime(Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename));
-
-			// Is cache old?
-			if ($lastmodified < $this->cache_lastmodified)
-			{
-				Minimee_helper::log('Cache file found but it is too old: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename), 3);
-				$out = FALSE;
-			}
-			
-			// the cache is valid!
-			else
-			{
-				Minimee_helper::log('Cache file found: ' . Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename), 3);
-				$out = $this->_cache_tag();
-			}
+			Minimee_helper::log('Cache file found: ' . $this->cache_filename, 3);
+			$out = $this->_cache_tag();
 		}
 		
 		// No cache file found
@@ -1476,6 +1468,26 @@ HEREDOC;
 		@chmod($filepath, FILE_READ_MODE);
 
 		Minimee_helper::log('Cache file `' . $this->cache_filename . '` was written to ' . $this->config->cache_path, 3);
+		
+		// Do we need to clean up expired caches?
+		if ($this->config->is_yes('cleanup'))
+		{
+			if ($handle = opendir($this->config->cache_path))
+			{
+				while (false !== ($file = readdir($handle)))
+				{
+					if ($file == '.' || $file == '..' || $file === $this->cache_filename) continue;
+
+					// matches should be deleted
+					if (strpos($file, $this->cache_filename_md5) === 0)
+					{
+						@unlink($this->config->cache_path . '/' . $file);
+						Minimee_helper::log('Cache file `' . $this->cache_filename . '` has expired. File deleted.', 3);
+					}
+				}
+				closedir($handle);
+			}
+		}
 
 		// free memory where possible
 		unset($filepath, $success);

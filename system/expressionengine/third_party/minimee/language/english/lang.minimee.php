@@ -32,6 +32,9 @@ $lang = array(
 	'cachebust' => 'Cache-Busting',
 	'cachebust_note' => 'Update this to a unique string to force Minimee to create a new cache file.<br />Optional, and for most scenarios unneccessary. Consult the <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
 	'cachebust_hint' => 'e.g. `1.0.0`.',
+	
+	'cleanup' => 'Cleanup Expired Caches',
+	'cleanup_note' => '<strong>Use with caution.</strong> When enabled, Minimee will automatically delete any cache file it determines has expired. Consult the <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
 
 	'combine' => 'Combine Assets',
 	'combine_note' => 'Specify which types of assets to combine.',

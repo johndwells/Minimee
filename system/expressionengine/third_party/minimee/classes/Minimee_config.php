@@ -40,6 +40,7 @@ class Minimee_config {
 		'cachebust'				=> '',
 		'cache_path'			=> '',
 		'cache_url'				=> '',
+		'cleanup'				=> '',
 		'combine'				=> '',
 		'combine_css'			=> '',
 		'combine_js'			=> '',
@@ -436,6 +437,7 @@ class Minimee_config {
 		switch($setting) :
 
 			/* Booleans default NO */
+			case('cleanup') :
 			case('disable') :
 				return ($value === TRUE OR preg_match('/1|true|on|yes|y/i', $value)) ? 'yes' : 'no';
 			break;
