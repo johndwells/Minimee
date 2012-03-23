@@ -691,19 +691,10 @@ HEREDOC;
 
 		Minimee_helper::log('Creating cache name from `' . $name . '`.', 3);
 		
-		// base cache name on config settings, so that changing config will create new cache!
-		$cf_array = $this->config->to_array();
-		
-		// unset any array keys that shouldn't effect file naming
-		unset($cf_array['cachebust'], $cf_array['cleanup']);
-		
-		// md5 hash of name + serialised config array
-		$this->cache_filename_md5 = md5($name . serialize($cf_array));
+		// md5 hash of name
+		$this->cache_filename_md5 = md5($name);
 
-		// cleanup
-		unset($cf_array);
-
-		// for clarity, include cachebust if provided
+		// include cachebust if provided
 		$cachebust = ($this->config->cachebust) ? '.' . $this->EE->security->sanitize_filename($this->config->cachebust) : '';
 
 		// put it all together

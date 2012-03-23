@@ -61,6 +61,7 @@ Complete and up-to-date documentation can be found on [Minimee's homepage](http:
 * Disable or override the URLs which are prepended to image & @import paths in CSS
 * New `priority=""` parameter allows you to queue assets into a specific order
 * For EE2.4 and above, assets are queue'd **after** the `exp:minimee:display` tag is parsed
+* New `cleanup=""` setting for automatically deleting expired caches
 * Verbose template debugging messages to help easily track down errors
 * Improved handling of fully-qualified URLs of local assets
 * Individually turn off and on minification & combining for all assets (CSS, JS and HTML)
@@ -80,14 +81,16 @@ Complete and up-to-date documentation can be found on [Minimee's homepage](http:
 Configuring via Global Variables is no longer supported, and __configuring via EE's $config variable has changed__; consult the Upgrade notes for more.
 
 ### Debug
-The `debug="yes"` setting has been removed. Instead, simply turn on EE's "Template Debugging", visit your front end and search the debugging content for messages to appear as:
+The `debug="yes"` setting has been removed. Instead, simply turn on EE's [Template Debugging](http://expressionengine.com/user_guide/cp/admin/output_and_debugging_preferences.html), visit your front end and search the debugging output for messages prefixed with:
 
 * __Minimee [INFO]:__ Debugging messages at important stages in Minimee's processing
 * __Minimee [DEBUG]:__ Indicates a potential issue to resolve
 * __Minimee [ERROR]:__ Something has gone wrong, and Minimee has failed
 
-### combine="no" and minify="no"
+### combine="no" and minify="no" no longer disables
 With Minimee 1.x if you were to set both `combine="no"` and `minify="no"`, Minimee would disable itself and not run at all.  Now, Minimee will continue to run, and still create cached files of what assets it parses (they will simply not be combined into a single file, and/or not be minified).
+
+_Note: In the case of CSS, there still may be minimal processing to prepend URLs to @import() and image url() values so that your styles continue to work as expected._
 
 ### Cachebusting
 A new "Cachebust" setting allows you to manually trigger Minimee to create new cache files. For most setups this is unneccessary, however edge cases will find this useful - such as when [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) needs to be re-run due to a modified `@import` file,  which Minimee is unable to detect.
@@ -170,6 +173,14 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		'cache_url'			=> 'http://site.com/cache',
 		
 		/**
+		 * When 'yes', Minimee will attempt to delete caches
+		 * it has determined to have expired.
+		 * Values: 'yes' or 'no'
+		 * Default: no
+		 */
+		'cleanup'		=> 'no',
+
+		/**
 		 * Turn on or off ALL combining of assets. 'yes' or 'no'.
 		 * Not to be mixed with 'combine_css' or 'combine_js'.
 		 * Values: 'yes' or 'no'
@@ -192,17 +203,33 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		'combine_js'		=> 'yes',
 		
 		/**
-		 * Whether or not to prepend the base URL to relative @import and image paths in CSS. 'yes' or 'no'.
+		 * Specify which minification library to use for your CSS.
+		 * Values: 'minify' or 'cssmin'
+		 * Default: minify
+		 */
+		'css_library'	=> 'minify',
+		
+		/**
+		 * Whether or not to prepend the base URL to relative
+		 * @import and image paths in CSS. 'yes' or 'no'.
 		 * Values: 'yes' or 'no'
 		 * Default: yes
 		 */
 		'css_prepend_mode'	=> 'yes',
 		
 		/**
-		 * Override the URL used when prepending URL to relative @import and image paths in CSS.
+		 * Override the URL used when prepending URL to relative
+		 * @import and image paths in CSS.
 		 * Defaults to Base URL.
 		 */
 		'css_prepend_url'	=> '/path/to/site.com',
+
+		/**
+		 * Specify which minification library to use for your JS.
+		 * Values: 'jsmin' or 'jsminplus'
+		 * Default: jsmin
+		 */
+		'css_library'	=> 'jsmin',
 
 		/**
 		 * Turn on or off ALL minifying. 'yes' or 'no'.
@@ -272,13 +299,25 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 ## How Minimee creates cache filenames
 
-A cache filename is a combination of Minimee's settings during runtime, and the list of files being cached together. It then appends its a cachebusting string in the format of `?m=0123456789`, representing the last modified timestamp.
+A cache filename begins with an md5() hash created from the list of files being cached together.  It then appends the last modified timestamp, and if a cachebusting string has been specified, comes next. The result format is:
 
-This means that every time you add or remove an asset to be combined, OR change any of Minimee's settings, all cache filenames will be changed.
+	// md5.timestamp.cachebust.ext
+	03b5614606d3e8d2f28d0b07f802fbbb.1332460675.v2.5.css
 
-## Cleaning your Cache folder
+This approach means that:
 
-To put it simply, this is up to you - BUT, things are much improved since Minimee 1.x, and the new way that Minimee2 calculates cache filenames means that your cache folder will not be nearly as littered with out of date files as before.
+* Any change to the list of files Minimee is to process will result in a new cache filename
+* Changing Minimee's settings, _with the exception of the cachebust string_, will __NOT__ create a new cache filename.
+
+
+## Keeping your Cache folder tidy
+
+The new "cleanup" setting will delete any cache files it has determined have expired. This is done by looking at the timestamp segment of the filename (see above).
+
+Minimee will not attempt to clean up files that are simply older than some unspecified time. Nor will it know to delete caches that are now obsolete, e.g. were created out of a combination of files that is no longer used any more.
+
+__This is not recommended for production mode, since this introduces a risk that Minimee deletes an asset that another browser may still be attempting to download.__
+
 
 ## How to use the 'cachebust'
 
