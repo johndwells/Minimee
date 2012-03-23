@@ -229,7 +229,7 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		 * Values: 'jsmin' or 'jsminplus'
 		 * Default: jsmin
 		 */
-		'css_library'	=> 'jsmin',
+		'js_library'	=> 'jsmin',
 
 		/**
 		 * Turn on or off ALL minifying. 'yes' or 'no'.
