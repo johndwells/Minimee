@@ -46,8 +46,6 @@ Version 2's substantial re-write has ushered in a host of changes big and small.
 
 Minimee is inspired and influenced by [SL Combinator](http://experienceinternet.co.uk/software/sl-combinator/) from Experience Internet, and [Carabiner Asset Management Library](http://codeigniter.com/wiki/Carabiner/) from Tony Dewan. It is released under a BSD License.
 
-Complete and up-to-date documentation can be found on [Minimee's homepage](http://johndwells.com/software/minimee).
-
 
 # Key Features
 
@@ -87,8 +85,8 @@ The `debug="yes"` setting has been removed. Instead, simply turn on EE's [Templa
 * __Minimee [DEBUG]:__ Indicates a potential issue to resolve
 * __Minimee [ERROR]:__ Something has gone wrong, and Minimee has failed
 
-### combine="no" and minify="no" no longer disables
-With Minimee 1.x if you were to set both `combine="no"` and `minify="no"`, Minimee would disable itself and not run at all.  Now, Minimee will continue to run, and still create cached files of what assets it parses (they will simply not be combined into a single file, and/or not be minified).
+### When combine="no" and minify="no" together
+With Minimee 1.x if you were to set both `combine="no"` and `minify="no"`, Minimee would disable itself and not run at all.  Now, _Minimee will continue to run_, and still create cached files of what assets it parses - they will simply not be combined into a single file, and/or not be minified.
 
 _Note: In the case of CSS, there still may be minimal processing to prepend URLs to @import() and image url() values so that your styles continue to work as expected._
 
@@ -102,7 +100,11 @@ A new "Cachebust" setting allows you to manually trigger Minimee to create new c
 
 There is a file who's name has **_changed case_**, which may go unrecognised with versioning systems such as SVN/Git; while a check is in place to account for this, it is recommended that you double-check the filename's casing has been properly maintained. The file is:
 
-/system/expressionengine/third_party/minimee/libraries/**JSM**in.php
+    // correct:
+    /system/expressionengine/third_party/minimee/libraries/JSMin.php
+    
+    // incorrect:
+    /system/expressionengine/third_party/minimee/libraries/jsmin.php
 
 Once you have upgraded Minimee on your server, either through deployment or FTP, you should make sure that this file has its proper case as above.
 
@@ -129,7 +131,7 @@ _Out-of-the-box and left un-configured, Minimee 2.x will look for a 'cache' fold
 
 ## Config via Extension
 
-For a visual guide of Minimee's Extension, visit the [Full Documentation](http://johndwells.com/software/minimee).
+A visual guide of Minimee2's Extension will eventually be available. In the meantime please see below.
 
 ## Config via EE's `$config`
 
@@ -156,7 +158,8 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		'base_url'			=> 'http://site.com',
 		
 		/**
-		 * An optional unique 'cachebusting' string to force Minimee to generate a new cache whenever updated.
+		 * An optional unique 'cachebusting' string to force
+		 * Minimee to generate a new cache whenever updated.
 		 */
 		'cachebust'			=> '',
 		
@@ -226,6 +229,9 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 		/**
 		 * Specify which minification library to use for your JS.
+		 * Please note that JSMinPlus is VERY memory-intensive. Not recommended
+		 * unless you really know what you're doing. Seriously.
+		 *
 		 * Values: 'jsmin' or 'jsminplus'
 		 * Default: jsmin
 		 */
@@ -311,7 +317,6 @@ This approach means that:
 
 
 ## Keeping your Cache folder tidy
-
 The new "cleanup" setting will delete any cache files it has determined have expired. This is done by looking at the timestamp segment of the filename (see above).
 
 Minimee will not attempt to clean up files that are simply older than some unspecified time. Nor will it know to delete caches that are now obsolete, e.g. were created out of a combination of files that is no longer used any more.
@@ -321,7 +326,16 @@ __This is not recommended for production mode, since this introduces a risk that
 
 ## How to use the 'cachebust'
 
-Coming soon.
+When you specify a cachebust value, such as `v1.0`, this value is appended toward the end of the cache filename (see above). In most situations this is not necessary, since Minimee will continue to look at file timestamps and create new cache files as required.
+
+However one case where it does come in handy is when you are using Minimee+LESS, and having LESS process `@import` files.  Since these files are processed outside of Minimee, it will be unaware of filesystem changes.
+
+You may also prefer to simply use the cachebust string as part of tracking your website "revisions". You can create a global variable `{global:cachebust}`, and pass this as a parameter to each of minimee's opening tags like so:
+
+    {exp:minimee:css cachebust="{global:cachebust}"}
+        ...
+    {/exp:minimee:css}
+
 
 ## The 'Croxton Queue' for EE2.4+
 
@@ -363,11 +377,28 @@ Coming soon.
 
 ## Different settings for different assets
 
-Coming soon.
+To specify unique settings for each asset, you must use the `queue` + `display` tags. Take for example you are using a theme from jQuery UI, and would like to cache & combine a copy of the theme CSS.  To do so, any `url()` properties must have a different URL prepended to them than your site.  Here's how you would accomplish this:
+
+    // Our first tag will specify an external URL to prepend to all url() paths
+    {exp:minimee:css
+        queue="css_head"
+        css_prepend_url="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/"
+    }
+        <link rel="stylesheet" href="http://static.jquery.com/ui/css/base2.css" />
+    {/exp:minimee:css}
+
+	// Our second tag does not specify a special prepend URL, so the default (base URL) will be used    
+    {exp:minimee:css queue="css_head"}
+        <link rel="stylesheet" href="/css/styles.css" />
+    {/exp:minimee:css}
+    
+    // Finally we display our combined output
+    {exp:minimee:display css="css_head"}
+
 
 ## Specifying the format of Minimee's link & script tags
 
-Coming soon.
+When Minimee runs, it looks at the first asset tag as the template for a final cache output.
 
 ## Does Minimee process `@import`'ed CSS assets?
 
