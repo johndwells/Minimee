@@ -646,14 +646,15 @@ HEREDOC;
 				Minimee_helper::log('The contents from `' . $file['name'] . '` were empty.', 2);
 			}
 			
+			// log & minify contents
 			else
 			{
 				Minimee_helper::log('Fetched contents of `' . $file['name'] . '`.', 3);
+	
+				// minify contents and append to $cache
+				$cache .= $this->_minify($contents, $file['name'], $css_prepend_url);
 			}
-			
-			// minify contents and append to $cache
-			$cache .= $this->_minify($contents, $file['name'], $css_prepend_url);
-			
+
 		endforeach;
 
 		// return our settings to our runtime
