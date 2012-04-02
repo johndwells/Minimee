@@ -1171,6 +1171,12 @@ HEREDOC;
 		$after = strlen($contents);
 		$change = round((($before - $after) / $before) * 100, 2);
 		Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $change . '%.', 3);
+		
+		// quick check that contents are not empty
+		if($after == 0)
+		{
+			Minimee_helper::log('Minification has returned an empty string for `' . $filename . '`.', 2);
+		}
 
 		// cleanup		
 		unset($before, $after, $change);
