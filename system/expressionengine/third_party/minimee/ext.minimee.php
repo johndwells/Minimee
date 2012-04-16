@@ -176,6 +176,12 @@ class Minimee_ext {
 			$this->EE->TMPL->tagparams = $tagparams;
 		}
 		
+		// do nothing if not (likely) html!
+		if ( ! preg_match('/webpage|static/i', $this->EE->TMPL->template_type))
+		{
+			return $template;
+		}
+		
 		// Are we configured to run through HTML minifier?
 		if ($this->config->is_no('minify') || $this->config->is_no('minify_html'))
 		{
