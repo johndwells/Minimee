@@ -236,6 +236,12 @@ class Minimee_ext {
 		// fetch settings
 		$this->get_settings();
 		
+		// do nothing if not (likely) html!
+		if ( ! preg_match('/webpage|static/i', $this->EE->TMPL->template_type))
+		{
+			return $template;
+		}
+		
 		// do not run through HTML minifier?
 		if($this->settings['disable'] == 'yes' || $this->settings['minify_html'] == 'no')
 		{
