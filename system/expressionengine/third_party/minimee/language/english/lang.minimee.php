@@ -22,11 +22,11 @@ $lang = array(
 	'base_url_hint' => 'e.g. ' . rtrim(get_instance()->config->item('base_url'), '/'),
 
 	'cache_path' => 'Cache Path',
-	'cache_path_note' => 'Relative values (without a leading slash) will be appended to the Base Path.<br />If left blank, will guess `cache`.',
+	'cache_path_note' => 'Assumed to be absolute, but will also test as relative to the Base Path.<br />If left blank, will guess `cache`.',
 	'cache_path_hint' => 'e.g. ' . rtrim(FCPATH, '/') . '/cache',
 
 	'cache_url' => 'Cache URL',
-	'cache_url_note' => 'Relative values (without a leading slash) will be appended to the Base URL.<br />If left blank, will guess `cache`.',
+	'cache_url_note' => 'Assumed to be a fully qualified URL, but will also test as relative to the Base URL.<br />If left blank, will guess `cache`.',
 	'cache_url_hint' => 'e.g. ' . rtrim(get_instance()->config->item('base_url'), '/') . '/cache',
 
 	'cachebust' => 'Cache-Busting',

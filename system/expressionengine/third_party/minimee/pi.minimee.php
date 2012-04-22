@@ -926,19 +926,21 @@ HEREDOC;
 	protected function _flightcheck()
 	{
 		/**
-		 * If our cache path appears relative, append it to our base path
+		 * If our cache_path doesn't appear to exist, treat it as relative. Try appending it to our base_url.
 		 */
-		if (strpos($this->config->cache_path, '/') !== 0)
+		if ( ! file_exists($this->config->cache_path))
 		{
-			$this->config->cache_path = $this->config->base_path . '/' . $this->config->cache_path;
-		}
+			Minimee_helper::log('Cache path `' . $this->config->cache_path . '` does not exist, so it is assumed to be relative to base path.', 3);
 
+			$this->config->cache_path = Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $this->config->cache_path);
+		}
+				
 		/**
-		 * If our cache url appears relative, append it to our base url
+		 * If our cache_url doesn't appear a valid url, append it to our base_url
 		 */
-		if (strpos($this->config->cache_url, '//') !== 0 && ! preg_match("#https?://#", $this->config->cache_url))
+		if ( ! Minimee_helper::is_url($this->config->cache_url))
 		{
-			$this->config->cache_url = $this->config->base_url . '/' . $this->config->cache_url;
+			$this->config->cache_url = Minimee_helper::remove_double_slashes($this->config->base_url . '/' . $this->config->cache_url, TRUE);
 		}
 
 		/**
