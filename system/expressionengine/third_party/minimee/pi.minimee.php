@@ -926,61 +926,76 @@ HEREDOC;
 	protected function _flightcheck()
 	{
 		/**
-		 * If our cache_path doesn't appear to exist, treat it as relative. Try appending it to our base_url.
+		 * Manually disabled?
+		 */
+		if ($this->config->is_yes('disable'))
+		{
+			// we can actually figure out if it's a runtime setting or default
+			$runtime = $this->config->get_runtime();
+			
+			if (isset($runtime['disable']) && $runtime['disable'] == 'yes')
+			{
+				throw new Exception('Disabled via tag parameter.');
+			}
+			else
+			{
+				throw new Exception('Disabled via config.');
+			}
+		}
+
+
+		/**
+		 * If our cache_path doesn't appear to exist, try appending it to our base_url and check again.
 		 */
 		if ( ! file_exists($this->config->cache_path))
 		{
-			Minimee_helper::log('Cache path `' . $this->config->cache_path . '` does not exist, so it is assumed to be relative to base path.', 3);
+			Minimee_helper::log('Cache Path `' . $this->config->cache_path . '` is being appended to Base Path `' . $this->config->base_path . '`.', 3);
 
 			$this->config->cache_path = Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $this->config->cache_path);
+
+			Minimee_helper::log('Cache Path is now `' . $this->config->cache_path . '`.', 3);
+
+			if ( ! file_exists($this->config->cache_path))
+			{
+				throw new Exception('Not configured correctly: your cache folder `' . $this->config->cache_path . '` does not exist.');
+			}
 		}
-				
+
+
+		/**
+		 * Be sure our cache path is also writable
+		 */
+		if ( ! is_really_writable($this->config->cache_path))
+		{
+			throw new Exception('Not configured correctly: your cache folder `' . $this->config->cache_path . '` is not writable.');
+		}
+
+
 		/**
 		 * If our cache_url doesn't appear a valid url, append it to our base_url
 		 */
 		if ( ! Minimee_helper::is_url($this->config->cache_url))
 		{
+			Minimee_helper::log('Cache URL `' . $this->config->cache_url . '` is being appended to Base URL `' . $this->config->base_url . '`.', 3);
+
 			$this->config->cache_url = Minimee_helper::remove_double_slashes($this->config->base_url . '/' . $this->config->cache_url, TRUE);
+
+			Minimee_helper::log('Cache URL is now `' . $this->config->cache_url . '`.', 3);
 		}
+
 
 		/**
 		 * Determine our runtime remote_mode setting
 		 */
 		$this->_set_remote_mode();
 
-	
-		// Flightcheck: determine if we can continue or disable permanently
-		switch ('flightcheck') :
 
-			case ($this->config->is_yes('disable')) :
-				// we can actually figure out if it's a runtime setting or default
-				$runtime = $this->config->get_runtime();
-				
-				if (isset($runtime['disable']) && $runtime['disable'] == 'yes')
-				{
-					throw new Exception('Disabled via tag parameter.');
-				}
-				else
-				{
-					throw new Exception('Disabled via config.');
-				}
-				
-			break;
+		/**
+		 * Passed flightcheck!
+		 */
+		Minimee_helper::log('Passed flightcheck.', 3);
 
-			case ( ! file_exists($this->config->cache_path)) :
-				throw new Exception('Not configured correctly: your cache folder `' . $this->config->cache_path . '` does not exist.');
-			break;
 
-			case ( ! is_really_writable($this->config->cache_path)) :
-				throw new Exception('Not configured correctly: your cache folder `' . $this->config->cache_path . '` is not writable.');
-			break;
-
-			default :
-				Minimee_helper::log('Passed flightcheck.', 3);
-			break;
-
-		endswitch;
-		
 		// chaining
 		return $this;
 	}
