@@ -303,6 +303,14 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 # Special Notes / FAQs
 
+## When/how does Minimee recognize to create a new file?
+
+- if it’s a local file (e.g. /home/your/site/css/styles.css), it checks for it’s modification date
+- if it’s a stylesheet template, it first checks the database, and if that template is saved as a file, also checks the file’s modification date
+- if it’s an “external” file, as in the path to the asset is a fully qualified url on an external domain, then it does not compare anything and only fetches the contents at the time of creating a cache.
+
+
+
 ## How Minimee creates cache filenames
 
 A cache filename begins with an md5() hash created from the list of files being cached together.  It then appends the last modified timestamp, and if a cachebusting string has been specified, comes next. The result format is:
