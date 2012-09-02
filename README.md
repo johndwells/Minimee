@@ -285,7 +285,7 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 	{/exp:minimee:css}
 	
 	{!-- will render something like: --}
-	<link href="http://site.com/cache/fbcff33e698e21d577744cf663ad5653.css?m=1298784510" rel="stylesheet" type="text/css" />
+	<link href="http://site.com/cache/b488f65d0085dcc6b8f536f533b5f2da.1345797433.css" rel="stylesheet" type="text/css" />
 
 ## JS:
 
