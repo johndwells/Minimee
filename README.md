@@ -7,7 +7,7 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 * [Forum Support](http://devot-ee.com/add-ons/support/minimee/)
 
 
-# Version 2.x (current BETA)
+# Version 2.0.1 (current BETA)
 
 _Beta means be wary of using in production environments. Beta also means your feedback is hugely appreciated._
 
@@ -51,9 +51,9 @@ Minimee is inspired and influenced by [SL Combinator](http://experienceinternet.
 
 ## New for 2.x:
 
-* Hooks for 3rd party integration (see [Minimee+LESS](https://github.com/johndwells/Minimee-LESS))
+* Hooks for 3rd party integration (see [Minimee+LESS](https://github.com/johndwells/Minimee-LESS), [MSMinimee](https://github.com/johndwells/MSMinimee))
 * ALL settings can be specified via config or extension, and then overridden at the tag level
-* Path & URL settings can now be relative to site root
+* Path & URL settings can now be relative to site
 * New `exp:minimee:link` tag returns just the URL to your minimee'd asset
 * Allow for different settings for each CSS/JS asset
 * Disable or override the URLs which are prepended to image & @import paths in CSS
@@ -127,7 +127,7 @@ However **if you have configured Minimee via EE's `$config` or Global Variables*
 
 # Configuration
 
-_Out-of-the-box and left un-configured, Minimee 2.x will look for a 'cache' folder at the root of your site, e.g. `http://yoursite.com/cache`. However this is not recommended in a production setting, as Minimee will first make a database query to check if the Extension is installed. Therefore it is recommended at a minimum to specify Minimee's "Cache Path" and "Cache URL" values._
+_Out-of-the-box and left un-configured, Minimee 2.x will look for a 'cache' folder at the root of your site, e.g. `http://yoursite.com/cache`._
 
 ## Config via Extension
 
@@ -144,7 +144,82 @@ Configuring Minimee via EE's `$config` has the advantage of not requiring any DB
 To configure Minimee via EE's `$config` array, the following values are available:
 
 	$config['minimee'] = array(
+
+		/**
+		 * ==============================================
+		 * BASIC PREFERENCES
+		 * ==============================================
+		 */
+
+		/**
+		 * The path to the cache folder.
+		 * Defaults to site's FCPATH + '/cache'
+		 */
+		'cache_path'		=> '/path/to/site.com/cache',
 		
+		/**
+		 * The URL to the cache folder.
+		 * Defaults to $EE->config->item('base_url') + '/cache'
+		 */
+		'cache_url'			=> 'http://site.com/cache',
+		
+		/**
+		 * Turn on or off ALL combining of assets. 'yes' or 'no'.
+		 * When set to 'no', the 'combine_css' or 'combine_js' .
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'combine'			=> 'yes',
+
+		/**
+		 * Turn on or off combining of CSS assets only. 'yes' or 'no'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'combine_css'		=> 'yes',
+
+		/**
+		 * Turn on or off combining of JS assets only. 'yes' or 'no'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'combine_js'		=> 'yes',
+
+		/**
+		 * Turn on or off ALL minifying. 'yes' or 'no'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'minify'			=> 'yes',
+
+		/**
+		 * Turn on or off minifying of CSS assets. 'yes' or 'no'.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'minify_css'		=> 'yes',
+
+		/**
+		 * Turn on or off minifying of the template HTML.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'minify_html'		=> 'yes',
+
+		/**
+		 * Turn on or off minifying of JS assets.
+		 * Values: 'yes' or 'no'
+		 * Default: yes
+		 */
+		'minify_js'			=> 'yes',
+
+
+		/**
+		 * ==============================================
+		 * ADVANCED PREFERENCES
+		 * ==============================================
+		 */
+
 		/**
 		 * The base path of your local source assets.
 		 * Defaults to site's FCPATH
@@ -164,18 +239,6 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		'cachebust'			=> '',
 		
 		/**
-		 * The path to the cache folder.
-		 * Defaults to site's FCPATH + '/cache'
-		 */
-		'cache_path'		=> '/path/to/site.com/cache',
-		
-		/**
-		 * The URL to the cache folder.
-		 * Defaults to $EE->config->item('base_url') + '/cache'
-		 */
-		'cache_url'			=> 'http://site.com/cache',
-		
-		/**
 		 * When 'yes', Minimee will attempt to delete caches
 		 * it has determined to have expired.
 		 * Values: 'yes' or 'no'
@@ -183,28 +246,6 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		 */
 		'cleanup'		=> 'no',
 
-		/**
-		 * Turn on or off ALL combining of assets. 'yes' or 'no'.
-		 * Not to be mixed with 'combine_css' or 'combine_js'.
-		 * Values: 'yes' or 'no'
-		 * Default: yes
-		 */
-		'combine'			=> 'yes',
-
-		/**
-		 * Turn on or off combining of CSS assets only. 'yes' or 'no'.
-		 * Values: 'yes' or 'no'
-		 * Default: yes
-		 */
-		'combine_css'		=> 'yes',
-
-		/**
-		 * Turn on or off combining of JS assets only. 'yes' or 'no'.
-		 * Values: 'yes' or 'no'
-		 * Default: yes
-		 */
-		'combine_js'		=> 'yes',
-		
 		/**
 		 * Specify which minification library to use for your CSS.
 		 * Values: 'minify' or 'cssmin'
@@ -237,34 +278,6 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		 */
 		'js_library'	=> 'jsmin',
 
-		/**
-		 * Turn on or off ALL minifying. 'yes' or 'no'.
-		 * Values: 'yes' or 'no'
-		 * Default: yes
-		 */
-		'minify'			=> 'yes',
-
-		/**
-		 * Turn on or off minifying of CSS assets. 'yes' or 'no'.
-		 * Values: 'yes' or 'no'
-		 * Default: yes
-		 */
-		'minify_css'		=> 'yes',
-
-		/**
-		 * Turn on or off minifying of the template HTML.
-		 * Values: 'yes' or 'no'
-		 * Default: yes
-		 */
-		'minify_html'		=> 'yes',
-
-		/**
-		 * Turn on or off minifying of JS assets.
-		 * Values: 'yes' or 'no'
-		 * Default: yes
-		 */
-		'minify_js'			=> 'yes',
-		
 		/**
 		 * Specify the method with which Minimee should fetch external & {stylesheet=} assets.
 		 * Values: 'auto', 'fgc', or 'curl'
@@ -302,6 +315,12 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 
 # Special Notes / FAQs
+
+## Minimee isn't working. Where do I start?
+
+Start by turning on EE's template debugging, and visiting the front end of your site. Search for Minimee's debugging messages (see above), which may help track down the root of trouble.
+
+And unless you have specific reason to do otherwise, all "Advanced Settings" can be left blank. 
 
 ## How Minimee creates cache filenames
 
@@ -373,7 +392,20 @@ Note that this parse-order-be-damned technique is available for all of Minimee's
 
 ## SSL: mixing `http` & `https`
 
-Coming soon.
+When you need Minimee to support a mix of `http` & `https`, you can specify a [Protocol Relative URL](https://www.google.co.uk/search?q=protocol+relative+url) in Minimee's Cache URL and Base URL:
+
+    $config['minimee'] = array(
+
+		...
+
+		// Note the two leading slashes
+		'cache_url'			=> '//site.com/cache',
+		'base_url'			=> '//site.com',
+		
+		...
+	);
+
+Take note that if you are also changing the URL that is prepended to CSS assets (`css_prepend_url`), you will want to be sure this too is protocol 'agnostic'.
 
 ## Different settings for different assets
 
@@ -403,3 +435,15 @@ When Minimee runs, it looks at the first asset tag as the template for a final c
 ## Does Minimee process `@import`'ed CSS assets?
 
 No. But [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) does.
+
+## MSM Compatibility
+
+Minimee is already MSM-compatible if each Site's cache folder is located in the same relative location. For example:
+
+* http://siteone.com/cache
+* http://siteone.com/site2/cache
+* http://sitethree.com/cache
+
+To ensure compatibility in these situations, either config Minimee via config.php using a bootstrap method (examples mentioned above), or config Minimee via the extension but use _relative path and url values_, e.g. `'cache'`, instead of `/cache`.
+
+If your setup does not match the above, and you need per-site configuration, check out [MSMinimee](http://github.com/johndwells/MSMinimee).
