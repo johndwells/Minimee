@@ -230,7 +230,7 @@ class Minimee_helper {
 		}
 		
 		// free memory where possible
-		unset($pat, $haystack);
+		unset($pat);
 
 		return $matches;
 	}

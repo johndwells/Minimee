@@ -316,11 +316,21 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 # Special Notes / FAQs
 
+<<<<<<< HEAD
 ## Minimee isn't working. Where do I start?
 
 Start by turning on EE's template debugging, and visiting the front end of your site. Search for Minimee's debugging messages (see above), which may help track down the root of trouble.
 
 And unless you have specific reason to do otherwise, all "Advanced Settings" can be left blank. 
+=======
+## When/how does Minimee recognize to create a new file?
+
+- if it’s a local file (e.g. /home/your/site/css/styles.css), it checks for it’s modification date
+- if it’s a stylesheet template, it first checks the database, and if that template is saved as a file, also checks the file’s modification date
+- if it’s an “external” file, as in the path to the asset is a fully qualified url on an external domain, then it does not compare anything and only fetches the contents at the time of creating a cache.
+
+
+>>>>>>> 15249c99d203b4a5a21deb0554a4284c6b57d9e0
 
 ## How Minimee creates cache filenames
 
