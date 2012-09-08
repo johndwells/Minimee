@@ -441,6 +441,7 @@ class Minimee_config {
 			/* Booleans default NO */
 			case('cleanup') :
 			case('disable') :
+			case('minify_html') :
 				return ($value === TRUE OR preg_match('/1|true|on|yes|y/i', $value)) ? 'yes' : 'no';
 			break;
 		
@@ -451,7 +452,6 @@ class Minimee_config {
 			case('css_prepend_mode') :
 			case('minify') :
 			case('minify_css') :
-			case('minify_html') :
 			case('minify_js') :
 				return ($value === FALSE OR preg_match('/0|false|off|no|n/i', $value)) ? 'no' : 'yes';
 			break;

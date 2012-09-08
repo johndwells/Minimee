@@ -7,7 +7,7 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 * [Forum Support](http://devot-ee.com/add-ons/support/minimee/)
 
 
-# Version 2.0.1 (current BETA)
+# Version 2.0.2 (current BETA)
 
 _Beta means be wary of using in production environments. Beta also means your feedback is hugely appreciated._
 
@@ -202,9 +202,9 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		/**
 		 * Turn on or off minifying of the template HTML.
 		 * Values: 'yes' or 'no'
-		 * Default: yes
+		 * Default: no
 		 */
-		'minify_html'		=> 'yes',
+		'minify_html'		=> 'no',
 
 		/**
 		 * Turn on or off minifying of JS assets.
