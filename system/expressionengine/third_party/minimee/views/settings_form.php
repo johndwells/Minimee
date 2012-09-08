@@ -80,6 +80,7 @@
 	echo $this->table->generate();
 	$this->table->clear();
 
+
 	/**
 	 * Begin building our 'advanced' table
 	 */
@@ -169,7 +170,10 @@
 	/**
 	 * Spit out our advanced table
 	 */
-	 echo $this->table->generate();
+?>
+	<p><a href="#" id="minimee_advanced_handle"><?php echo lang('advanced_config'); ?></a><br /><br /></p>
+	<div id="minimee_advanced_table"><?php echo $this->table->generate(); ?></div>
+<?php
 
 
 	/**
@@ -214,6 +218,21 @@
 				MINIMEE.toggleSettings($(this).val());
 			}).trigger('change');
 				
+			MINIMEE.$adv_table = $('#minimee_advanced_table');
+			MINIMEE.$adv_handle = $('#minimee_advanced_handle').parent('p');
+
+			MINIMEE.$adv_table.hide();
+			MINIMEE.$adv_handle.click(function(e) {
+				e.preventDefault();
+				MINIMEE.$adv_handle.slideUp();
+				MINIMEE.$adv_table.slideDown();
+			});
+
+			$('th', MINIMEE.$adv_table).click(function(e) {
+				e.preventDefault();
+				MINIMEE.$adv_handle.slideDown();
+				MINIMEE.$adv_table.slideUp();
+			});
 		});
 	</script>
 
