@@ -183,7 +183,7 @@ class Minimee_ext {
 		}
 		
 		// Are we configured to run through HTML minifier?
-		if ($this->config->is_no('minify') || $this->config->is_no('minify_html'))
+		if ($this->config->is_no('minify_html'))
 		{
 			Minimee_helper::log('HTML minification is disabled.', 3);
 			return $template;
@@ -192,7 +192,7 @@ class Minimee_ext {
 		// is Minimee nonetheless disabled?
 		if ($this->config->is_yes('disable'))
 		{
-			Minimee_helper::log('HTML minification aborted because Minimee has been disabled.', 3);
+			Minimee_helper::log('HTML minification aborted because Minimee has been disabled completely.', 3);
 			return $template;
 		}
 
@@ -325,6 +325,23 @@ class Minimee_ext {
 			if ($query->num_rows() > 0)
 			{
 				$settings = unserialize($query->row()->settings);
+
+				// migrate combine if 'no'
+				if(array_key_exists('combine', $settings) && $settings['combine'] == 'no')
+				{
+					$settings['combine_css'] = 'no';
+					$settings['combine_js'] = 'no';
+					unset($settings['combine']);
+				}
+
+				// migrate minify if 'no'
+				if(array_key_exists('minify', $settings) && $settings['minify'] == 'no')
+				{
+					$settings['minify_css'] = 'no';
+					$settings['minify_js'] = 'no';
+					$settings['minify_html'] = 'no';
+					unset($settings['minify']);
+				}
 
 				// Sanitise & merge to get a complete up-to-date array of settings
 				$settings = $this->config->sanitise_settings(array_merge($this->config->get_allowed(), $settings));

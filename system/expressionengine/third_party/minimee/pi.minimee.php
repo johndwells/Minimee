@@ -1083,7 +1083,7 @@ HEREDOC;
 
 
 				// be sure we want to minify
-				if ($this->config->is_yes('minify') && $this->config->is_yes('minify_js'))
+				if ($this->config->is_yes('minify_js'))
 				{
 
 					// See if JSMinPlus was explicitly requested
@@ -1133,7 +1133,7 @@ HEREDOC;
 				$relativePath = ($rel !== FALSE && $this->config->is_yes('css_prepend_mode')) ? $rel . '/' : NULL;
 
 				// be sure we want to minify
-				if ($this->config->is_yes('minify') && $this->config->is_yes('minify_css'))
+				if ($this->config->is_yes('minify_css'))
 				{
 
 					// See if CSSMin was explicitly requested
@@ -1298,7 +1298,7 @@ HEREDOC;
 		$return ='';
 
 		// combining files?
-		if ($this->config->is_yes('combine') && $this->config->is_yes('combine_' . $this->type))
+		if ($this->config->is_yes('combine_' . $this->type))
 		{
 			// first try to fetch from cache
 			$return = $this->_get_cache();

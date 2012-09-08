@@ -7,7 +7,7 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 * [Forum Support](http://devot-ee.com/add-ons/support/minimee/)
 
 
-# Version 2.0.2 (current BETA)
+# Version 2.0.3 (current BETA)
 
 _Beta means be wary of using in production environments. Beta also means your feedback is hugely appreciated._
 
@@ -55,7 +55,7 @@ Minimee is inspired and influenced by [SL Combinator](http://experienceinternet.
 * ALL settings can be specified via config or extension, and then overridden at the tag level
 * Path & URL settings can now be relative to site
 * New `exp:minimee:link` tag returns just the URL to your minimee'd asset
-* Allow for different settings for each CSS/JS asset
+* Removal of `combine=` and `minify=`, in favor of settings per asset type
 * Disable or override the URLs which are prepended to image & @import paths in CSS
 * New `priority=""` parameter allows you to queue assets into a specific order
 * For EE2.4 and above, assets are queue'd **after** the `exp:minimee:display` tag is parsed
@@ -85,10 +85,19 @@ The `debug="yes"` setting has been removed. Instead, simply turn on EE's [Templa
 * __Minimee [DEBUG]:__ Indicates a potential issue to resolve
 * __Minimee [ERROR]:__ Something has gone wrong, and Minimee has failed
 
-### When combine="no" and minify="no" together
-With Minimee 1.x if you were to set both `combine="no"` and `minify="no"`, Minimee would disable itself and not run at all.  Now, _Minimee will continue to run_, and still create cached files of what assets it parses - they will simply not be combined into a single file, and/or not be minified.
+### Specify combine & minify rules per asset type
 
-_Note: In the case of CSS, there still may be minimal processing to prepend URLs to @import() and image url() values so that your styles continue to work as expected._
+There are 5 new settings/parameters that allow fine-grained control of turning on & off combining and minification for each asset type:
+
+* `combine_css`
+* `combine_js`
+* `minify_css`
+* `minify_js`
+* `minify_html`
+
+Because of these new settings/parameters, `combine="no"` and `minify="no"` have been removed (as of 2.0.3).
+
+It may also be worth noting that in Minimee 1.x, if you set both `combine="no"` and `minify="no"`, you would effectively disable Minimee.  This is no longer the case - even if every `combine_` and `minify_` is set to `no`, Minimee will continue to run and create cache files (albeit unminified and uncombined). The only way to truly disable Minimee is via `disable`.
 
 ### Cachebusting
 A new "Cachebust" setting allows you to manually trigger Minimee to create new cache files. For most setups this is unneccessary, however edge cases will find this useful - such as when [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) needs to be re-run due to a modified `@import` file,  which Minimee is unable to detect.
@@ -114,6 +123,7 @@ Once you have upgraded Minimee on your server, either through deployment or FTP,
 If you have Minimee 1x installed and are using it's Extension, there is nothing you will need to do prior to overwriting system/expressionengine/third_party/minimee.
 
 However **if you have configured Minimee via EE's `$config` or Global Variables**, please note:
+As mentioned above, `combine="y|n"` and `minify="y|n"` have been removed in favor of per-asset options.
 
 * Configuring via global variables is **no longer supported**
 * When configuring via EE's `$config`, **setting keys have changed to be a single array**. See below for details.
@@ -164,14 +174,6 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		'cache_url'			=> 'http://site.com/cache',
 		
 		/**
-		 * Turn on or off ALL combining of assets. 'yes' or 'no'.
-		 * When set to 'no', the 'combine_css' or 'combine_js' .
-		 * Values: 'yes' or 'no'
-		 * Default: yes
-		 */
-		'combine'			=> 'yes',
-
-		/**
 		 * Turn on or off combining of CSS assets only. 'yes' or 'no'.
 		 * Values: 'yes' or 'no'
 		 * Default: yes
@@ -184,13 +186,6 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		 * Default: yes
 		 */
 		'combine_js'		=> 'yes',
-
-		/**
-		 * Turn on or off ALL minifying. 'yes' or 'no'.
-		 * Values: 'yes' or 'no'
-		 * Default: yes
-		 */
-		'minify'			=> 'yes',
 
 		/**
 		 * Turn on or off minifying of CSS assets. 'yes' or 'no'.
