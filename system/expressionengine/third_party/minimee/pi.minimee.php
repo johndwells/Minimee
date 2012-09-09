@@ -762,7 +762,7 @@ HEREDOC;
 		$this->_set_filesdata($matches[1]);
 
 		// free memory where possible
-		unset($haystack, $pat, $matches);
+		unset($pat, $matches);
 		
 		// chaining
 		return $this;
