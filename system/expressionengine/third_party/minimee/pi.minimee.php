@@ -219,7 +219,7 @@ class Minimee {
 			}
 	
 			// free memory where possible
-			unset($pat, $haystack, $matches, $paths);
+			unset($matches, $paths);
 	
 			return $out;
 		}
