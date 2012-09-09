@@ -740,7 +740,10 @@ HEREDOC;
 	protected function _fetch_files($haystack)
 	{
 		// first up, let's substitute stylesheet= for minimee=, because we handle these special
-		$haystack = preg_replace("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", '[minimee=$1]', $haystack);
+		if($this->type == 'css')
+		{
+			$haystack = preg_replace("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", '[minimee=$1]', $haystack);
+		}
 
 		// parse globals if we find any EE syntax tags
 		if (preg_match("/".LD."(.*?)".RD."/", $haystack) === 1)
