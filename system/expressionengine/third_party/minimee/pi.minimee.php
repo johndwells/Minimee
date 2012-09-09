@@ -85,6 +85,9 @@ class Minimee {
 
 		// grab instance of our config object
 		$this->config = Minimee_helper::config();
+
+		// set local version of tagdata
+		$this->tagdata = $this->EE->TMPL->tagdata;
 	}
 	// ------------------------------------------------------
 
@@ -388,7 +391,7 @@ HEREDOC;
 		}
 		else
 		{
-			return $this->EE->TMPL->tagdata;
+			return $this->tagdata;
 		}
 	}
 	// ------------------------------------------------------
@@ -737,8 +740,10 @@ HEREDOC;
 	 * @param string either css or js
 	 * @return bool TRUE on success of fetching files; FALSE on failure
 	 */
-	protected function _fetch_files($haystack)
+	protected function _fetch_files()
 	{
+		$haystack = $this->tagdata;
+
 		// first up, let's substitute stylesheet= for minimee=, because we handle these special
 		if($this->type == 'css')
 		{
@@ -1268,7 +1273,7 @@ HEREDOC;
 		try
 		{
 			$this->_fetch_params()
-				 ->_fetch_files($this->EE->TMPL->tagdata);
+				 ->_fetch_files();
 
 			// Are we queueing for later? If so, just save in session
 			if ($this->queue)
@@ -1440,7 +1445,7 @@ HEREDOC;
 		}
 		
 		// Append tagdata - used if queueing ever aborts from an error
-		$this->cache[$this->type][$this->queue]['tagdata'] .= $this->EE->TMPL->tagdata;
+		$this->cache[$this->type][$this->queue]['tagdata'] .= $this->tagdata;
 
 		// Add all files to the queue cache
 		foreach($this->filesdata as $filesdata)
