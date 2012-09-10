@@ -7,10 +7,7 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 * [Forum Support](http://devot-ee.com/add-ons/support/minimee/)
 
 
-# Version 2.0.4 (current BETA)
-
-_Beta means be wary of using in production environments. Beta also means your feedback is hugely appreciated._
-
+# Version 2.1.0
 
 ## Requirements:
 
