@@ -1,10 +1,4 @@
 <?php
-/*
- * A high performance PHP library for using multi curl for parallel http calls.
- * https://github.com/jmathai/php-multi-curl
- * @author Jaisen Mathai
- */
-
 class EpiCurl
 {
   const timeout = 3;
@@ -64,7 +58,7 @@ class EpiCurl
   {
     if($key != null)
     {
-      if(isset($this->responses[$key]))
+      if(isset($this->responses[$key]['data']))
       {
         return $this->responses[$key];
       }
@@ -94,6 +88,11 @@ class EpiCurl
       return null;
     }
     return false;
+  }
+  
+  public function cleanupResponses()
+  {
+    $this->responses = array();
   }
 
   private function getKey($ch)

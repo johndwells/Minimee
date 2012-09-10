@@ -1,82 +1,112 @@
-<?php
-if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-require_once PATH_THIRD . 'minimee/config.php';
+// our helper will require_once() everything else we need
+require_once PATH_THIRD . 'minimee/classes/Minimee_helper.php';
 
 /**
- * Minimee: minimize & combine your CSS and JS files. For EE2 only.
+ * ExpressionEngine - by EllisLab
+ *
+ * @package		ExpressionEngine
+ * @author		ExpressionEngine Dev Team
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @license		http://expressionengine.com/user_guide/license.html
+ * @link		http://expressionengine.com
+ * @since		Version 2.0
+ * @filesource
+ */
+ 
+// ------------------------------------------------------------------------
+
+/**
+ * Minimee: minimize & combine your CSS and JS files. Minify your HTML. For EE2 only.
  * @author John D Wells <http://johndwells.com>
  * @license http://www.opensource.org/licenses/bsd-license.php BSD license
  * @link	http://johndwells.com/software/minimee
  */
 class Minimee_ext {
 
+	/**
+	 * EE, obviously
+	 */
+	private $EE;
+
+
+	/**
+	 * Standard Extension stuff
+	 */
 	public $name			= MINIMEE_NAME;
 	public $version			= MINIMEE_VER;
 	public $description		= MINIMEE_DESC;
 	public $docs_url		= MINIMEE_DOCS;
+	public $settings 		= array();
 	public $settings_exist	= 'y';
 
-	public $settings		= array();
-	public $config_loc		= FALSE;
-	
-	public $EE;
+
+	/**
+	 * Our magical config class
+	 */
+	public $config;
+
+
+	/**
+	 * Reference to our cache
+	 */
+	public $cache;
+
+
+	// ------------------------------------------------------
+
 
 	/**
 	 * Constructor
 	 *
-	 * @param 	mixed	Settings array or empty string if none exist.
+	 * NOTE: We never use the $settings variable passed to us,
+	 * because we want our Minimee_config object to always be in charge.
+	 *
+	 * @param 	mixed	Settings array - only passed when activating a hook
 	 * @return void
 	 */
 	public function __construct($settings = array())
 	{
+		// Got EE?
 		$this->EE =& get_instance();
 
-		// initialise default settings array
-		$this->settings = $this->_default_settings();
+		// grab a reference to our cache
+		$this->cache =& Minimee_helper::cache();
+
+		// grab instance of our config object
+		$this->config = Minimee_helper::config();
 		
-		/*
-		 * Try to determine where Minimee is being configured.
-		 * This check is only reliable on the front end.
-		 * ================================================ */
-		// first check config
-		if ($this->EE->config->item('minimee_cache_path') && $this->EE->config->item('minimee_cache_url'))
-		{
-			$this->config_loc = 'config';
-		}
-		// check in global varas
-		elseif (array_key_exists('minimee_cache_path', $this->EE->config->_global_vars) && array_key_exists('minimee_cache_url', $this->EE->config->_global_vars))
-		{
-			$this->config_loc = 'global';
-		}
-		// assume db (default)
-		else
-		{
-			$this->config_loc = 'db';
-		}
+		Minimee_helper::log('Extension has been instantiated.', 3);
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
 	 * Activate Extension
+	 * 
 	 * @return void
 	 */
 	public function activate_extension()
 	{
+		// reset our runtime to 'factory' defaults, and return as array
+		$settings = $this->config->factory()->to_array();
+	
 		$data = array(
 			'class'		=> __CLASS__,
 			'hook'		=> 'template_post_parse',
-			'method'	=> 'minify_html',
-			'settings'	=> serialize($this->settings),
+			'method'	=> 'template_post_parse',
+			'settings'	=> serialize($settings),
 			'priority'	=> 10,
 			'version'	=> $this->version,
 			'enabled'	=> 'y'
 		);
 		
 		$this->EE->db->insert('extensions', $data);
+
+		Minimee_helper::log('Extension has been activated.', 3);
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -88,153 +118,63 @@ class Minimee_ext {
 	{
 		$this->EE->db->where('class', __CLASS__);
 		$this->EE->db->delete('extensions');
+
+		Minimee_helper::log('Extension has been disabled.', 3);
 	}
-	// END
-
-
-	/**
-	 * Used by plugin, retrieves settings from config, global variables OR database (and in that order)
-	 *
-	 * @return void
-	 */
-	public function get_settings()
-	{
-		// if settings are already in session cache, use those
-		if (isset($this->EE->session->cache['minimee']['settings']))
-		{
-			$this->settings = $this->EE->session->cache['minimee']['settings'];
-			return;
-		}
-		
-		// retrieve config settings (location may vary)
-		switch ($this->config_loc) :
-
-			case ('config') :
-				$this->settings['cache_path'] = $this->EE->config->item('minimee_cache_path');
-				$this->settings['cache_url'] = $this->EE->config->item('minimee_cache_url');
-				$this->settings['base_path'] = $this->EE->config->item('minimee_base_path'); // optional
-				$this->settings['base_url'] = $this->EE->config->item('minimee_base_url'); // optional
-				$this->settings['debug'] = $this->EE->config->item('minimee_debug'); // optional
-				$this->settings['disable'] = $this->EE->config->item('minimee_disable'); // optional
-				$this->settings['minify_html'] = $this->EE->config->item('minimee_minify_html'); // optional
-				$this->settings['remote_mode'] = $this->EE->config->item('remote_mode'); // optional
-				
-				$this->EE->TMPL->log_item('Minimee has retrieved settings from config.');
-			break;
-			
-			case ('global') :
-				$this->settings['cache_path'] = $this->EE->config->_global_vars['minimee_cache_path'];
-				$this->settings['cache_url'] = $this->EE->config->_global_vars['minimee_cache_url'];
-	
-				// optional
-				if (array_key_exists('minimee_base_path', $this->EE->config->_global_vars))
-				{
-					$this->settings['base_path'] = $this->EE->config->_global_vars['minimee_base_path'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_base_url', $this->EE->config->_global_vars))
-				{
-					$this->settings['base_url'] = $this->EE->config->_global_vars['minimee_base_url'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_debug', $this->EE->config->_global_vars))
-				{
-					$this->settings['debug'] = $this->EE->config->_global_vars['minimee_debug'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_disable', $this->EE->config->_global_vars))
-				{
-					$this->settings['disable'] = $this->EE->config->_global_vars['minimee_disable'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_minify_html', $this->EE->config->_global_vars))
-				{
-					$this->settings['minify_html'] = $this->EE->config->_global_vars['minimee_minify_html'];
-				}
-	
-				// optional
-				if (array_key_exists('minimee_remote_mode', $this->EE->config->_global_vars))
-				{
-					$this->settings['remote_mode'] = $this->EE->config->_global_vars['minimee_remote_mode'];
-				}
-	
-				$this->EE->TMPL->log_item('Minimee has retrieved settings from global variables.');
-			break;
-			
-			case ('db') :
-			default :
-				$this->EE->db
-							->select('settings')
-							->from('extensions')
-							->where(array('enabled' => 'y', 'class' => __CLASS__ ))
-							->limit(1);
-				$query = $this->EE->db->get();
-				
-				if ($query->num_rows() > 0)
-				{
-					$this->settings = unserialize($query->row()->settings);
-					$this->EE->TMPL->log_item('Minimee has retrieved settings from DB.');
-				}
-				else
-				{
-					$this->EE->TMPL->log_item('Minimee has not yet been configured.');
-				}
-			break;
-
-		endswitch;
-		
-		// if config is not in DB, we need to inject ourselves into extensions hook
-		if($this->config_loc != 'db')
-		{
-			$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('minify_html', '', MINIMEE_VER);
-	  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
-		}
-
-		// normalize settings before adding to session
-		$this->settings = $this->_normalize_settings($this->settings);
-		
-		// now set to session for subsequent calls
-		$this->EE->session->cache['minimee'] = array(
-			'settings' => array(),
-			'js' => array(),
-			'css' => array()
-		);
-		$this->EE->session->cache['minimee']['settings'] = $this->settings;
-		
-	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
 	 * Method for template_post_parse hook
-	 *
-	 * 
 	 *
 	 * @param 	string	Parsed template string
 	 * @param 	bool	Whether is a sub-template or not
 	 * @param 	string	Site ID
 	 * @return 	string	Template string, possibly minified
 	 */
-	public function minify_html($template, $sub, $site_id)
+	public function template_post_parse($template, $sub, $site_id)
 	{
-		// has this hook already been called?
+		// play nice with others
 		if (isset($this->EE->extensions->last_call) && $this->EE->extensions->last_call)
 		{
 			$template = $this->EE->extensions->last_call;
 		}
 
 		// do nothing if not final template
-		if($sub !== FALSE)
+		if ($sub !== FALSE)
 		{
 			return $template;
 		}
 		
-		// fetch settings
-		$this->get_settings();
+		// see if we need to post-render any plugin methods
+		if (isset($this->cache['template_post_parse']))
+		{
+			if ( ! class_exists('Minimee'))
+			{
+				include_once PATH_THIRD . 'minimee/pi.minimee.php';
+			}
+
+			$m = new Minimee();
+			
+			// this tells Minimee that we are calling it from hook
+			$m->calling_from_hook = TRUE;
+			
+			// save our TMPL values to put back into place once finished
+			$tagparams = $this->EE->TMPL->tagparams;
+
+			// loop through & call each method
+			foreach($this->cache['template_post_parse'] as $needle => $tag)
+			{
+				Minimee_helper::log('Calling Minimee::' . $tag['method'] . '() during template_post_parse: ' . serialize($tag['tagparams']), 3);
+
+				$this->EE->TMPL->tagparams = $tag['tagparams'];
+				$out = $m->{$tag['method']}();
+				$template = str_replace(LD.$needle.RD, $out, $template);
+			}
+			
+			// put things back into place
+			$this->EE->TMPL->tagparams = $tagparams;
+		}
 		
 		// do nothing if not (likely) html!
 		if ( ! preg_match('/webpage|static/i', $this->EE->TMPL->template_type))
@@ -242,18 +182,28 @@ class Minimee_ext {
 			return $template;
 		}
 		
-		// do not run through HTML minifier?
-		if($this->settings['disable'] == 'yes' || $this->settings['minify_html'] == 'no')
+		// Are we configured to run through HTML minifier?
+		if ($this->config->is_no('minify_html'))
 		{
+			Minimee_helper::log('HTML minification is disabled.', 3);
 			return $template;
 		}
 
-		// we've made it this far, so...		
-		// include our needed HTML library
-		require_once('libraries/HTML.php');
+		// is Minimee nonetheless disabled?
+		if ($this->config->is_yes('disable'))
+		{
+			Minimee_helper::log('HTML minification aborted because Minimee has been disabled completely.', 3);
+			return $template;
+		}
+
+		// we've made it this far, so...
+		Minimee_helper::log('Running HTML minification.', 3);
+
+		Minimee_helper::library('html');
+
 		return Minify_HTML::minify($template);
 	}
-	// END
+	// ------------------------------------------------------
 
 
 	/**
@@ -265,31 +215,54 @@ class Minimee_ext {
 	{
 		if (empty($_POST))
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			Minimee_helper::log($this->EE->lang->line('unauthorized_access'), 1);
 		}
+		
+		else
+		{
+			// grab our posted form
+			$settings = $_POST;
+			
+			// checkboxes are funny: if they don't exist in post, they must be explicitly added and set to "no"
+			$checkboxes = array(
+				'combine_css',
+				'combine_js',
+				'minify_css',
+				'minify_html',
+				'minify_js'
+			);
+			
+			foreach($checkboxes as $key)
+			{
+				if ( ! isset($settings[$key]))
+				{
+					$settings[$key] = 'no';
+				}
+			}
+	
+			// run our $settings through sanitise_settings()
+			$settings = $this->config->sanitise_settings(array_merge($this->config->get_allowed(), $settings));
+			
+			// update db
+			$this->EE->db->where('class', __CLASS__)
+						 ->update('extensions', array('settings' => serialize($settings)));
+			
+			Minimee_helper::log('Extension settings have been saved.', 3);
 
-		$this->EE->lang->loadfile('minimee');
+			// save the environment			
+			unset($settings);
 
-		$settings['cache_path'] = $this->EE->input->post('cache_path');
-		$settings['cache_url'] = $this->EE->input->post('cache_url');
-		$settings['base_path'] = $this->EE->input->post('base_path');
-		$settings['base_url'] = $this->EE->input->post('base_url');
-		$settings['debug'] = $this->EE->input->post('debug');
-		$settings['disable'] = $this->EE->input->post('disable');
-		$settings['minify_html'] = $this->EE->input->post('minify_html');
-		$settings['remote_mode'] = $this->EE->input->post('remote_mode');
-		
-		$settings = $this->_normalize_settings($settings);
-		
-		$this->EE->db->where('class', __CLASS__);
-		$this->EE->db->update('extensions', array('settings' => serialize($settings)));
-		
-		$this->EE->session->set_flashdata(
-			'message_success',
-		 	$this->EE->lang->line('preferences_updated')
-		);
+			// let frontend know we succeeeded
+			$this->EE->session->set_flashdata(
+				'message_success',
+			 	$this->EE->lang->line('preferences_updated')
+			);
+
+			$this->EE->functions->redirect(BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=minimee');
+		}
 	}
-	// END
+	// ------------------------------------------------------
+
 
 	/**
 	 * Settings Form
@@ -302,39 +275,21 @@ class Minimee_ext {
 		$this->EE->load->helper('form');
 		$this->EE->load->library('table');
 
-		// view vars		
-		$vars = array('config_loc' => $this->config_loc);
-		
-		// normalize current settings just in case
-		$current = $this->_normalize_settings($current);
+		// Merge the contents of our db with the allowed
+		$current = array_merge($this->config->get_allowed(), $current);
 
-		$yes_no_options = array(
-			'no'	=> lang('no'),
-			'yes' 	=> lang('yes') 
-		);
-		
-		$remote_mode_options = array(
-			'auto' 	=> lang('auto'), 
-			'curl'	=> lang('curl'),
-			'fgc' 	=> lang('fgc'),
-		);
-		
-		$vars['settings'] = array(
-			'cache_path'	=> form_input(array('name' => 'cache_path', 'id' => 'cache_path', 'value' => $current['cache_path'])),
-			'cache_url'		=> form_input(array('name' => 'cache_url', 'id' => 'cache_url', 'value' => $current['cache_url'])),
-			'minify_html'	=> form_dropdown('minify_html', $yes_no_options, $current['minify_html'], 'id="minify_html"'),
+		// view vars		
+		$vars = array(
+			'config_warning' => ($this->config->location != 'db') ? lang('config_location_warning') : '',
+			'form_open' => form_open('C=addons_extensions'.AMP.'M=save_extension_settings'.AMP.'file=minimee'),
+			'settings' => $current,
+			'flashdata_success' => $this->EE->session->flashdata('message_success')
 			);
-		
-		$vars['settings_advanced'] = array(
-			'disable'		=> form_dropdown('disable', $yes_no_options, $current['disable'], 'id="disable"'),
-			'debug'			=> form_dropdown('debug', $yes_no_options, $current['debug'], 'id="debug"'),
-			'remote_mode'	=> form_dropdown('remote_mode', $remote_mode_options, $current['remote_mode'], 'id="remote_mode"'),
-			'base_path'		=> form_input(array('name' => 'base_path', 'id' => 'base_path', 'value' => $current['base_path'])),
-			'base_url'		=> form_input(array('name' => 'base_url', 'id' => 'base_url', 'value' => $current['base_url'])),
-		);
-		
+
+		// return our view
 		return $this->EE->load->view('settings_form', $vars, TRUE);			
 	}
+	// ------------------------------------------------------
 
 
 	/**
@@ -345,211 +300,77 @@ class Minimee_ext {
 	 */
 	public function update_extension($current = '')
 	{
+		/**
+		 * Up-to-date
+		 */
 		if ($current == '' OR $current == $this->version)
 		{
 			return FALSE;
 		}
 		
-		if ($current < '1.0.3')
+		/**
+		 * 2.0.0
+		 * 
+		 * - refactor to use new Minimee_config object
+		 */
+		if ($current < '2.0.0')
 		{
-			$this->EE->db
-						->select('settings')
-						->from('extensions')
-						->where('class', __CLASS__)
-						->limit(1);
-			$query = $this->EE->db->get();
+			$query = $this->EE->db
+							->select('settings')
+							->from('extensions')
+							->where('class', __CLASS__)
+							->limit(1)
+							->get();
 			
 			if ($query->num_rows() > 0)
 			{
-				$this->settings = unserialize($query->row()->settings);
+				$settings = unserialize($query->row()->settings);
+
+				// migrate combine if 'no'
+				if(array_key_exists('combine', $settings) && $settings['combine'] == 'no')
+				{
+					$settings['combine_css'] = 'no';
+					$settings['combine_js'] = 'no';
+					unset($settings['combine']);
+				}
+
+				// migrate minify if 'no'
+				if(array_key_exists('minify', $settings) && $settings['minify'] == 'no')
+				{
+					$settings['minify_css'] = 'no';
+					$settings['minify_js'] = 'no';
+					$settings['minify_html'] = 'no';
+					unset($settings['minify']);
+				}
+
+				// Sanitise & merge to get a complete up-to-date array of settings
+				$settings = $this->config->sanitise_settings(array_merge($this->config->get_allowed(), $settings));
 				
-				// convert boolean to string
-				$this->settings['disable'] = ($this->settings['disable']) ? 'yes' : 'no';
-				
-				// remove legacy strict mode
-				unset($this->settings['strict']);
-				
-				// add new remote_mode
-				$this->settings['remote_mode'] = 'auto';
-				
-				//normalize just to be safe
-				$this->settings = $this->_normalize_settings($this->settings);
-
-				// update db				
-				$this->EE->db
-						->where('class', __CLASS__)
-						->update('extensions', array('settings' => serialize($this->settings)));
-			}
-		}
-
-		if ($current < '1.0.4')
-		{
-			$this->EE->db
-						->select('settings')
-						->from('extensions')
-						->where('class', __CLASS__)
-						->limit(1);
-			$query = $this->EE->db->get();
-			
-			if ($query->num_rows() > 0)
-			{
-				$this->settings = unserialize($query->row()->settings);
-
-				// add new debug
-				$this->settings['debug'] = 'no';
-				
-				//normalize just to be safe
-				$this->settings = $this->_normalize_settings($this->settings);
-
-				// update db				
-				$this->EE->db
-						->where('class', __CLASS__)
-						->update('extensions', array('settings' => serialize($this->settings)));
-						
-			}
-		}
-				
-		if ($current < '1.1.2')
-		{
-			$this->EE->db
-						->select('settings')
-						->from('extensions')
-						->where('class', __CLASS__)
-						->limit(1);
-			$query = $this->EE->db->get();
-			
-			if ($query->num_rows() > 0)
-			{
-				$this->settings = unserialize($query->row()->settings);
-
-				// add new base_path & base_url
-				$this->settings['base_path'] = '';
-				$this->settings['base_url'] = '';
-				
-				//normalize just to be safe
-				$this->settings = $this->_normalize_settings($this->settings);
-
-				// update db				
-				$this->EE->db
-						->where('class', __CLASS__)
-						->update('extensions', array('settings' => serialize($this->settings)));
-						
-			}
-		}
-		
-		if ($current < '1.1.4')
-		{
-			$this->EE->db
-						->select('settings')
-						->from('extensions')
-						->where('class', __CLASS__)
-						->limit(1);
-			$query = $this->EE->db->get();
-			
-			if ($query->num_rows() > 0)
-			{
-				// pull them out
-				$this->settings = unserialize($query->row()->settings);
-
-				//normalize just to be safe
-				$this->settings = $this->_normalize_settings($this->settings);
-
-				// update db				
-				$this->EE->db
-						->where('class', __CLASS__)
-						->update('extensions', array('settings' => serialize($this->settings)));
-						
-			}
-		}
-
-		if ($current < '1.1.5')
-		{
-
-			$this->EE->db
-						->select('settings')
-						->from('extensions')
-						->where('class', __CLASS__)
-						->limit(1);
-			$query = $this->EE->db->get();
-			
-			if ($query->num_rows() > 0)
-			{
-				$this->settings = unserialize($query->row()->settings);
-
-				// add new minify_html setting (default to no)
-				$this->settings['minify_html'] = 'no';
-				
-				//normalize just to be safe
-				$this->settings = $this->_normalize_settings($this->settings);
-
 				// update db				
 				$this->EE->db
 						->where('class', __CLASS__)
 						->update('extensions', array(
 							'hook'		=> 'template_post_parse',
-							'method'	=> 'minify_html',
-							'settings' => serialize($this->settings)
+							'method'	=> 'template_post_parse',
+							'settings' => serialize($settings)
 						));
 			}
-						
+
+			$query->free_result();			
+
+			Minimee_helper::log('Upgraded to 2.0.0', 3);
 		}
-		
+
 		// update table row with version
 		$this->EE->db->where('class', __CLASS__);
 		$this->EE->db->update(
 					'extensions', 
 					array('version' => $this->version)
 		);
-	}
-	// END
 
-	
-	/**
-	 * Returns a default array of settings
-	 *
-	 * @return array default settings & values
-	 */
-	function _default_settings()
-	{
-		return array(
-			'base_path'		=> '',
-			'base_url'		=> '',
-			'cache_path'	=> '',
-			'cache_url'		=> '',
-			'debug'			=> 'no',
-			'disable'		=> 'no',
-			'minify_html'	=> 'no',
-			'remote_mode'	=> 'auto'
-		);
+		Minimee_helper::log('Upgrade complete. Now running ' . $this->version, 3);
 	}
-
-	
-	/**
-	 * Standardise settings just to be safe!
-	 *
-	 * @param array an array of options to be normalised
-	 * @return void
-	 */
-	private function _normalize_settings($settings)
-	{
-		// this ensures we avoid any PHP errors
-		$settings = array_merge($this->_default_settings(), $settings);
-
-		// required
-		$settings['cache_path'] = rtrim($settings['cache_path'], '/');
-		$settings['cache_url'] = rtrim($settings['cache_url'], '/');
-		
-		// optional
-		$settings['base_path'] = rtrim($settings['base_path'], '/');
-		$settings['base_url'] = rtrim($settings['base_url'], '/');
-		$settings['debug'] = (in_array(strtolower($settings['debug']), array('yes', 'y', 'on'))) ? 'yes' : 'no'; // default = 'no'
-		$settings['disable'] = ($settings['disable'] === TRUE OR in_array(strtolower($settings['disable']), array('yes', 'y', 'on'))) ? 'yes' : 'no'; // default = 'no'
-		$settings['minify_html'] = (in_array(strtolower($settings['minify_html']), array('yes', 'y', 'on'))) ? 'yes' : 'no'; // default = 'no'
-		$settings['remote_mode'] = (in_array(strtolower($settings['remote_mode']), array('auto', 'fgc', 'curl'))) ? strtolower($settings['remote_mode']) : 'auto'; // default = 'auto'
-		
-		return $settings;
-	}
-	// END
+	// ------------------------------------------------------
 
 }
 // END CLASS
