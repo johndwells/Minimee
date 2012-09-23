@@ -118,29 +118,27 @@ class Minimee {
 		{
 			return $out;
 		}
-	
-		// see which to display
-		$js = strtolower($this->EE->TMPL->fetch_param('js'));
-		$css = strtolower($this->EE->TMPL->fetch_param('css'));
+
+		// to fill and return
 		$out = '';
 
-		if ($js)
-		{
-			$this->queue = $js;
-			$this->type = 'js';
-			$out .= $this->_display();
-		}
-
-		if ($css)
+		// display any css tags
+		if ($css = strtolower($this->EE->TMPL->fetch_param('css')))
 		{
 			$this->queue = $css;
 			$this->type = 'css';
 			$out .= $this->_display();
 		}
 
-		// free memory where possible
-		unset($js, $css);
-		
+	
+		// display any js tags
+		if ($js = strtolower($this->EE->TMPL->fetch_param('js')))
+		{
+			$this->queue = $js;
+			$this->type = 'js';
+			$out .= $this->_display();
+		}
+
 		return $out;
 	}
 	// ------------------------------------------------------
