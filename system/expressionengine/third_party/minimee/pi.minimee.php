@@ -53,6 +53,7 @@ class Minimee {
 	public $stylesheet_query		= FALSE;	// Boolean of whether to fetch stylesheets from DB
 	public $template				= '';		// the template with which to render css link or js script tags
 	public $type					= '';		// 'css' or 'js'
+	public $tagdata					= '';		// our local copy of TMPL tagdata
 
 
 	/**
@@ -85,9 +86,6 @@ class Minimee {
 
 		// grab instance of our config object
 		$this->config = Minimee_helper::config();
-
-		// set local version of tagdata
-		$this->tagdata = $this->EE->TMPL->tagdata;
 	}
 	// ------------------------------------------------------
 
@@ -99,6 +97,9 @@ class Minimee {
 	 */
 	public function css()
 	{
+		// set local version of tagdata
+		$this->tagdata = $this->EE->TMPL->tagdata;
+
 		$this->type = 'css';
 		return $this->_run();
 	}
@@ -254,6 +255,9 @@ class Minimee {
 	 */
 	public function js()
 	{
+		// set local version of tagdata
+		$this->tagdata = $this->EE->TMPL->tagdata;
+
 		$this->type = 'js';
 		return $this->_run();
 	}
