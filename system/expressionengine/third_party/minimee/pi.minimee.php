@@ -1430,7 +1430,7 @@ HEREDOC;
 		}
 
 		// create new session array for this queue
-		if ( ! array_key_exists($this->queue, $this->cache[$this->type]))
+		if ( ! isset($this->cache[$this->type][$this->queue]))
 		{
 			$this->cache[$this->type][$this->queue] = array(
 				'template' => $this->template,
@@ -1441,7 +1441,7 @@ HEREDOC;
 		
 		// be sure we have a priority key in place
 		$priority = (int) $this->EE->TMPL->fetch_param('priority', 0);
-		if ( ! array_key_exists($priority, $this->cache[$this->type][$this->queue]['filesdata']))
+		if ( ! isset($this->cache[$this->type][$this->queue]['filesdata'][$priority]))
 		{
 			$this->cache[$this->type][$this->queue]['filesdata'][$priority] = array();
 		}
