@@ -385,7 +385,7 @@ HEREDOC;
 		Minimee_helper::log($log, 1);
 
 		// Let's return the original tagdata, wherever it came from
-		if ($this->queue && array_key_exists($this->queue, $this->cache[$this->type]))
+		if ($this->queue && isset($this->cache[$this->type][$this->queue]))
 		{
 			return $this->cache[$this->type][$this->queue]['tagdata'];
 		}
