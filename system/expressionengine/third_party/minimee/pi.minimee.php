@@ -53,7 +53,7 @@ class Minimee {
 	public $stylesheet_query		= FALSE;	// Boolean of whether to fetch stylesheets from DB
 	public $template				= '';		// the template with which to render css link or js script tags
 	public $type					= '';		// 'css' or 'js'
-	public $tagdata					= '';		// our local copy of TMPL tagdata
+	public $on_error				= '';		// what to return on error (likely TMPL->tagdata)
 
 
 	/**
@@ -98,7 +98,7 @@ class Minimee {
 	public function css()
 	{
 		// set local version of tagdata
-		$this->tagdata = $this->EE->TMPL->tagdata;
+		$this->on_error = $this->EE->TMPL->tagdata;
 
 		$this->type = 'css';
 		return $this->_run();
@@ -254,7 +254,7 @@ class Minimee {
 	public function js()
 	{
 		// set local version of tagdata
-		$this->tagdata = $this->EE->TMPL->tagdata;
+		$this->on_error = $this->EE->TMPL->tagdata;
 
 		$this->type = 'js';
 		return $this->_run();
@@ -386,14 +386,14 @@ HEREDOC;
 		// log our error message
 		Minimee_helper::log($log, 1);
 
-		// Let's return the original tagdata, wherever it came from
+		// Return our on_error content, whether from queue or current run
 		if ($this->queue && isset($this->cache[$this->type][$this->queue]))
 		{
-			return $this->cache[$this->type][$this->queue]['tagdata'];
+			return $this->cache[$this->type][$this->queue]['on_error'];
 		}
 		else
 		{
-			return $this->tagdata;
+			return $this->on_error;
 		}
 	}
 	// ------------------------------------------------------
@@ -744,7 +744,7 @@ HEREDOC;
 	 */
 	protected function _fetch_files()
 	{
-		$haystack = $this->tagdata;
+		$haystack = $this->EE->TMPL->tagdata;
 
 		// first up, let's substitute stylesheet= for minimee=, because we handle these special
 		if($this->type == 'css')
@@ -1434,7 +1434,7 @@ HEREDOC;
 		{
 			$this->cache[$this->type][$this->queue] = array(
 				'template' => $this->template,
-				'tagdata' => '',
+				'on_error' => '',
 				'filesdata' => array()
 			);
 		}
@@ -1446,8 +1446,8 @@ HEREDOC;
 			$this->cache[$this->type][$this->queue]['filesdata'][$priority] = array();
 		}
 		
-		// Append tagdata - used if queueing ever aborts from an error
-		$this->cache[$this->type][$this->queue]['tagdata'] .= $this->tagdata;
+		// Append $on_error
+		$this->cache[$this->type][$this->queue]['on_error'] .= $this->on_error;
 
 		// Add all files to the queue cache
 		foreach($this->filesdata as $filesdata)
