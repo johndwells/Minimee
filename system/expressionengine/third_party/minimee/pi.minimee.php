@@ -1051,14 +1051,14 @@ HEREDOC;
 		// check for cache file
 		if (file_exists(Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename)))
 		{
-			Minimee_helper::log('Cache file found: ' . $this->cache_filename, 3);
+			Minimee_helper::log('Cache file found: `' . $this->cache_filename . '`', 3);
 			$out = $this->_cache_tag();
 		}
 		
 		// No cache file found
 		else
 		{
-			Minimee_helper::log('Cache file not found.', 3);
+			Minimee_helper::log('Cache file not found: `' . $this->cache_filename . '`', 3);
 			$out = FALSE;
 		}
 
