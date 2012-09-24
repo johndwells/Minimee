@@ -1220,7 +1220,7 @@ HEREDOC;
 	 * @param String	Method name (e.g. display, link or embed)
 	 * @return Mixed	TRUE if delay, FALSE if not
 	 */
-	public function _postpone($method)
+	protected function _postpone($method)
 	{
 		// definitely do not postpone if EE is less than 2.4
 		if (version_compare(APP_VER, '2.4', '<'))
@@ -1464,7 +1464,7 @@ HEREDOC;
 	 * @param string either 'js' or 'css'
 	 * @return void
 	 */
-	public function _set_remote_mode()
+	protected function _set_remote_mode()
 	{
 
 		// let's only do this once per session
