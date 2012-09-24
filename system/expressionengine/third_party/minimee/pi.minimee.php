@@ -217,7 +217,7 @@ class Minimee {
 				}
 				
 				// there's no way this doesn't exist... right?
-				$out .= file_get_contents($name) . "\n";
+				$out .= file_get_contents($path) . "\n";
 			}
 	
 			// free memory where possible
