@@ -411,7 +411,6 @@ HEREDOC;
 	
 	/** 
 	 * Internal function for making tag strings
-	 * [Adapted from CodeIgniter Carabiner library]
 	 * 
 	 * @return	String containing an HTML tag reference to given reference
 	 */
@@ -420,7 +419,20 @@ HEREDOC;
 		// construct url
 		$url = Minimee_helper::remove_double_slashes($this->config->cache_url . '/' . $this->cache_filename, TRUE);
 
-		return str_replace('{minimee}', $url, $this->template);
+		return str_replace('{minimee}', $this->_cache_link(), $this->template);
+	}
+	// ------------------------------------------------------
+
+	
+	/** 
+	 * Internal function for making link to cache
+	 * 
+	 * @return	String containing an HTML tag reference to given reference
+	 */
+	protected function _cache_link()
+	{
+		// build link from cache url + cache filename
+		return Minimee_helper::remove_double_slashes($this->config->cache_url . '/' . $this->cache_filename, TRUE);
 	}
 	// ------------------------------------------------------
 
