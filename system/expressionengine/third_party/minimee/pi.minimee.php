@@ -420,7 +420,7 @@ HEREDOC;
 		// construct url
 		$url = Minimee_helper::remove_double_slashes($this->config->cache_url . '/' . $this->cache_filename, TRUE);
 
-		return str_replace('{minimee}', $this->_cache_link(), $this->template);
+		return str_replace('{minimee}', $this->_cache_url(), $this->template);
 	}
 	// ------------------------------------------------------
 
@@ -430,7 +430,7 @@ HEREDOC;
 	 * 
 	 * @return	String containing an HTML tag reference to given reference
 	 */
-	protected function _cache_link()
+	protected function _cache_url()
 	{
 		// build link from cache url + cache filename
 		return Minimee_helper::remove_double_slashes($this->config->cache_url . '/' . $this->cache_filename, TRUE);
