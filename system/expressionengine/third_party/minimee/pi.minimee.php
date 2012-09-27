@@ -113,33 +113,7 @@ class Minimee {
 	 */
 	public function display()
 	{
-		// try to postpone until template_post_parse
-		if ($out = $this->_postpone('display'))
-		{
-			return $out;
-		}
-
-		// to fill and return
-		$out = '';
-
-		// display any css tags
-		if ($css = strtolower($this->EE->TMPL->fetch_param('css')))
-		{
-			$this->queue = $css;
-			$this->type = 'css';
-			$out .= $this->_display();
-		}
-
-	
-		// display any js tags
-		if ($js = strtolower($this->EE->TMPL->fetch_param('js')))
-		{
-			$this->queue = $js;
-			$this->type = 'js';
-			$out .= $this->_display();
-		}
-
-		return $out;
+		return $this->tag();
 	}
 	// ------------------------------------------------------
 	
@@ -335,7 +309,34 @@ class Minimee {
 	 */
 	public function tag()
 	{
-		return $this->display();
+		// try to postpone until template_post_parse
+		if ($out = $this->_postpone('display'))
+		{
+			return $out;
+		}
+
+		// to fill and return
+		$out = '';
+		$this->out_type = 'tag';
+
+		// display any css tags
+		if ($css = strtolower($this->EE->TMPL->fetch_param('css')))
+		{
+			$this->queue = $css;
+			$this->type = 'css';
+			$out .= $this->_display();
+		}
+
+	
+		// display any js tags
+		if ($js = strtolower($this->EE->TMPL->fetch_param('js')))
+		{
+			$this->queue = $js;
+			$this->type = 'js';
+			$out .= $this->_display();
+		}
+
+		return $out;
 	}
 	// ------------------------------------------------------
 
