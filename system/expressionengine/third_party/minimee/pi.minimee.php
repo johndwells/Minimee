@@ -679,7 +679,7 @@ HEREDOC;
 				Minimee_helper::log('Fetched contents of `' . $file['name'] . '`.', 3);
 	
 				// minify contents and append to $cache
-				$cache .= $this->_minify($contents, $file['name'], $css_prepend_url);
+				$cache .= $this->_minify($this->type, $contents, $file['name'], $css_prepend_url);
 			}
 
 		endforeach;
@@ -1083,16 +1083,17 @@ HEREDOC;
 	/** 
 	 * Internal function for (maybe) minifying assets
 	 * 
+	 * @param	Type of asset to minify (css/js)
 	 * @param	Contents to be minified
-	 * @param	The name of the file being minified
-	 * @param	mixed A relative path to use, if provided
+	 * @param	The name of the file being minified (used for logging)
+	 * @param	mixed A relative path to use, if provided (for css minification)
 	 * @return	String (maybe) minified contents of file
 	 */
-	protected function _minify($contents, $filename, $rel = FALSE)
+	protected function _minify($type, $contents, $filename, $rel = FALSE)
 	{
 		$before = strlen($contents);
 	
-		switch ($this->type) :
+		switch ($type) :
 			
 			case 'js':
 			
