@@ -1264,7 +1264,7 @@ HEREDOC;
 			else
 			{
 				// base our needle off the calling tag
-				$needle = md5($this->EE->TMPL->tagproper);
+				$needle = sha1($this->EE->TMPL->tagproper);
 				
 				// save our tagparams to re-instate during calling of hook
 				$tagparams = $this->EE->TMPL->tagparams;
