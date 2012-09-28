@@ -53,7 +53,9 @@ class Minimee {
 	public $stylesheet_query		= FALSE;	// Boolean of whether to fetch stylesheets from DB
 	public $template				= '';		// the template with which to render css link or js script tags
 	public $type					= '';		// 'css' or 'js'
+	public $out_type				= '';		// 'url', 'tag', or 'embed'
 	public $on_error				= '';		// what to return on error (likely TMPL->tagdata)
+	public $out_delimiter			= array('embed' => "\n", 'url' => ',', 'tag' => '');
 
 
 	/**
@@ -100,7 +102,12 @@ class Minimee {
 		// set local version of tagdata
 		$this->on_error = $this->EE->TMPL->tagdata;
 
+		// our asset type
 		$this->type = 'css';
+
+		// type of output
+		$this->out_type = 'tag';
+
 		return $this->_run();
 	}
 	// ------------------------------------------------------
@@ -113,6 +120,7 @@ class Minimee {
 	 */
 	public function display()
 	{
+		// alias of tag
 		return $this->tag();
 	}
 	// ------------------------------------------------------
@@ -121,88 +129,19 @@ class Minimee {
 	/**
 	 * Plugin function: exp:minimee:embed
 	 * 
+	 * This fetches files from our queue and embeds the cache
+	 * contents inline. It has no on_error value, and
+	 * the asset type is determined by the queue 
+	 * 
 	 * @return mixed string or empty
 	 */
 	public function embed()
 	{
-		// try to postpone until template_post_parse
-		if ($out = $this->_postpone('embed'))
-		{
-			return $out;
-		}
-	
-		// make sure only one is being specified
-		if ($this->EE->TMPL->fetch_param('js') && $this->EE->TMPL->fetch_param('css'))
-		{
-			return $this->_abort('When using exp:minimee:embed, you may not specify JS and CSS file types together.');
-		}
+		// type of output
+		$this->out_type = 'embed';
 
-		if ($this->EE->TMPL->fetch_param('js'))
-		{
-			$this->queue = $this->EE->TMPL->fetch_param('js');
-			$this->type = 'js';
-		}
-
-		if ($this->EE->TMPL->fetch_param('css'))
-		{
-			$this->queue = $this->EE->TMPL->fetch_param('css');
-			$this->type = 'css';
-		}
-
-		// abort error if no queue was provided		
-		if ( ! $this->queue)
-		{
-			return $this->_abort('When using exp:minimee:embed, you must specify a queue name.');
-		}
-		
-		/**
-		 * Processes things like normal, but at the last minute
-		 * we grab the contents of the cached file, and return directly to our template.
-		 */
-		try
-		{
-			// this is what we'd normally return to a template
-			$out = $this->_fetch_params()
-						->_fetch_queue()
-						->_flightcheck()
-						->_check_headers()
-						->_process();
-	
-			// now find links to cached assets
-			$matches = Minimee_helper::preg_match_by_type($out, $this->type);
-			if ( ! $matches)
-			{
-				throw new Exception('No files found to return.');
-			}
-			
-			// replace the url with path
-			$paths = Minimee_helper::replace_url_with($this->config->cache_url, $this->config->cache_path, $matches[1]);
-	
-			// clear $out so we can replace with code to embed
-			$out = '';
-	
-			// fetch contents of each file
-			foreach ($paths as $path)
-			{
-				// strip timestamp
-				if (strpos($path, '?') !== FALSE)
-				{
-					$name = substr($path, 0, strpos($path, '?'));
-				}
-				
-				// there's no way this doesn't exist... right?
-				$out .= file_get_contents($path) . "\n";
-			}
-	
-			// free memory where possible
-			unset($matches, $paths);
-	
-			return $out;
-		}
-		catch (Exception $e)
-		{
-			return $this->_abort($e);
-		}
+		// let's go
+		return $this->_run('embed', TRUE);
 	}
 	// ------------------------------------------------------
 
@@ -230,7 +169,12 @@ class Minimee {
 		// set local version of tagdata
 		$this->on_error = $this->EE->TMPL->tagdata;
 
+		// our asset type
 		$this->type = 'js';
+
+		// type of output
+		$this->out_type = 'tag';
+
 		return $this->_run();
 	}
 	// ------------------------------------------------------
@@ -239,104 +183,43 @@ class Minimee {
 	/**
 	 * Plugin function: exp:minimee:link
 	 * 
-	 * Rather than returning the tags or cache contents, simply return a link to cache(s)
+	 * Alias to exp:minimee:url
 	 */
 	public function link()
 	{
-		// try to postpone until template_post_parse
-		if ($out = $this->_postpone('link'))
-		{
-			return $out;
-		}
-	
-		// make sure only one is being specified
-		if ($this->EE->TMPL->fetch_param('js') && $this->EE->TMPL->fetch_param('css'))
-		{
-			return $this->_abort('When using exp:minimee:link, you may not specify JS and CSS file types together.');
-		}
+		return $this->url();
+	}
+	// ------------------------------------------------------
 
-		if ($this->EE->TMPL->fetch_param('js'))
-		{
-			$this->queue = $this->EE->TMPL->fetch_param('js');
-			$this->type = 'js';
-		}
 
-		if ($this->EE->TMPL->fetch_param('css'))
-		{
-			$this->queue = $this->EE->TMPL->fetch_param('css');
-			$this->type = 'css';
-		}
+	/**
+	 * Plugin function: exp:minimee:url
+	 * 
+	 * Rather than returning the tags or cache contents, simply return URL to cache(s)
+	 */
+	public function url()
+	{
+		// set our output type		
+		$this->out_type = 'url';
 
-		// abort early if no queue was provided		
-		if ( ! $this->queue)
-		{
-			return $this->_abort('When using exp:minimee:link, you must specify a queue name.');
-		}
-		
-		/**
-		 * Processes things like normal, but only return the links to cache file(s).
-		 */
-		try
-		{
-			// this is what we'd normally return to a template
-			$out = $this->_fetch_params()
-						->_fetch_queue()
-						->_flightcheck()
-						->_check_headers()
-						->_process();
-
-			// now find links to cached assets
-			$matches = Minimee_helper::preg_match_by_type($out, $this->type);
-	
-			if ( ! $matches)
-			{
-				throw new Exception('No files found to return.');
-			}
-
-			// return a pipe-delimited string
-			return implode('|', $matches[1]);
-		}
-		catch (Exception $e)
-		{
-			return $this->_abort($e);
-		}
+		// let's go
+		return $this->_run('url', TRUE);
 	}
 	// ------------------------------------------------------
 	
 
 	/**
-	 * Alias of exp:minimee:display
+	 * Plugin function: exp:minimee:display
+	 *
+	 * Return the tags for cache
 	 */
 	public function tag()
 	{
-		// try to postpone until template_post_parse
-		if ($out = $this->_postpone('display'))
-		{
-			return $out;
-		}
-
-		// to fill and return
-		$out = '';
+		// set output type
 		$this->out_type = 'tag';
 
-		// display any css tags
-		if ($css = strtolower($this->EE->TMPL->fetch_param('css')))
-		{
-			$this->queue = $css;
-			$this->type = 'css';
-			$out .= $this->_display();
-		}
-
-	
-		// display any js tags
-		if ($js = strtolower($this->EE->TMPL->fetch_param('js')))
-		{
-			$this->queue = $js;
-			$this->type = 'js';
-			$out .= $this->_display();
-		}
-
-		return $out;
+		// let's go
+		return $this->_run('tag', TRUE);
 	}
 	// ------------------------------------------------------
 
@@ -365,8 +248,8 @@ CSS:
 
 JS:
 {exp:minimee:js}
-	<script type="text/javascript" src="scripts/jquery.form.js"></script>
-	<script type="text/javascript" src="scripts/jquery.easing.1.3.js"></script>
+	<script type="text/javascript" src="/scripts/jquery.form.js"></script>
+	<script type="text/javascript" src="/scripts/jquery.easing.1.3.js"></script>
 {/exp:minimee:js}
 
 HTML (for EE2.4+):
@@ -408,8 +291,106 @@ HEREDOC;
 		}
 	}
 	// ------------------------------------------------------
+
+
+	/**
+	 * Get or greate our cache
+	 *
+	 * Here handles the rare combine="no" circumstances.
+	 * @return String	Final tag output
+	 */
+	protected function _cache()
+	{
+		// what to eventually return
+		$return ='';
+
+		// combining files?
+		if ($this->config->is_yes('combine_' . $this->type))
+		{
+			// first try to fetch from cache
+			$return = $this->_get_cache();
+			
+			if ($return === FALSE)
+			{
+				// write new cache
+				$return = $this->_create_cache();
+			}
+		}
+
+		// manual work to combine each file in turn
+		else
+		{
+			$filesdata = $this->filesdata;
+			$this->filesdata = array();
+			$out = '';
+			$return = array();
+			foreach($filesdata as $file)
+			{
+				$this->filesdata = array($file);
+
+				// first try to fetch from cache
+				$out = $this->_get_cache();
+				
+				if ($out === FALSE)
+				{
+					// write new cache
+					$out = $this->_create_cache();
+				}
+	
+				$return[] = $out;
+			}
+
+			// glue output based on type
+			switch($this->out_type) :
+				case 'embed' :
+					$return = implode($this->out_delimiter[$this->out_type], $return);
+				break;
+
+				case 'url' :
+					$return = implode($this->out_delimiter[$this->out_type], $return);
+				break;
+
+				case 'tag' :
+				default :
+					$return = implode($this->out_delimiter[$this->out_type], $return);
+				break;
+			endswitch;
+
+			unset($out);
+		}
+		
+		return $return;
+
+	}
+	// ------------------------------------------------------
 	
 	
+	/** 
+	 * Internal function to return contents of cache file
+	 * 
+	 * @return	Contents of cache (css or js)
+	 */
+	protected function _cache_contents()
+	{
+		// silently get and return cache contents
+		return @file_get_contents($this->_cache_path());
+	}
+	// ------------------------------------------------------
+
+
+	/** 
+	 * Internal function for making link to cache
+	 * 
+	 * @return	String containing an HTML tag reference to given reference
+	 */
+	protected function _cache_path()
+	{
+		// build link from cache url + cache filename
+		return Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename, TRUE);
+	}
+	// ------------------------------------------------------
+
+
 	/** 
 	 * Internal function for making tag strings
 	 * 
@@ -417,9 +398,7 @@ HEREDOC;
 	 */
 	protected function _cache_tag()
 	{
-		// construct url
-		$url = Minimee_helper::remove_double_slashes($this->config->cache_url . '/' . $this->cache_filename, TRUE);
-
+		// inject our cache url into template and return
 		return str_replace('{minimee}', $this->_cache_url(), $this->template);
 	}
 	// ------------------------------------------------------
@@ -692,7 +671,7 @@ HEREDOC;
 		$this->_write_cache($cache);
 
 		// create our output tag
-		$out = $this->_cache_tag();
+		$out = $this->_return();
 
 		// free memory where possible
 		unset($cache, $contents, $css_prepend_url, $runtime);
@@ -728,30 +707,6 @@ HEREDOC;
 
 		// put it all together
 		return $this->cache_filename_md5 . '.' . $this->cache_lastmodified . $cachebust . '.' . $this->type;
-	}
-	// ------------------------------------------------------
-	
-
-	/**
-	 * Processes and displays queue
-	 *
-	 * @return string The final output from Minimee::out()
-	 */	
-	protected function _display()
-	{
-		try
-		{
-			return $this->_fetch_params()
-						->_fetch_queue()
-						->_flightcheck()
-						->_check_headers()
-						->_process();
-
-		}
-		catch (Exception $e)
-		{
-			return $this->_abort($e);
-		}
 	}
 	// ------------------------------------------------------
 	
@@ -860,7 +815,7 @@ HEREDOC;
 		
 		// order by priority
 		ksort($this->cache[$this->type][$this->queue]['filesdata']);
-		
+
 		// now reduce down to one array
 		$filesdata = array();
 		foreach($this->cache[$this->type][$this->queue]['filesdata'] as $fdata)
@@ -1065,7 +1020,7 @@ HEREDOC;
 		if (file_exists(Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename)))
 		{
 			Minimee_helper::log('Cache file found: `' . $this->cache_filename . '`', 3);
-			$out = $this->_cache_tag();
+			$out = $this->_return();
 		}
 		
 		// No cache file found
@@ -1290,87 +1245,101 @@ HEREDOC;
 
 
 	/**
-	 * Called by Minimee:css and Minimee:js, performs basic run command
+	 * Return contents as determined by $this->out_type
 	 * 
 	 * @return mixed string or empty
 	 */
-	protected function _run()
+	protected function _return()
 	{
-		try
-		{
-			$this->_fetch_params()
-				 ->_fetch_files();
+		switch($this->out_type) :
+			case 'embed' :
+				return $this->_cache_contents();
+			break;
 
-			// Are we queueing for later? If so, just save in session
-			if ($this->queue)
-			{
-				return $this->_set_queue();
-			}
+			case 'url' :
+				return $this->_cache_url();
+			break;
 
-			return $this->_flightcheck()
-						->_check_headers()
-						->_process();
-			
-		}
-		catch (Exception $e)
-		{
-			return $this->_abort($e);
-		}
+			case 'tag' :
+			default :
+				return $this->_cache_tag();
+			break;
+
+		endswitch;
 	}
 	// ------------------------------------------------------
 
 
 	/**
-	 * Process our filesdata
-	 *
-	 * The main purpose of this method is to handle combine="no" circumstances.
-	 * @return String	Final tag output
+	 * Called by Minimee:css and Minimee:js, performs basic run command
+	 * 
+	 * @param mixed  Name of method to pass to postpone
+	 * @param bool   Whether we should check for a queue or not
+	 * @return mixed string or empty
 	 */
-	protected function _process()
+	protected function _run($method = FALSE, $from_queue = FALSE)
 	{
-		// what to eventually return
-		$return ='';
-
-		// combining files?
-		if ($this->config->is_yes('combine_' . $this->type))
+		// try to postpone until template_post_parse
+		if ($method && $out = $this->_postpone($method))
 		{
-			// first try to fetch from cache
-			$return = $this->_get_cache();
-			
-			if ($return === FALSE)
-			{
-				// write new cache
-				$return = $this->_create_cache();
-			}
+			return $out;
 		}
 
-		// manual work to combine each file in turn
-		else
+		try
 		{
-			$filesdata = $this->filesdata;
-			$this->filesdata = array();
-			$out = '';
-			foreach($filesdata as $file)
+			// should we be operating off file(s) stored in queue?
+			if($from_queue)
 			{
-				$this->filesdata = array($file);
-
-				// first try to fetch from cache
-				$out = $this->_get_cache();
-				
-				if ($out === FALSE)
+				if ($this->EE->TMPL->fetch_param('js'))
 				{
-					// write new cache
-					$out = $this->_create_cache();
+					$this->queue = $this->EE->TMPL->fetch_param('js');
+					$this->type = 'js';
 				}
-	
-				$return .= $out;
-			}
-			
-			unset($out);
-		}
-		
-		return $return;
 
+				if ($this->EE->TMPL->fetch_param('css'))
+				{
+					$this->queue = $this->EE->TMPL->fetch_param('css');
+					$this->type = 'css';
+				}
+
+				// abort error if no queue was provided		
+				if ( ! $this->queue)
+				{
+					return $this->_abort('You must specify a queue name.');
+				}
+
+				// fetch our parameters
+				$this->_fetch_params();
+
+				// OK, let's fetch from our queue
+				$this->_fetch_queue();
+			}
+
+			// fetch our files
+			else
+			{
+				// fetch our parameters
+				$this->_fetch_params();
+
+				// fetch our files
+				$this->_fetch_files();
+
+				// should we set our files to queue for later?
+				if($this->queue)
+				{
+					return $this->_set_queue();
+				}
+			}
+
+			// the rest is easy
+			return $this->_flightcheck()
+						->_check_headers()
+						->_cache();
+		}
+		catch (Exception $e)
+		{
+			return $this->_abort($e);
+		}
 	}
 	// ------------------------------------------------------
 
