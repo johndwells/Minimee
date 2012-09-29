@@ -11,6 +11,7 @@ require_once PATH_THIRD . 'minimee/classes/Minimee_config.php';
  */
 class Minimee_helper {
 
+
 	/**
 	 * Logging levels
 	 */
@@ -19,7 +20,8 @@ class Minimee_helper {
 		2 => 'DEBUG',
 		3 => 'INFO'
 	);
-	
+
+
 	/**
 	 * Our 'Singleton' config
 	 */
@@ -56,18 +58,12 @@ class Minimee_helper {
 	 *
 	 * @return 	Array	Instance Minimee_config
 	 */
-	public static function config($extend = array())
+	public static function config()
 	{
 		if (self::$_config === FALSE)
 		{
 			self::$_config = new Minimee_config();
 			self::$_config->init();
-		}
-		
-		// 'extend' our defaults with runtime settings?
-		if ($extend)
-		{
-			self::$_config->extend($extend);
 		}
 		
 		return self::$_config;

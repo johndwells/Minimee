@@ -18,12 +18,12 @@ require_once PATH_THIRD . 'minimee/classes/Minimee_helper.php';
 // ------------------------------------------------------------------------
 
 /**
- * Minimee API
+ * Minimee Library
  * @author John D Wells <http://johndwells.com>
  * @license http://www.opensource.org/licenses/bsd-license.php BSD license
  * @link	http://johndwells.com/software/minimee
  */
-class Minimee_API {
+class Minimee_lib {
 
 	/**
 	 * EE, obviously
@@ -61,10 +61,10 @@ class Minimee_API {
 	/**
 	 * Constructor
 	 *
-	 * @param Object 	Instance of Minimee_config
+	 * @param Mixed 	Instance of Minimee_config, or Array to be passed to Minimee_config
 	 * @return void
 	 */
-	public function __construct($config)
+	public function __construct($config = array())
 	{
 		// got EE?
 		$this->EE =& get_instance();
@@ -73,12 +73,14 @@ class Minimee_API {
 		$this->cache =& Minimee_helper::cache();
 
 		// set instance of our config object
-		if( ! $config instanceof Minimee_config)
+		if($config instanceof Minimee_config)
 		{
-			throw new Exception('Minimee_api needs instance of Minimee_config to run.');
+			$this->config = $config;
 		}
-
-		$this->config = $config;
+		else
+		{
+			$this->config = new Minimee_config($config);
+		}
 	}
 	// ------------------------------------------------------
 
@@ -969,5 +971,5 @@ class Minimee_API {
 }
 // END
 	
-/* End of file Minimee_api.php */ 
-/* Location: ./system/expressionengine/third_party/minimee/classes/Minimee_api.php */
+/* End of file Minimee_lib.php */ 
+/* Location: ./system/expressionengine/third_party/minimee/classes/Minimee_lib.php */
