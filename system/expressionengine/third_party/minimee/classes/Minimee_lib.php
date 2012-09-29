@@ -382,8 +382,8 @@ class Minimee_lib {
 
 		foreach ($files as $key => $file)
 		{
-			// try to avoid duplicates
-			if (in_array($file, $dups)) continue;
+			// try to avoid duplicates and emptyness
+			if (in_array($file, $dups) || ! $file) continue;
 		
 			$dups[] = $file['name'];
 		
