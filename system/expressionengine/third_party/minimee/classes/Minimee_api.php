@@ -84,6 +84,42 @@ class Minimee_API {
 
 
 	/**
+	 * Convenience wrapper for running CSS minification on a batch of files
+	 *
+	 * @param mixed 	String or array of files to cache
+	 * @return mixed 	String or array of cache filename(s)
+	 */
+	public function css($files)
+	{
+		$this->type = 'css';
+		
+		return $this->set_filesdata($files)
+					->flightcheck()
+					->check_headers()
+					->cache();
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Convenience wrapper for running JS minification on a batch of files
+	 *
+	 * @param mixed 	String or array of files to cache
+	 * @return mixed 	String or array of cache filename(s)
+	 */
+	public function js($files)
+	{
+		$this->type = 'css';
+		
+		return $this->set_filesdata($files)
+					->flightcheck()
+					->check_headers()
+					->cache();
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Get or greate our cache
 	 *
 	 * Here handles the rare combine="no" circumstances.
@@ -397,6 +433,9 @@ class Minimee_API {
 
 		// free memory where possible
 		unset($dups);
+
+		// chaining
+		return $this;
 	}
 	// ------------------------------------------------------
 
