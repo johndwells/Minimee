@@ -77,19 +77,25 @@ class Minimee_config {
 	/**
 	 * Constructor function
 	 *
-	 * If an array is passed, then we clearly expect to init itself
+	 * If an array is passed, then we will avoid our own internal init
 	 * 
 	 * @param Array	An array of settings to extend runtime
 	 */
-	public function __construct($extend = array())
+	public function __construct($override = array())
 	{
-		$this->EE =& get_instance();
-		
-		// by 'extend' we mean merge runtime with defaults
-		if ($extend)
+		if ($override)
 		{
-			// grab our config settings, will become our defaults
-			$this->init()->extend($extend);
+			Minimee_helper::log('Settings have been passed via construct().', 3);
+
+			// make a complete & sanitised settings array, and set as our default
+			$this->_default = $this->sanitise_settings(array_merge($this->_allowed, $override));
+		}
+		else
+		{
+			// We need EE for normal operations
+			$this->EE =& get_instance();
+		
+			$this->init();
 		}
 	}
 	// ------------------------------------------------------

@@ -114,7 +114,7 @@ class Minimee {
 		$this->config = Minimee_helper::config();
 
 		// instantiate our API
-		$this->API = new Minimee_api();
+		$this->API = new Minimee_api($this->config);
 	}
 	// ------------------------------------------------------
 

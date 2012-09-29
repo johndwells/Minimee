@@ -44,7 +44,7 @@ class Minimee_API {
 
 
 	/**
-	 * Our magical config class
+	 * Minimee_config
 	 */
 	public $config;
 
@@ -61,9 +61,10 @@ class Minimee_API {
 	/**
 	 * Constructor
 	 *
+	 * @param Object 	Instance of Minimee_config
 	 * @return void
 	 */
-	public function __construct()
+	public function __construct($config)
 	{
 		// got EE?
 		$this->EE =& get_instance();
@@ -71,8 +72,8 @@ class Minimee_API {
 		// grab reference to our cache
 		$this->cache =& Minimee_helper::cache();
 
-		// grab instance of our config object
-		$this->config = Minimee_helper::config();
+		// set instance of our config object
+		$this->config = $config;
 	}
 	// ------------------------------------------------------
 
