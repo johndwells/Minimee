@@ -385,8 +385,8 @@ class Minimee_lib {
 			// try to avoid duplicates and emptyness
 			if (in_array($file, $dups) || ! $file) continue;
 		
-			$dups[] = $file['name'];
-		
+			$dups[] = $file;
+
 			$this->filesdata[$key] = array(
 				'name' => $file,
 				'type' => NULL,
