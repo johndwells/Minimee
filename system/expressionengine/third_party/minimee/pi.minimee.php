@@ -35,9 +35,27 @@ $plugin_info = array(
 class Minimee {
 
 	/**
+	 * Our API
+	 */
+	private $API 					= NULL;
+
+
+	/**
 	 * EE, obviously
 	 */
-	private $EE;
+	private $EE 					= NULL;
+
+
+	/**
+	 * Reference to our cache
+	 */
+	public $cache 					= NULL;
+
+
+	/**
+	 * Our magical config class
+	 */
+	public $config;
 
 
 	/**
@@ -47,21 +65,33 @@ class Minimee {
 
 
 	/**
+	 * What to return if error
+	 */
+	public $on_error				= '';
+
+
+	/**
+	 * Type of format/content to return
+	 */
+	public $out_delimiter			= array('embed' => "\n", 'url' => ',', 'tag' => '');
+
+
+	/**
+	 * Type of format/content to return
+	 */
+	public $out_type 				= '';
+
+
+	/**
+	 * Template with which to render css link or js script tags
+	 */
+	public $template				= '';
+
+
+	/**
 	 * Name of our queue, if running
 	 */
 	public $queue					= '';
-
-
-	/**
-	 * Our API
-	 */
-	public $API;
-
-
-	/**
-	 * Reference to our cache
-	 */
-	public $cache;
 
 
 	// ------------------------------------------------------
@@ -80,6 +110,9 @@ class Minimee {
 		// grab reference to our cache
 		$this->cache =& Minimee_helper::cache();
 
+		// grab instance of our config object
+		$this->config = Minimee_helper::config();
+
 		// instantiate our API
 		$this->API = new Minimee_api();
 	}
@@ -94,13 +127,13 @@ class Minimee {
 	public function css()
 	{
 		// set local version of tagdata
-		$this->API->on_error = $this->EE->TMPL->tagdata;
+		$this->on_error = $this->EE->TMPL->tagdata;
 
 		// our asset type
 		$this->API->type = 'css';
 
 		// type of output
-		$this->API->out_type = 'tag';
+		$this->out_type = 'tag';
 
 		return $this->_run();
 	}
@@ -132,7 +165,7 @@ class Minimee {
 	public function embed()
 	{
 		// type of output
-		$this->API->out_type = 'embed';
+		$this->out_type = 'embed';
 
 		// let's go
 		return $this->_run('embed', TRUE);
@@ -161,13 +194,13 @@ class Minimee {
 	public function js()
 	{
 		// set local version of tagdata
-		$this->API->on_error = $this->EE->TMPL->tagdata;
+		$this->on_error = $this->EE->TMPL->tagdata;
 
 		// our asset type
 		$this->API->type = 'js';
 
 		// type of output
-		$this->API->out_type = 'tag';
+		$this->out_type = 'tag';
 
 		return $this->_run();
 	}
@@ -195,7 +228,7 @@ class Minimee {
 	public function url()
 	{
 		// set our output type		
-		$this->API->out_type = 'url';
+		$this->out_type = 'url';
 
 		// let's go
 		return $this->_run('url', TRUE);
@@ -211,7 +244,7 @@ class Minimee {
 	public function tag()
 	{
 		// set output type
-		$this->API->out_type = 'tag';
+		$this->out_type = 'tag';
 
 		// let's go
 		return $this->_run('tag', TRUE);
@@ -277,14 +310,66 @@ HEREDOC;
 		Minimee_helper::log($log, 1);
 
 		// Return our on_error content, whether from queue or current run
-		if ($this->queue && isset($this->API->cache[$this->API->type][$this->queue]))
+		if ($this->queue && isset($this->cache[$this->API->type][$this->queue]))
 		{
-			return $this->API->cache[$this->API->type][$this->queue]['on_error'];
+			return $this->cache[$this->API->type][$this->queue]['on_error'];
 		}
 		else
 		{
-			return $this->API->on_error;
+			return $this->on_error;
 		}
+	}
+	// ------------------------------------------------------
+
+
+	/** 
+	 * Internal function to return contents of cache file
+	 * 
+	 * @return	Contents of cache (css or js)
+	 */
+	protected function _cache_contents($filename)
+	{
+		// silently get and return cache contents
+		return @file_get_contents($this->_cache_path($filename));
+	}
+	// ------------------------------------------------------
+
+
+	/** 
+	 * Internal function for making link to cache
+	 * 
+	 * @return	String containing an HTML tag reference to given reference
+	 */
+	protected function _cache_path($filename)
+	{
+		// build link from cache url + cache filename
+		return Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $filename, TRUE);
+	}
+	// ------------------------------------------------------
+
+
+	/** 
+	 * Internal function for making tag strings
+	 * 
+	 * @return	String containing an HTML tag reference to given reference
+	 */
+	protected function _cache_tag($filename)
+	{
+		// inject our cache url into template and return
+		return str_replace('{minimee}', $this->_cache_url($filename), $this->template);
+	}
+	// ------------------------------------------------------
+
+	
+	/** 
+	 * Internal function for making link to cache
+	 * 
+	 * @return	String containing an HTML tag reference to given reference
+	 */
+	protected function _cache_url($filename)
+	{
+		// build link from cache url + cache filename
+		return Minimee_helper::remove_double_slashes($this->config->cache_url . '/' . $filename, TRUE);
 	}
 	// ------------------------------------------------------
 
@@ -322,7 +407,7 @@ HEREDOC;
 		}
 
 		// set our tag template
-		$this->API->template = str_replace($matches[1][0], '{minimee}', $matches[0][0]);
+		$this->template = str_replace($matches[1][0], '{minimee}', $matches[0][0]);
 		
 		// set our files & filesdata arrays
 		$this->API->set_filesdata($matches[1]);
@@ -380,29 +465,36 @@ HEREDOC;
 	 */	
 	protected function _fetch_queue()
 	{
-		if ( ! isset($this->API->cache[$this->API->type][$this->queue]))
+		if ( ! isset($this->cache[$this->API->type][$this->queue]))
 		{
 			throw new Exception('Could not find a queue of files by the name of \'' . $this->queue . '\'.');
 		}
 
 		// set our tag template
-		$this->API->template = $this->API->cache[$this->API->type][$this->queue]['template'];
+		$this->template = $this->cache[$this->API->type][$this->queue]['template'];
 		
 		// order by priority
-		ksort($this->API->cache[$this->API->type][$this->queue]['filesdata']);
+		ksort($this->cache[$this->API->type][$this->queue]['filesdata']);
 
-		// now reduce down to one array
-		$filesdata = array();
-		foreach($this->API->cache[$this->API->type][$this->queue]['filesdata'] as $fdata)
+		$queue = array();
+		// first reduce down to one array
+		foreach($this->cache[$this->API->type][$this->queue]['filesdata'] as $fdata)
 		{
-			$filesdata = array_merge($filesdata, $fdata);
+			$queue = array_merge($queue, $fdata);
 		}
-		
+
+		// now extract just the filenames to pass to API->set_filesdata
+		$filesdata = array();
+		foreach($queue as $fdata)
+		{
+			$filesdata[] = $fdata['name'];
+		}
+
 		// clear filesdata just in case
 		$this->API->filesdata = array();
 
 		// set our Minimee::filesdata array
-		$this->API->set_filesdata($filesdata, TRUE);
+		$this->API->set_filesdata($filesdata);
 
 		// No files found?
 		if ( ! is_array($this->API->filesdata) OR count($this->API->filesdata) == 0)
@@ -411,7 +503,7 @@ HEREDOC;
 		}
 		
 		// cleanup
-		unset($filesdata);
+		unset($queue, $filesdata);
 		
 		// chaining
 		return $this;
@@ -450,12 +542,12 @@ HEREDOC;
 				// save our tagparams to re-instate during calling of hook
 				$tagparams = $this->EE->TMPL->tagparams;
 				
-				if ( ! isset($this->API->cache['template_post_parse']))
+				if ( ! isset($this->cache['template_post_parse']))
 				{
-					$this->API->cache['template_post_parse'] = array();
+					$this->cache['template_post_parse'] = array();
 				}
 				
-				$this->API->cache['template_post_parse'][$needle] = array(
+				$this->cache['template_post_parse'][$needle] = array(
 					'method' => $method,
 					'tagparams' => $tagparams
 				);
@@ -466,6 +558,61 @@ HEREDOC;
 				return LD.$needle.RD;
 			}
 		}
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Return contents as determined by $this->out_type
+	 * 
+	 * @return mixed string or empty
+	 */
+	protected function _return($filenames)
+	{
+		// what we will eventually return
+		$return = array();
+
+		// cast to array for ease
+		if( ! is_array($filenames))
+		{
+			$filenames = array($filenames);
+		}
+
+		foreach($filenames as $filename)
+		{
+			switch($this->out_type) :
+				case 'embed' :
+					$return[] = $this->_cache_contents($filename);
+				break;
+
+				case 'url' :
+					$return[] = $this->_cache_url($filename);
+				break;
+
+				case 'tag' :
+				default :
+					$return[] = $this->_cache_tag($filename);
+				break;
+
+			endswitch;
+		}
+
+		// glue output based on type
+		switch($this->out_type) :
+			case 'embed' :
+				return implode($this->out_delimiter[$this->out_type], $return);
+			break;
+
+			case 'url' :
+				return implode($this->out_delimiter[$this->out_type], $return);
+			break;
+
+			case 'tag' :
+			default :
+				return implode($this->out_delimiter[$this->out_type], $return);
+			break;
+		endswitch;
+
 	}
 	// ------------------------------------------------------
 
@@ -531,10 +678,13 @@ HEREDOC;
 				}
 			}
 
-			// the rest is easy
-			return $this->API->flightcheck()
+			$filenames = $this->API->flightcheck()
 							 ->check_headers()
 							 ->cache();
+
+			// format and return
+			return $this->_return($filenames);
+
 		}
 		catch (Exception $e)
 		{
@@ -553,16 +703,16 @@ HEREDOC;
 	protected function _set_queue()
 	{
 		// be sure we have a cache set up
-		if ( ! isset($this->API->cache[$this->API->type]))
+		if ( ! isset($this->cache[$this->API->type]))
 		{
-			$this->API->cache[$this->API->type] = array();
+			$this->cache[$this->API->type] = array();
 		}
 
 		// create new session array for this queue
-		if ( ! isset($this->API->cache[$this->API->type][$this->queue]))
+		if ( ! isset($this->cache[$this->API->type][$this->queue]))
 		{
-			$this->API->cache[$this->API->type][$this->queue] = array(
-				'template' => $this->API->template,
+			$this->cache[$this->API->type][$this->queue] = array(
+				'template' => $this->template,
 				'on_error' => '',
 				'filesdata' => array()
 			);
@@ -570,18 +720,18 @@ HEREDOC;
 		
 		// be sure we have a priority key in place
 		$priority = (int) $this->EE->TMPL->fetch_param('priority', 0);
-		if ( ! isset($this->API->cache[$this->API->type][$this->queue]['filesdata'][$priority]))
+		if ( ! isset($this->cache[$this->API->type][$this->queue]['filesdata'][$priority]))
 		{
-			$this->API->cache[$this->API->type][$this->queue]['filesdata'][$priority] = array();
+			$this->cache[$this->API->type][$this->queue]['filesdata'][$priority] = array();
 		}
 		
 		// Append $on_error
-		$this->API->cache[$this->API->type][$this->queue]['on_error'] .= $this->API->on_error;
+		$this->cache[$this->API->type][$this->queue]['on_error'] .= $this->on_error;
 
 		// Add all files to the queue cache
 		foreach($this->API->filesdata as $filesdata)
 		{
-			$this->API->cache[$this->API->type][$this->queue]['filesdata'][$priority][] = $filesdata;
+			$this->cache[$this->API->type][$this->queue]['filesdata'][$priority][] = $filesdata;
 		}
 	}
 	// ------------------------------------------------------

@@ -204,7 +204,6 @@ class Minimee_helper {
 	/**
 	 * Helper function to parse content looking for CSS and JS tags.
 	 * Returns array of links found.
-
 	 * @param 	string	String to search
 	 * @param 	string	Which type of tags to search for - CSS or JS
 	 * @return 	array	Array of found matches

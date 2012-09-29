@@ -40,11 +40,7 @@ class Minimee_API {
 	public $filesdata				= array();	// array of assets to process
 	public $remote_mode				= '';		// 'fgc' or 'curl'
 	public $stylesheet_query		= FALSE;	// Boolean of whether to fetch stylesheets from DB
-	public $template				= '';		// the template with which to render css link or js script tags
 	public $type					= '';		// 'css' or 'js'
-	public $out_type				= '';		// 'url', 'tag', or 'embed'
-	public $on_error				= '';		// what to return on error (likely TMPL->tagdata)
-	public $out_delimiter			= array('embed' => "\n", 'url' => ',', 'tag' => '');
 
 
 	/**
@@ -85,24 +81,24 @@ class Minimee_API {
 	 * Get or greate our cache
 	 *
 	 * Here handles the rare combine="no" circumstances.
-	 * @return String	Final tag output
+	 * @return mixed 	String or array of cache filename(s)
 	 */
 	public function cache()
 	{
-		// what to eventually return
-		$return ='';
-
 		// combining files?
 		if ($this->config->is_yes('combine_' . $this->type))
 		{
-			// first try to fetch from cache
-			$return = $this->_get_cache();
-			
-			if ($return === FALSE)
+			// what to eventually return
+			$return = '';
+
+			// first try to fetch from cache			
+			if ($this->_get_cache() === FALSE)
 			{
 				// write new cache
-				$return = $this->_create_cache();
+				$this->_create_cache();
 			}
+
+			$return = $this->cache_filename;
 		}
 
 		// manual work to combine each file in turn
@@ -117,38 +113,20 @@ class Minimee_API {
 				$this->filesdata = array($file);
 
 				// first try to fetch from cache
-				$out = $this->_get_cache();
-				
-				if ($out === FALSE)
+				if ($this->_get_cache() === FALSE)
 				{
 					// write new cache
-					$out = $this->_create_cache();
+					$this->_create_cache();
 				}
 	
-				$return[] = $out;
+				$return[] = $this->cache_filename;
 			}
-
-			// glue output based on type
-			switch($this->out_type) :
-				case 'embed' :
-					$return = implode($this->out_delimiter[$this->out_type], $return);
-				break;
-
-				case 'url' :
-					$return = implode($this->out_delimiter[$this->out_type], $return);
-				break;
-
-				case 'tag' :
-				default :
-					$return = implode($this->out_delimiter[$this->out_type], $return);
-				break;
-			endswitch;
 
 			unset($out);
 		}
 		
+		// return string or array
 		return $return;
-
 	}
 	// ------------------------------------------------------
 
@@ -364,48 +342,37 @@ class Minimee_API {
 	 * @param array array of files
 	 * @return void
 	 */
-	public function set_filesdata($files, $from_queue = FALSE) {
-	
+	public function set_filesdata($files)
+	{
 		$dups = array();
 
 		foreach ($files as $key => $file)
 		{
-			// if we are receiving these from the queue, no need to calculate ALL of the below
-			if ($from_queue === TRUE)
+			// try to avoid duplicates
+			if (in_array($file, $dups)) continue;
+		
+			$dups[] = $file['name'];
+		
+			$this->filesdata[$key] = array(
+				'name' => $file,
+				'type' => NULL,
+				'runtime' => $this->config->get_runtime(),
+				'lastmodified' => '0000000000',
+				'stylesheet' => NULL
+			);
+
+			if (Minimee_helper::is_url($this->filesdata[$key]['name']))
 			{
-				$this->filesdata[$key] = $file;
+				$this->filesdata[$key]['type'] = 'remote';
 			}
-			
+			elseif (strpos($this->filesdata[$key]['name'], 'minimee=') !== FALSE && preg_match("/\[minimee=[\042\047]?(.*?)[\042\047]?\]/", $this->filesdata[$key]['name'], $matches))
+			{
+				$this->filesdata[$key]['type'] = 'stylesheet';
+				$this->filesdata[$key]['stylesheet'] = $matches[1];
+			}
 			else
 			{
-				// try to avoid duplicates
-				if (in_array($file, $dups)) continue;
-			
-				$dups[] = $file['name'];
-			
-				$this->filesdata[$key] = array(
-					'name' => $file,
-					'type' => NULL,
-					'runtime' => $this->config->get_runtime(),
-					'lastmodified' => '0000000000',
-					'stylesheet' => NULL
-				);
-	
-				if (Minimee_helper::is_url($this->filesdata[$key]['name']))
-				{
-					$this->filesdata[$key]['type'] = 'remote';
-				}
-				elseif (strpos($this->filesdata[$key]['name'], 'minimee=') !== FALSE && preg_match("/\[minimee=[\042\047]?(.*?)[\042\047]?\]/", $this->filesdata[$key]['name'], $matches))
-				{
-				
-					$this->filesdata[$key]['type'] = 'stylesheet';
-					$this->filesdata[$key]['stylesheet'] = $matches[1];
-		
-				}
-				else
-				{
-					$this->filesdata[$key]['type'] = 'local';
-				}
+				$this->filesdata[$key]['type'] = 'local';
 			}
 
 			// flag to see if we need to run SQL query later
@@ -422,58 +389,6 @@ class Minimee_API {
 	// ------------------------------------------------------
 
 
-	/** 
-	 * Internal function to return contents of cache file
-	 * 
-	 * @return	Contents of cache (css or js)
-	 */
-	protected function _cache_contents()
-	{
-		// silently get and return cache contents
-		return @file_get_contents($this->_cache_path());
-	}
-	// ------------------------------------------------------
-
-
-	/** 
-	 * Internal function for making link to cache
-	 * 
-	 * @return	String containing an HTML tag reference to given reference
-	 */
-	protected function _cache_path()
-	{
-		// build link from cache url + cache filename
-		return Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename, TRUE);
-	}
-	// ------------------------------------------------------
-
-
-	/** 
-	 * Internal function for making tag strings
-	 * 
-	 * @return	String containing an HTML tag reference to given reference
-	 */
-	protected function _cache_tag()
-	{
-		// inject our cache url into template and return
-		return str_replace('{minimee}', $this->_cache_url(), $this->template);
-	}
-	// ------------------------------------------------------
-
-	
-	/** 
-	 * Internal function for making link to cache
-	 * 
-	 * @return	String containing an HTML tag reference to given reference
-	 */
-	protected function _cache_url()
-	{
-		// build link from cache url + cache filename
-		return Minimee_helper::remove_double_slashes($this->config->cache_url . '/' . $this->cache_filename, TRUE);
-	}
-	// ------------------------------------------------------
-
-
 	/**
 	 * Performs heavy lifting of creating our cache
 	 * 
@@ -481,9 +396,6 @@ class Minimee_API {
 	 */	
 	protected function _create_cache()
 	{
-		// set to empty string
-		$out = '';
-
 		// the eventual contents of our cache
 		$cache = '';
 		
@@ -606,14 +518,11 @@ class Minimee_API {
 		// write our cache file
 		$this->_write_cache($cache);
 
-		// create our output tag
-		$out = $this->_return();
-
 		// free memory where possible
 		unset($cache, $contents, $css_prepend_url, $runtime);
 
-		// return output tag
-		return $out;
+		// return true
+		return TRUE;
 	}
 	// ------------------------------------------------------
 	
@@ -719,7 +628,6 @@ class Minimee_API {
 	protected function _get_cache()
 	{
 		// (re)set our usage vars
-		$out = '';
 		$this->cache_filename = '';
 		$this->cache_filename_md5 = '';
 		$this->cache_lastmodified = '';
@@ -741,18 +649,15 @@ class Minimee_API {
 		if (file_exists(Minimee_helper::remove_double_slashes($this->config->cache_path . '/' . $this->cache_filename)))
 		{
 			Minimee_helper::log('Cache file found: `' . $this->cache_filename . '`', 3);
-			$out = $this->_return();
+			return TRUE;
 		}
 		
 		// No cache file found
 		else
 		{
 			Minimee_helper::log('Cache file not found: `' . $this->cache_filename . '`', 3);
-			$out = FALSE;
+			return FALSE;
 		}
-
-		// if we've made it this far...		
-		return $out;
 	}
 	// ------------------------------------------------------
 
@@ -913,32 +818,6 @@ class Minimee_API {
 	}
 	// ------------------------------------------------------
 	
-
-	/**
-	 * Return contents as determined by $this->out_type
-	 * 
-	 * @return mixed string or empty
-	 */
-	protected function _return()
-	{
-		switch($this->out_type) :
-			case 'embed' :
-				return $this->_cache_contents();
-			break;
-
-			case 'url' :
-				return $this->_cache_url();
-			break;
-
-			case 'tag' :
-			default :
-				return $this->_cache_tag();
-			break;
-
-		endswitch;
-	}
-	// ------------------------------------------------------
-
 
 	/** 
 	 * Determine our remote mode for this call
