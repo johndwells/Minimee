@@ -301,9 +301,7 @@ class Minimee_API {
 	 */
 	public function flightcheck()
 	{
-		/**
-		 * Manually disabled?
-		 */
+		// Manually disabled?
 		if ($this->config->is_yes('disable'))
 		{
 			// we can actually figure out if it's a runtime setting or default
@@ -319,10 +317,7 @@ class Minimee_API {
 			}
 		}
 
-
-		/**
-		 * If our cache_path doesn't appear to exist, try appending it to our base_url and check again.
-		 */
+		// If our cache_path doesn't appear to exist, try appending it to our base_url and check again.
 		if ( ! file_exists($this->config->cache_path))
 		{
 			Minimee_helper::log('Cache Path `' . $this->config->cache_path . '` is being appended to Base Path `' . $this->config->base_path . '`.', 3);
@@ -337,19 +332,13 @@ class Minimee_API {
 			}
 		}
 
-
-		/**
-		 * Be sure our cache path is also writable
-		 */
+		// Be sure our cache path is also writable
 		if ( ! is_really_writable($this->config->cache_path))
 		{
 			throw new Exception('Not configured correctly: your cache folder `' . $this->config->cache_path . '` is not writable.');
 		}
 
-
-		/**
-		 * If our cache_url doesn't appear a valid url, append it to our base_url
-		 */
+		// If our cache_url doesn't appear a valid url, append it to our base_url
 		if ( ! Minimee_helper::is_url($this->config->cache_url))
 		{
 			Minimee_helper::log('Cache URL `' . $this->config->cache_url . '` is being appended to Base URL `' . $this->config->base_url . '`.', 3);
@@ -359,16 +348,11 @@ class Minimee_API {
 			Minimee_helper::log('Cache URL is now `' . $this->config->cache_url . '`.', 3);
 		}
 
-
-		/**
-		 * Determine our runtime remote_mode setting
-		 */
+		// Determine our runtime remote_mode setting
 		$this->_set_remote_mode();
 
 
-		/**
-		 * Passed flightcheck!
-		 */
+		// Passed flightcheck!
 		Minimee_helper::log('Passed flightcheck.', 3);
 
 
@@ -428,7 +412,6 @@ class Minimee_API {
 			{
 				$this->stylesheet_query = TRUE;
 			}
-
 		}
 
 		// free memory where possible
