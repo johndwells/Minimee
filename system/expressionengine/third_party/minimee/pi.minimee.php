@@ -380,8 +380,6 @@ HEREDOC;
 	 * pulling out href & src attributes respectively.
 	 * [Adapted from SL Combinator]
 	 * 
-	 * @param string tagdata
-	 * @param string either css or js
 	 * @return bool TRUE on success of fetching files; FALSE on failure
 	 */
 	protected function _fetch_files()
@@ -401,17 +399,24 @@ HEREDOC;
 		$haystack = preg_replace("/\[minimee=(.*?)\]/", LD . 'stylesheet=$1' . RD, $haystack);
 
 		// try to match any pattern of css or js tag
-		$matches = Minimee_helper::preg_match_by_type($haystack, $this->MEE->type);
-		if ( ! $matches)
+		if ($matches = Minimee_helper::preg_match_by_type($haystack, $this->MEE->type))
 		{
-			throw new Exception('No ' . $this->MEE->type . ' files found to return.');
-		}
+			// set our tag template
+			$this->template = str_replace($matches[1][0], '{minimee}', $matches[0][0]);
 
-		// set our tag template
-		$this->template = str_replace($matches[1][0], '{minimee}', $matches[0][0]);
-		
-		// set our files & filesdata arrays
-		$this->MEE->set_filesdata($matches[1]);
+			// set our files & filesdata arrays
+			$this->MEE->set_filesdata($matches[1]);
+		}
+		// no matches; assume entire haystack is our asset
+		// no guarantees what will happen next...
+		else
+		{
+			// set our tag template
+			$this->template = '{minimee}';
+
+			// set our files & filesdata arrays
+			$this->MEE->set_filesdata($haystack);
+		}
 
 		// free memory where possible
 		unset($pat, $matches);
