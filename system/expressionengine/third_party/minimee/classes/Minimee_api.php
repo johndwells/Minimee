@@ -352,6 +352,12 @@ class Minimee_API {
 	{
 		$dups = array();
 
+		// cast to array to be safe
+		if( ! is_array($files))
+		{
+			$files = array($files);
+		}
+
 		foreach ($files as $key => $file)
 		{
 			// try to avoid duplicates
