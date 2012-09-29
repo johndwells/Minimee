@@ -238,6 +238,10 @@ class Minimee_helper {
 				$pat = "/<script{1}.*?src=['|\"]{1}(.*?)['|\"]{1}[^>]*>(.*?)<\/script>/i";
 			break;
 
+			default :
+				return FALSE;
+			break;
+
 		endswitch;
 
 		if ( ! preg_match_all($pat, $haystack, $matches, PREG_PATTERN_ORDER))
