@@ -73,6 +73,11 @@ class Minimee_API {
 		$this->cache =& Minimee_helper::cache();
 
 		// set instance of our config object
+		if( ! $config instanceof Minimee_config)
+		{
+			throw new Exception('Minimee_api needs instance of Minimee_config to run.');
+		}
+
 		$this->config = $config;
 	}
 	// ------------------------------------------------------
