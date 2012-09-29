@@ -399,7 +399,7 @@ class Minimee_lib {
 			{
 				$this->filesdata[$key]['type'] = 'remote';
 			}
-			elseif (strpos($this->filesdata[$key]['name'], 'minimee=') !== FALSE && preg_match("/\[minimee=[\042\047]?(.*?)[\042\047]?\]/", $this->filesdata[$key]['name'], $matches))
+			elseif (preg_match("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", $this->filesdata[$key]['name'], $matches))
 			{
 				$this->filesdata[$key]['type'] = 'stylesheet';
 				$this->filesdata[$key]['stylesheet'] = $matches[1];

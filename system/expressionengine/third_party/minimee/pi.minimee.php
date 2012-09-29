@@ -388,17 +388,17 @@ HEREDOC;
 	{
 		$haystack = $this->EE->TMPL->tagdata;
 
-		// first up, let's substitute stylesheet= for minimee=, because we handle these special
-		if($this->MEE->type == 'css')
-		{
-			$haystack = preg_replace("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", '[minimee=$1]', $haystack);
-		}
+		// first up substitute stylesheet= for minimee=, because we handle these special
+		$haystack = preg_replace("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", '[minimee=$1]', $haystack);
 
 		// parse globals if we find any EE syntax tags
 		if (preg_match("/".LD."(.*?)".RD."/", $haystack) === 1)
 		{
 			$haystack = $this->EE->TMPL->parse_globals($haystack);
 		}
+
+		// put {stylesheet=} back
+		$haystack = preg_replace("/\[minimee=(.*?)\]/", LD . 'stylesheet=$1' . RD, $haystack);
 
 		// try to match any pattern of css or js tag
 		$matches = Minimee_helper::preg_match_by_type($haystack, $this->MEE->type);
