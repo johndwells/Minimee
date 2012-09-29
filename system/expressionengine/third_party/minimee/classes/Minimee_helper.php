@@ -124,42 +124,63 @@ class Minimee_helper {
 		switch ($which) :
 
 			case ('minify') :
-				require_once('Minify/CSS.php');
+				if ( ! class_exists('Minify_CSS'))
+				{
+					require_once('Minify/CSS.php');
+				}
 			break;
 
 			case ('cssmin') :
-				require_once('CSSMin.php');
+				if ( ! class_exists('CSSmin'))
+				{
+					require_once('CSSMin.php');
+				}
 			break;
 			
 			case ('css_urirewriter') :
-				require_once('Minify/CSS/UriRewriter.php');
+				if ( ! class_exists('Minify_CSS_UriRewriter'))
+				{
+					require_once('Minify/CSS/UriRewriter.php');
+				}
 			break;
 
 			case ('curl') :
-				require_once('EpiCurl.php');
+				if ( ! class_exists('EpiCurl'))
+				{
+					require_once('EpiCurl.php');
+				}
 			break;
 			
 			case ('jsmin') :
 			
-				// this sucks, but it's a case-insensitivity issue that we need to protect ourselves against
-				if (glob(PATH_THIRD . 'minimee/libraries/JSM*n.php'))
+				if ( ! class_exists('JSMin'))
 				{
-					require_once('JSMin.php');
-				}
-			
-				else
-				{
-					self::log('jsmin.php in minimee/libraries needs to be renamed to the proper capitalisation of "JSMin.php".', 2);
-					require_once('jsmin.php');
+					// this sucks, but it's a case-insensitivity issue that we need to protect ourselves against
+					if (glob(PATH_THIRD . 'minimee/libraries/JSM*n.php'))
+					{
+						require_once('JSMin.php');
+					}
+				
+					else
+					{
+						self::log('jsmin.php in minimee/libraries needs to be renamed to the proper capitalisation of "JSMin.php".', 2);
+						require_once('jsmin.php');
+					}
 				}
 			break;
 			
 			case ('jsminplus') :
-				require_once('JSMinPlus.php');
+				if ( ! class_exists('JSMinPlus'))
+				{
+					require_once('JSMinPlus.php');
+				}
 			break;
 			
 			case ('html') :
-				require_once('Minify/HTML.php');
+				if ( ! class_exists('Minify_HTML'))
+				{
+					require_once('Minify/HTML.php');
+				}
 			break;
 
 		endswitch;
