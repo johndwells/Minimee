@@ -193,7 +193,7 @@ class Minimee_lib {
 			// file runtime settings can be overridden by tag runtime settings
 			$this->config->reset()->extend($runtime)->extend($this->filesdata[$key]['runtime']);
 
-			switch ($this->filesdata[$key]['type']) :
+			switch ($this->filesdata[$key]['source']) :
 			
 				/**
 				 * Stylesheets (e.g. {stylesheet='template/file'}
@@ -235,11 +235,11 @@ class Minimee_lib {
 					
 					$realpath = realpath(Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $local));
 	
-					// if the $local file exists, let's alter the file type & name, and calculate lastmodified
+					// if the $local file exists, let's alter the file source & name, and calculate lastmodified
 					if (file_exists($realpath))
 					{
 						$this->filesdata[$key]['name'] = $local;
-						$this->filesdata[$key]['type'] = 'local';
+						$this->filesdata[$key]['source'] = 'local';
 						
 						$this->filesdata[$key]['lastmodified'] = filemtime($realpath);
 	
@@ -397,7 +397,7 @@ class Minimee_lib {
 
 			$this->filesdata[$key] = array(
 				'name' => $file,
-				'type' => NULL,
+				'source' => NULL,
 				'runtime' => $this->config->get_runtime(),
 				'lastmodified' => '0000000000',
 				'stylesheet' => NULL
@@ -405,20 +405,20 @@ class Minimee_lib {
 
 			if (Minimee_helper::is_url($this->filesdata[$key]['name']))
 			{
-				$this->filesdata[$key]['type'] = 'remote';
+				$this->filesdata[$key]['source'] = 'remote';
 			}
 			elseif (preg_match("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", $this->filesdata[$key]['name'], $matches))
 			{
-				$this->filesdata[$key]['type'] = 'stylesheet';
+				$this->filesdata[$key]['source'] = 'stylesheet';
 				$this->filesdata[$key]['stylesheet'] = $matches[1];
 			}
 			else
 			{
-				$this->filesdata[$key]['type'] = 'local';
+				$this->filesdata[$key]['source'] = 'local';
 			}
 
 			// flag to see if we need to run SQL query later
-			if ($this->filesdata[$key]['type'] == 'stylesheet')
+			if ($this->filesdata[$key]['source'] == 'stylesheet')
 			{
 				$this->stylesheet_query = TRUE;
 			}
@@ -500,12 +500,12 @@ class Minimee_lib {
 			// file runtime settings can be overridden by tag runtime settings
 			$this->config->reset()->extend($runtime)->extend($file['runtime']);
 		
-			switch ($file['type']) :
+			switch ($file['source']) :
 	
 				case ('stylesheet');
 				case ('remote') :
 				
-					// no relative paths for either types
+					// no relative paths for either sources
 					$css_prepend_url = FALSE;
 					
 					// fgc & curl both need http(s): on front
