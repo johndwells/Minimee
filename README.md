@@ -7,7 +7,7 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 * [Forum Support](http://devot-ee.com/add-ons/support/minimee/)
 
 
-# Version 2.2.0
+# Version 2.3.0
 
 ## Requirements:
 
