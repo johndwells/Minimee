@@ -35,15 +35,15 @@ $plugin_info = array(
 class Minimee {
 
 	/**
-	 * Our Minimee_lib
-	 */
-	private $MEE 					= NULL;
-
-
-	/**
 	 * EE, obviously
 	 */
 	private $EE 					= NULL;
+
+
+	/**
+	 * Our Minimee_lib
+	 */
+	private $MEE 					= NULL;
 
 
 	/**
@@ -55,7 +55,7 @@ class Minimee {
 	/**
 	 * Our magical config class
 	 */
-	public $config;
+	public $config 					= NULL;
 
 
 	/**
@@ -73,19 +73,19 @@ class Minimee {
 	/**
 	 * Type of format/content to return
 	 */
-	public $out_delimiter			= array('embed' => "\n", 'url' => ',', 'tag' => '');
+	public $return_delimiter		= array('embed' => "\n", 'url' => ',', 'tag' => '');
 
 
 	/**
-	 * Type of format/content to return
+	 * Type of format/content to return (embed, url or tag)
 	 */
-	public $out_type 				= '';
+	public $return_format 			= '';
 
 
 	/**
 	 * Template with which to render css link or js script tags
 	 */
-	public $template				= '';
+	public $template				= '{minimee}';
 
 
 	/**
@@ -102,7 +102,7 @@ class Minimee {
 	 *
 	 * @return void
 	 */
-	public function __construct()
+	public function __construct($str = '')
 	{
 		// got EE?
 		$this->EE =& get_instance();
@@ -116,6 +116,71 @@ class Minimee {
 		// instantiate our Minimee_lib
 		// pass our static config
 		$this->MEE = new Minimee_lib($this->config);
+
+		// magic: run as our "api"
+		// $str would contain custom field content if used as a field modifier (e.g. {ft_stylesheet:minimee})
+		// tagparts would have a length of 1 if person called minimee like {exp:minimee}...{/exp:minimee}
+		if($str || count($this->EE->TMPL->tagparts) == 1)
+		{
+			$this->return_data = $this->api($str);
+		}
+
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * API-like interface
+	 *
+	 * @return void
+	 */
+	protected function _api($str = '')
+	{
+		// set parameters that affect config
+		$this->_fetch_params();
+
+		// set/override return delimiter
+		$this->return_delimiter[$this->return_format] = $this->EE->TMPL->fetch_param('return_delimiter', $this->return_delimiter[$this->return_format]);
+
+		// our error is our files
+		$this->on_error = $this->EE->TMPL->fetch_param('files', $str);
+
+		// what is our files delimiter?
+		$files_delimiter = $this->EE->TMPL->fetch_param('files_delimiter', ',');
+
+		$files = $this->EE->TMPL->fetch_param('files', $str);
+
+		// set our files & filesdata arrays
+		$files = explode($files_delimiter, $files);
+
+		$this->MEE->set_filesdata($files);
+		try
+		{
+			$filenames = $this->MEE->flightcheck()
+							  ->check_headers()
+							  ->cache();
+
+			// format and return
+			return $this->_return($filenames);
+
+		}
+		catch (Exception $e)
+		{
+			return $this->_abort($e);
+		}
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Plugin function: exp:minimee:contents
+	 * 
+	 * Alias to exp:minimee:embed
+	 */
+	public function contents()
+	{
+		// alias of Minimee::embed()
+		return $this->embed();
 	}
 	// ------------------------------------------------------
 
@@ -134,7 +199,7 @@ class Minimee {
 		$this->MEE->type = 'css';
 
 		// type of output
-		$this->out_type = 'tag';
+		$this->return_format = 'tag';
 
 		return $this->_run();
 	}
@@ -166,7 +231,7 @@ class Minimee {
 	public function embed()
 	{
 		// type of output
-		$this->out_type = 'embed';
+		$this->return_format = 'embed';
 
 		// let's go
 		return $this->_run('embed', TRUE);
@@ -201,7 +266,7 @@ class Minimee {
 		$this->MEE->type = 'js';
 
 		// type of output
-		$this->out_type = 'tag';
+		$this->return_format = 'tag';
 
 		return $this->_run();
 	}
@@ -222,17 +287,47 @@ class Minimee {
 
 
 	/**
-	 * Plugin function: exp:minimee:url
+	 * Plugin function: exp:minimee:queue
 	 * 
-	 * Rather than returning the tags or cache contents, simply return URL to cache(s)
+	 * Explicitly queue a file for later
 	 */
-	public function url()
+	public function queue()
 	{
-		// set our output type		
-		$this->out_type = 'url';
+		// set local version of tagdata
+		$this->on_error = $this->EE->TMPL->tagdata;
 
-		// let's go
-		return $this->_run('url', TRUE);
+		try
+		{
+			// queue any JS
+			if ($this->EE->TMPL->fetch_param('js'))
+			{
+				$this->queue = $this->EE->TMPL->fetch_param('js');
+				$this->MEE->type = 'js';
+
+				$this->_fetch_params();
+
+				$this->_fetch_files();
+
+				$this->_set_queue();
+			}
+
+			// queue any CSS
+			if ($this->EE->TMPL->fetch_param('css'))
+			{
+				$this->queue = $this->EE->TMPL->fetch_param('css');
+				$this->MEE->type = 'css';
+
+				$this->_fetch_params();
+
+				$this->_fetch_files();
+
+				$this->_set_queue();
+			}
+		}
+		catch (Exception $e)
+		{
+			return $this->_abort($e);
+		}
 	}
 	// ------------------------------------------------------
 	
@@ -245,10 +340,26 @@ class Minimee {
 	public function tag()
 	{
 		// set output type
-		$this->out_type = 'tag';
+		$this->return_format = 'tag';
 
 		// let's go
 		return $this->_run('tag', TRUE);
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Plugin function: exp:minimee:url
+	 * 
+	 * Rather than returning the tags or cache contents, simply return URL to cache(s)
+	 */
+	public function url()
+	{
+		// set our output type		
+		$this->return_format = 'url';
+
+		// let's go
+		return $this->_run('url', TRUE);
 	}
 	// ------------------------------------------------------
 
@@ -411,9 +522,6 @@ HEREDOC;
 		// no guarantees what will happen next...
 		else
 		{
-			// set our tag template
-			$this->template = '{minimee}';
-
 			// set our files & filesdata arrays
 			$this->MEE->set_filesdata($haystack);
 		}
@@ -434,6 +542,22 @@ HEREDOC;
 	 */
 	protected function _fetch_params()
 	{
+		/*
+		 * Part 1: Parameters
+		 */
+		// set type
+		$this->MEE->type = $this->EE->TMPL->fetch_param('type', $this->MEE->type);
+
+		// set return format
+		$this->return_format = $this->EE->TMPL->fetch_param('return_format', $this->return_format);
+
+		// set/override return delimiter
+		$this->return_delimiter[$this->return_format] = $this->EE->TMPL->fetch_param('return_delimiter', $this->return_delimiter[$this->return_format]);
+
+
+		/*
+		 * Part 2: config
+		 */
 		$tagparams = $this->EE->TMPL->tagparams;
 		
 		// we do need to account for the fact that minify="no" is assumed to be pertaining to the tag
@@ -476,8 +600,13 @@ HEREDOC;
 			throw new Exception('Could not find a queue of files by the name of \'' . $this->queue . '\'.');
 		}
 
-		// set our tag template
+		// re-set our tag template
 		$this->template = $this->cache[$this->MEE->type][$this->queue]['template'];
+
+		// re-set what to return on error
+		$this->on_error = $this->cache[$this->MEE->type][$this->queue]['on_error'];
+
+		// TODO: re-set other runtime properties
 		
 		// order by priority
 		ksort($this->cache[$this->MEE->type][$this->queue]['filesdata']);
@@ -489,7 +618,7 @@ HEREDOC;
 			$queue = array_merge($queue, $fdata);
 		}
 
-		// now extract just the filenames to pass to M->set_filesdata
+		// now extract just the filenames to pass to MEE->set_filesdata
 		$filesdata = array();
 		foreach($queue as $fdata)
 		{
@@ -569,7 +698,7 @@ HEREDOC;
 
 
 	/**
-	 * Return contents as determined by $this->out_type
+	 * Return contents as determined by $this->return_format
 	 * 
 	 * @return mixed string or empty
 	 */
@@ -586,7 +715,7 @@ HEREDOC;
 
 		foreach($filenames as $filename)
 		{
-			switch($this->out_type) :
+			switch($this->return_format) :
 				case 'embed' :
 					$return[] = $this->_cache_contents($filename);
 				break;
@@ -604,18 +733,18 @@ HEREDOC;
 		}
 
 		// glue output based on type
-		switch($this->out_type) :
+		switch($this->return_format) :
 			case 'embed' :
-				return implode($this->out_delimiter[$this->out_type], $return);
+				return implode($this->return_delimiter[$this->return_format], $return);
 			break;
 
 			case 'url' :
-				return implode($this->out_delimiter[$this->out_type], $return);
+				return implode($this->return_delimiter[$this->return_format], $return);
 			break;
 
 			case 'tag' :
 			default :
-				return implode($this->out_delimiter[$this->out_type], $return);
+				return implode($this->return_delimiter[$this->return_format], $return);
 			break;
 		endswitch;
 
@@ -685,8 +814,8 @@ HEREDOC;
 			}
 
 			$filenames = $this->MEE->flightcheck()
-							 ->check_headers()
-							 ->cache();
+							  ->check_headers()
+							  ->cache();
 
 			// format and return
 			return $this->_return($filenames);
@@ -733,6 +862,8 @@ HEREDOC;
 		
 		// Append $on_error
 		$this->cache[$this->MEE->type][$this->queue]['on_error'] .= $this->on_error;
+
+		// TODO: save other runtime properties
 
 		// Add all files to the queue cache
 		foreach($this->MEE->filesdata as $filesdata)
