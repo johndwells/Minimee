@@ -7,7 +7,7 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 * [Forum Support](http://devot-ee.com/add-ons/support/minimee/)
 
 
-# Version 2.3.0
+# Version 2.1.2
 
 ## Requirements:
 
@@ -48,10 +48,9 @@ The architecture of Minimee2 has given me the opportunity to build other add-ons
 ## New for 2.x:
 
 * Hooks for 3rd party integration (see [Minimee+LESS](https://github.com/johndwells/Minimee-LESS), [MSMinimee](https://github.com/johndwells/MSMinimee))
-* ALL settings can be specified via config or extension, and then overridden at the tag level
+* ALL settings can be specified via config or extension, _as well as_ via tag parameters
 * Path & URL settings can now be relative to site
-* New `exp:minimee:link` tag returns just the URL to your minimee'd asset
-* Removal of `combine=` and `minify=`, in favor of settings per asset type
+* New `exp:minimee:url` tag returns just the URL to your minimee'd asset
 * Disable or override the URLs which are prepended to image & @import paths in CSS
 * New `priority=""` parameter allows you to queue assets into a specific order
 * For EE2.4 and above, assets are queue'd **after** the `exp:minimee:display` tag is parsed
@@ -122,7 +121,7 @@ if you have configured Minimee via EE's `$config` or Global Variables, please no
 * When configuring via EE's `$config`, __setting keys have changed to be a single array__. See below for details.
 
 
-### Setting/Parameter Changes
+### Setting Changes
 
 As mentioned above, `combine="y|n"` and `minify="y|n"` have been removed in favor of per-asset options.
 
@@ -297,6 +296,24 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 		'remote_mode'		=> 'auto'
 	);
 
+# Parameters
+
+In addition to any configuration values mentioned above, the following parameters can also be passed at runtime:
+
+### exp:minimee:css and exp:minimee:js
+
+* `priority=""` For use with `queue` feature. Value specified is a number; lower numbers are placed earlier in queue order.
+* `combine=""`
+* `minify=""`
+* `output=""` tag, link or embed
+* `output_delimiter=""` what to place between cache outputs
+
+### exp:minimee:url
+
+* `files=""` a pipe- or comma-delimited string of files
+
+
+
 # Usage
 
 Every configuration setting mentioned above can also be passed as a tag parameter; __tag parameters will override settings__. Basic usage is as follows:
@@ -334,6 +351,8 @@ Every configuration setting mentioned above can also be passed as a tag paramete
 Start by turning on EE's template debugging, and visiting the front end of your site. Search for Minimee's debugging messages (see above), which may help track down the root of trouble.
 
 And unless you have specific reason to do otherwise, all "Advanced Settings" should be left to Minimee's defaults.
+
+For official support please head over to the @devot-ee forum. When posting, please specify what version of EE and Minimee you are running: [Minimee Support Forums on @devotee](devot-ee.com/add-ons/support/minimee).
 
 ## When/how does Minimee know to create a new file?
 
