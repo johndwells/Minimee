@@ -111,7 +111,7 @@ class Minimee_lib {
 	 */
 	public function js($files)
 	{
-		$this->type = 'css';
+		$this->type = 'js';
 		
 		return $this->set_filesdata($files)
 					->flightcheck()
