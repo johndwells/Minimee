@@ -93,9 +93,8 @@ class Minimee_lib {
 	 */
 	public function css($files)
 	{
-		$this->type = 'css';
-		
-		return $this->set_filesdata($files)
+		return $this->set_type('css')
+					->set_filesdata($files)
 					->flightcheck()
 					->check_headers()
 					->cache();
@@ -111,9 +110,8 @@ class Minimee_lib {
 	 */
 	public function js($files)
 	{
-		$this->type = 'js';
-		
-		return $this->set_filesdata($files)
+		return $this->set_type('js')
+					->set_filesdata($files)
 					->flightcheck()
 					->check_headers()
 					->cache();
@@ -353,6 +351,16 @@ class Minimee_lib {
 		// Determine our runtime remote_mode setting
 		$this->_set_remote_mode();
 
+		// Be sure we have a valid type & files set
+		if ( ! $this->type)
+		{
+			throw new Exception('Must specify a valid asset type.');
+		}
+
+		if ( ! $this->filesdata)
+		{
+			throw new Exception('Must specify at least one file to minify.');
+		}
 
 		// Passed flightcheck!
 		Minimee_helper::log('Passed flightcheck.', 3);
@@ -421,6 +429,49 @@ class Minimee_lib {
 
 		// chaining
 		return $this;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Set up our Minimee::type flag
+	 * 
+	 * @param String 		css or js
+	 * @return void
+	 */
+	public function set_type($type)
+	{
+
+		if (preg_match('/css|js/i', $type))
+		{
+			$this->type = strtolower($type);
+		}
+		else
+		{
+			throw new Exception('`' . $type . '` is not a valid type of asset.');
+		}
+
+		// chaining
+		return $this;
+
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Our basic run
+	 *
+	 * @param String 	Type of cache (css or js)
+	 * @param mixed 	String or array of files to cache
+	 * @return mixed 	String or array of cache filename(s)
+	 */
+	public function run($type, $files)
+	{
+		return $this->set_type($type)
+					->set_filesdata($files)
+					->flightcheck()
+					->check_headers()
+					->cache();
 	}
 	// ------------------------------------------------------
 
