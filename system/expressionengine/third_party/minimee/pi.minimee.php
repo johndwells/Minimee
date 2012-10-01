@@ -298,52 +298,6 @@ class Minimee {
 
 
 	/**
-	 * Plugin function: exp:minimee:queue
-	 * 
-	 * Explicitly queue a file for later
-	 */
-	public function queue()
-	{
-		// set local version of tagdata
-		$this->on_error = $this->EE->TMPL->tagdata;
-
-		try
-		{
-			// queue any JS
-			if ($this->EE->TMPL->fetch_param('js'))
-			{
-				$this->queue = $this->EE->TMPL->fetch_param('js');
-				$this->type = 'js';
-
-				$this->_fetch_params();
-
-				$this->_fetch_files();
-
-				$this->_set_queue();
-			}
-
-			// queue any CSS
-			if ($this->EE->TMPL->fetch_param('css'))
-			{
-				$this->queue = $this->EE->TMPL->fetch_param('css');
-				$this->type = 'css';
-
-				$this->_fetch_params();
-
-				$this->_fetch_files();
-
-				$this->_set_queue();
-			}
-		}
-		catch (Exception $e)
-		{
-			return $this->_abort($e);
-		}
-	}
-	// ------------------------------------------------------
-	
-
-	/**
 	 * Plugin function: exp:minimee:display
 	 *
 	 * Return the tags for cache
