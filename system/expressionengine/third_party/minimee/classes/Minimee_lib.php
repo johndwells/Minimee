@@ -373,7 +373,7 @@ class Minimee_lib {
 
 
 	/**
-	 * Set up our Minimee::filesdata arrays to prepare for processing
+	 * Set up our Minimee_lib::filesdata arrays to prepare for processing
 	 * 
 	 * @param array array of files
 	 * @return void
@@ -434,7 +434,7 @@ class Minimee_lib {
 
 
 	/**
-	 * Set up our Minimee::type flag
+	 * Set up our Minimee_lib::type flag
 	 * 
 	 * @param String 		css or js
 	 * @return void
@@ -650,7 +650,7 @@ class Minimee_lib {
 	 */
 	protected function _fetch_stylesheet_versions() {
 	
-		// nothing to do if Minimee::stylesheet_query is FALSE
+		// nothing to do if Minimee_lib::stylesheet_query is FALSE
 		if ( ! $this->stylesheet_query) return FALSE;
 
 		// let's only do this once per session
