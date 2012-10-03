@@ -573,7 +573,7 @@ class Minimee_lib {
 				default :
 				
 					// grab contents of file
-					$contents = file_get_contents(realpath(Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $file['name']))) . "\n";
+					$contents = file_get_contents(realpath(Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $file['name'])));
 					
 					// determine css prepend url
 					$css_prepend_url = ($this->config->css_prepend_url) ? $this->config->css_prepend_url : $this->config->base_url;
@@ -594,7 +594,7 @@ class Minimee_lib {
 				Minimee_helper::log('Fetched contents of `' . $file['name'] . '`.', 3);
 	
 				// minify contents and append to $cache
-				$cache .= $this->_minify($this->type, $contents, $file['name'], $css_prepend_url);
+				$cache .= $this->_minify($this->type, $contents, $file['name'], $css_prepend_url) . "\n";
 			}
 
 		endforeach;
@@ -901,7 +901,7 @@ class Minimee_lib {
 		unset($before, $after, $change);
 		
 		// return our (maybe) minified contents
-		return $contents . "\n";
+		return $contents;
 	}
 	// ------------------------------------------------------
 	
