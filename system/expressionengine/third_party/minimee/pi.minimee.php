@@ -183,7 +183,7 @@ class Minimee {
 		try
 		{
 			$filenames = $this->MEE->set_type($this->type)
-								   ->set_filesdata($this->files)
+								   ->set_files($this->files)
 								   ->flightcheck()
 								   ->check_headers()
 								   ->cache();
@@ -495,7 +495,7 @@ HEREDOC;
 			// set our tag template
 			$this->template = str_replace($matches[1][0], '{minimee}', $matches[0][0]);
 
-			// set our files & filesdata arrays
+			// set our files array
 			$this->files = $matches[1];
 		}
 		// no matches; assume entire haystack is our asset
@@ -585,12 +585,12 @@ HEREDOC;
 
 			// TODO: re-set other runtime properties
 			
-			// filesdata: order by priority
-			ksort($this->cache[$this->type][$this->queue]['filesdata']);
+			// files: order by priority
+			ksort($this->cache[$this->type][$this->queue]['files']);
 
 			// flatten to one array
 			$this->files = array();
-			foreach($this->cache[$this->type][$this->queue]['filesdata'] as $file)
+			foreach($this->cache[$this->type][$this->queue]['files'] as $file)
 			{
 				$this->files = array_merge($this->files, $file);
 			}
@@ -786,7 +786,7 @@ HEREDOC;
 		try
 		{
 			$filenames = $this->MEE->set_type($this->type)
-								   ->set_filesdata($this->files)
+								   ->set_files($this->files)
 								   ->flightcheck()
 								   ->check_headers()
 								   ->cache();
@@ -823,15 +823,15 @@ HEREDOC;
 			$this->cache[$this->type][$this->queue] = array(
 				'template' => $this->template,
 				'on_error' => array(),
-				'filesdata' => array()
+				'files' => array()
 			);
 		}
 		
 		// be sure we have a priority key in place
 		$priority = (int) $this->EE->TMPL->fetch_param('priority', 0);
-		if ( ! isset($this->cache[$this->type][$this->queue]['filesdata'][$priority]))
+		if ( ! isset($this->cache[$this->type][$this->queue]['files'][$priority]))
 		{
-			$this->cache[$this->type][$this->queue]['filesdata'][$priority] = array();
+			$this->cache[$this->type][$this->queue]['files'][$priority] = array();
 		}
 		
 		// Add $on_error
@@ -846,7 +846,7 @@ HEREDOC;
 		// Add all files to the queue cache
 		foreach($this->files as $file)
 		{
-			$this->cache[$this->type][$this->queue]['filesdata'][$priority][] = $file;
+			$this->cache[$this->type][$this->queue]['files'][$priority][] = $file;
 		}
 	}
 	// ------------------------------------------------------

@@ -94,7 +94,7 @@ class Minimee_lib {
 	public function css($files)
 	{
 		return $this->set_type('css')
-					->set_filesdata($files)
+					->set_files($files)
 					->flightcheck()
 					->check_headers()
 					->cache();
@@ -111,7 +111,7 @@ class Minimee_lib {
 	public function js($files)
 	{
 		return $this->set_type('js')
-					->set_filesdata($files)
+					->set_files($files)
 					->flightcheck()
 					->check_headers()
 					->cache();
@@ -378,7 +378,7 @@ class Minimee_lib {
 	 * @param array array of files
 	 * @return void
 	 */
-	public function set_filesdata($files)
+	public function set_files($files)
 	{
 		$dups = array();
 
@@ -468,7 +468,7 @@ class Minimee_lib {
 	public function run($type, $files)
 	{
 		return $this->set_type($type)
-					->set_filesdata($files)
+					->set_files($files)
 					->flightcheck()
 					->check_headers()
 					->cache();
