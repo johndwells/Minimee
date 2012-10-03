@@ -65,11 +65,6 @@ class Minimee {
 
 
 	/**
-	 * Should we wrap cache contents with tag?
-	 */
-	public $contents_wrap			= TRUE;
-
-	/**
 	 * Our local property of filenames to cache
 	 */
 	public $files					= array();
@@ -120,7 +115,7 @@ class Minimee {
 	/**
 	 * An array of attributes to use when wrapping cache contents in a tag
 	 */
-	public $wrap_attributes			= array();
+	public $attributes				= '';
 
 
 	// ------------------------------------------------------
@@ -179,7 +174,9 @@ class Minimee {
 		}
 
 		$this->on_error = $assets;
-		$this->return_format = 'url';
+
+		// set our return format
+		$this->_set_return_format();
 
 		// set parameters that affect config
 		$this->_fetch_params();
@@ -234,9 +231,6 @@ class Minimee {
 		// our asset type
 		$this->type = 'css';
 
-		// type of output
-		$this->return_format = 'tag';
-
 		return $this->_run();
 	}
 	// ------------------------------------------------------
@@ -250,35 +244,10 @@ class Minimee {
 	public function display($method = '')
 	{
 		// see if calling via exp:minimee:display:method syntax
-		if($method == '')
-		{
-			$method = $this->EE->TMPL->tagparts[count($this->EE->TMPL->tagparts) - 1];
-		}
-
-		// consolidate our aliases into allowed methods
-		switch($method) :
-			case 'url' :
-			case 'link' :
-				$method = 'url';
-				$this->return_format = 'url';
-			break;
-
-			case 'contents' :
-			case 'embed' :
-				$method = 'contents';
-				$this->return_format = 'contents';
-			break;
-
-			case 'tag' :
-			case 'display' :
-			default :
-				$method = 'tag';
-				$this->return_format = 'tag';
-			break;
-		endswitch;
+		$this->_set_return_format($method);
 
 		// try to postpone until template_post_parse
-		if ($out = $this->_postpone($method))
+		if ($out = $this->_postpone($this->return_format))
 		{
 			return $out;
 		}
@@ -370,9 +339,6 @@ class Minimee {
 
 		// our asset type
 		$this->type = 'js';
-
-		// type of output
-		$this->return_format = 'tag';
 
 		return $this->_run();
 	}
@@ -485,8 +451,27 @@ HEREDOC;
 	 */
 	protected function _cache_contents($filename)
 	{
-		// silently get and return cache contents
-		return @file_get_contents($this->_cache_path($filename));
+		$open = $close = '';
+
+		// If attributes have been supplied, it is inferred we should wrap
+		// our output in tags
+		if($this->attributes)
+		{
+			switch($this->type) :
+				case 'css' :
+					$open = '<style' . $this->attributes . '>';
+					$close = '</style>';
+				break;
+
+				case 'js' :
+					$open = '<script' . $this->attributes . '>';
+					$close = '</script>';
+				break;
+			endswitch;
+		}
+
+		// silently get and return cache contents, wrapped in open and close
+		return $open . @file_get_contents($this->_cache_path($filename)) . $close;
 	}
 	// ------------------------------------------------------
 
@@ -511,8 +496,22 @@ HEREDOC;
 	 */
 	protected function _cache_tag($filename)
 	{
+		$tmpl = $this->template;
+		if($tmpl == '' || $tmpl == '{minimee}' || $this->attributes)
+		{
+			switch($this->type) :
+				case 'css' :
+					$tmpl = '<link href="{minimee}"' . $this->attributes . ' />';
+				break;
+
+				case 'js' :
+					$tmpl = '<script src="{minimee}"' . $this->attributes . '></script>';
+				break;
+			endswitch;
+		}
+
 		// inject our cache url into template and return
-		return str_replace('{minimee}', $this->_cache_url($filename), $this->template);
+		return str_replace('{minimee}', $this->_cache_url($filename), $tmpl);
 	}
 	// ------------------------------------------------------
 
@@ -591,14 +590,11 @@ HEREDOC;
 		// set type
 		$this->type = $this->EE->TMPL->fetch_param('type', $this->type);
 
-		// set return format
+		// override return format
 		$this->return_format = $this->EE->TMPL->fetch_param('return_format', $this->return_format);
 
 		// set/override return delimiter
-		if($this->return_format)
-		{
-			$this->return_delimiter[$this->return_format] = $this->EE->TMPL->fetch_param('return_delimiter', $this->return_delimiter[$this->return_format]);
-		}
+		$this->return_delimiter[$this->return_format] = $this->EE->TMPL->fetch_param('return_delimiter', $this->return_delimiter[$this->return_format]);
 
 		// tag attributes for returning cache contents
 		if(is_array($this->EE->TMPL->tagparams))
@@ -607,7 +603,7 @@ HEREDOC;
 			{
 				if(strpos($key, 'attribute:') === 0)
 				{
-					$this->wrap_attributes[substr($key, 10)] = $val;
+					$this->attributes .= ' ' . substr($key, 10) . '="' . $val . '"';
 				}
 			}
 		}
@@ -804,45 +800,9 @@ HEREDOC;
 			endswitch;
 		}
 
+
 		// glue output based on type
-		switch($this->return_format) :
-			case 'contents' :
-				// determine wrapping tag by type
-				if($this->contents_wrap == TRUE)
-				{
-					$attributes = '';
-					foreach($this->wrap_attributes as $key => $val)
-					{
-						$attributes .= ' ' . $key . '="' . $val . '"';
-					}
-
-					switch($this->type) :
-						case 'css' :
-							$pre = '<style' . $attributes . '>';
-
-							$post = '</style>';
-						break;
-
-						case 'js' :
-							$pre = '<script' . $attributes . '>';
-							$post = '</script>';
-						break;
-					endswitch;
-				}
-
-				 return $pre . implode($this->return_delimiter[$this->return_format], $return) . $post;
-			break;
-
-			case 'url' :
-				return implode($this->return_delimiter[$this->return_format], $return);
-			break;
-
-			case 'tag' :
-			default :
-				return implode($this->return_delimiter[$this->return_format], $return);
-			break;
-		endswitch;
-
+		return implode($this->return_delimiter[$this->return_format], $return);
 	}
 	// ------------------------------------------------------
 
@@ -854,6 +814,9 @@ HEREDOC;
 	 */
 	protected function _run()
 	{
+		// set our return format
+		$this->_set_return_format();
+
 		// fetch our parameters
 		$this->_fetch_params();
 
@@ -893,6 +856,43 @@ HEREDOC;
 		{
 			return $this->_abort($e);
 		}
+	}
+	// ------------------------------------------------------
+
+
+	/** 
+	 * Set our return_format property
+	 * 
+	 * @return void
+	 */
+	protected function _set_return_format($format = '')
+	{
+		if( ! $format)
+		{
+			$format = $this->EE->TMPL->tagparts[count($this->EE->TMPL->tagparts) - 1];
+		}
+
+		// consolidate our aliases into allowed methods
+		switch($format) :
+			case 'minimee' :
+			case 'url' :
+			case 'link' :
+				$this->return_format = 'url';
+			break;
+
+			case 'contents' :
+			case 'embed' :
+				$this->return_format = 'contents';
+			break;
+
+			case 'css' :
+			case 'js' :
+			case 'tag' :
+			case 'display' :
+			default :
+				$this->return_format = 'tag';
+			break;
+		endswitch;
 	}
 	// ------------------------------------------------------
 
