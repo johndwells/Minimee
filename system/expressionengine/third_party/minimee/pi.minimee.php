@@ -675,7 +675,27 @@ HEREDOC;
 		return $this;
 	}
 	// ------------------------------------------------------
-	
+
+
+	protected function _flightcheck()
+	{
+		// Manually disabled?
+		if ($this->config->is_yes('disable'))
+		{
+			// we can actually figure out if it's a runtime setting or default
+			$runtime = $this->config->get_runtime();
+			
+			if (isset($runtime['disable']) && $runtime['disable'] == 'yes')
+			{
+
+				throw new Exception('Disabled via tag parameter.');
+			}
+			else
+			{
+				throw new Exception('Disabled via config.');
+			}
+		}
+	}	
 	
 	/**
 	 * Postpone processing our method until template_post_parse hook?
@@ -795,6 +815,16 @@ HEREDOC;
 
 		// fetch our files
 		$this->_fetch_files();
+
+		// quick flightcheck
+		try
+		{
+			$this->_flightcheck();
+		}
+		catch (Exception $e)
+		{
+			return $this->_abort($e);
+		}
 
 		// should we set our files to queue for later?
 		if($this->queue)
