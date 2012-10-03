@@ -127,6 +127,12 @@ class Minimee_lib {
 	 */
 	public function cache()
 	{
+		// Be sure we have a valid type
+		if ( ! $this->type)
+		{
+			throw new Exception('Must specify a valid asset type.');
+		}
+
 		// combining files?
 		if ($this->config->is_yes('combine_' . $this->type))
 		{
@@ -181,6 +187,12 @@ class Minimee_lib {
 	 */
 	public function check_headers()
 	{
+		// let's be sure we have files
+		if ( ! $this->filesdata)
+		{
+			throw new Exception('Must specify at least one file to minify.');
+		}
+
 		// query for any stylesheets	
 		$stylesheet_versions = $this->_fetch_stylesheet_versions();
 		
@@ -350,17 +362,6 @@ class Minimee_lib {
 
 		// Determine our runtime remote_mode setting
 		$this->_set_remote_mode();
-
-		// Be sure we have a valid type & files set
-		if ( ! $this->type)
-		{
-			throw new Exception('Must specify a valid asset type.');
-		}
-
-		if ( ! $this->filesdata)
-		{
-			throw new Exception('Must specify at least one file to minify.');
-		}
 
 		// Passed flightcheck!
 		Minimee_helper::log('Passed flightcheck.', 3);
