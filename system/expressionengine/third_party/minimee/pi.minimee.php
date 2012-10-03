@@ -65,6 +65,11 @@ class Minimee {
 
 
 	/**
+	 * Should we wrap cache contents with tag?
+	 */
+	public $contents_wrap			= TRUE;
+
+	/**
 	 * Our local property of filenames to cache
 	 */
 	public $files					= array();
@@ -85,11 +90,11 @@ class Minimee {
 	/**
 	 * When combine="no", what to separate each cache return value with
 	 */
-	public $return_delimiter		= array('embed' => "\n", 'url' => ',', 'tag' => '');
+	public $return_delimiter		= array('contents' => "\n", 'url' => ',', 'tag' => '');
 
 
 	/**
-	 * Type of format/content to return (embed, url or tag)
+	 * Type of format/content to return (contents, url or tag)
 	 */
 	public $return_format 			= '';
 
@@ -202,12 +207,10 @@ class Minimee {
 
 	/**
 	 * Plugin function: exp:minimee:contents
-	 * 
-	 * Alias to exp:minimee:embed
 	 */
 	public function contents()
 	{
-		return $this->display('embed');
+		return $this->display('contents');
 	}
 	// ------------------------------------------------------
 
@@ -256,8 +259,8 @@ class Minimee {
 
 			case 'contents' :
 			case 'embed' :
-				$method = 'embed';
-				$this->return_format = 'embed';
+				$method = 'contents';
+				$this->return_format = 'contents';
 			break;
 
 			case 'tag' :
@@ -323,8 +326,7 @@ class Minimee {
 	/**
 	 * Plugin function: exp:minimee:embed
 	 * 
-	 * This fetches files from our queue and embeds the cache
-	 * contents inline. 
+	 * Alias of exp:minimee:contents
 	 * 
 	 * @return mixed string or empty
 	 */
@@ -332,7 +334,7 @@ class Minimee {
 	{
 		// TODO: Add parameter for output tag parameters
 
-		return $this->display('embed');
+		return $this->display('contents');
 	}
 	// ------------------------------------------------------
 
@@ -578,7 +580,7 @@ HEREDOC;
 	protected function _fetch_params()
 	{
 		/*
-		 * Part 1: Parameters
+		 * Part 1: Parameters that may override defaults
 		 */
 		// set type
 		$this->type = $this->EE->TMPL->fetch_param('type', $this->type);
@@ -700,7 +702,7 @@ HEREDOC;
 	/**
 	 * Postpone processing our method until template_post_parse hook?
 	 * 
-	 * @param String	Method name (e.g. display, link or embed)
+	 * @param String	Method name
 	 * @return Mixed	TRUE if delay, FALSE if not
 	 */
 	protected function _postpone($method)
@@ -767,7 +769,7 @@ HEREDOC;
 		foreach($filenames as $filename)
 		{
 			switch($this->return_format) :
-				case 'embed' :
+				case 'contents' :
 					$return[] = $this->_cache_contents($filename);
 				break;
 
@@ -785,8 +787,22 @@ HEREDOC;
 
 		// glue output based on type
 		switch($this->return_format) :
-			case 'embed' :
-				return implode($this->return_delimiter[$this->return_format], $return);
+			case 'contents' :
+				// determine wrapping tag by type
+				if($this->contents_wrap == TRUE)
+				switch($this->type) :
+					case 'css' :
+						$pre = '<style type="text/css">';
+						$post = '</style>';
+					break;
+
+					case 'js' :
+						$pre = '<script type="text/javascript">';
+						$post = '</script>';
+					break;
+				endswitch;
+
+				 return $pre . implode($this->return_delimiter[$this->return_format], $return) . $post;
 			break;
 
 			case 'url' :
