@@ -117,6 +117,12 @@ class Minimee {
 	public $queue					= '';
 
 
+	/**
+	 * An array of attributes to use when wrapping cache contents in a tag
+	 */
+	public $wrap_attributes			= array();
+
+
 	// ------------------------------------------------------
 
 
@@ -594,6 +600,19 @@ HEREDOC;
 			$this->return_delimiter[$this->return_format] = $this->EE->TMPL->fetch_param('return_delimiter', $this->return_delimiter[$this->return_format]);
 		}
 
+		// tag attributes for returning cache contents
+		if(is_array($this->EE->TMPL->tagparams))
+		{
+			foreach($this->EE->TMPL->tagparams as $key => $val)
+			{
+				if(strpos($key, 'attribute:') === 0)
+				{
+					$this->wrap_attributes[substr($key, 10)] = $val;
+				}
+			}
+		}
+
+
 		/*
 		 * Part 2: config
 		 */
@@ -790,17 +809,26 @@ HEREDOC;
 			case 'contents' :
 				// determine wrapping tag by type
 				if($this->contents_wrap == TRUE)
-				switch($this->type) :
-					case 'css' :
-						$pre = '<style type="text/css">';
-						$post = '</style>';
-					break;
+				{
+					$attributes = '';
+					foreach($this->wrap_attributes as $key => $val)
+					{
+						$attributes .= ' ' . $key . '="' . $val . '"';
+					}
 
-					case 'js' :
-						$pre = '<script type="text/javascript">';
-						$post = '</script>';
-					break;
-				endswitch;
+					switch($this->type) :
+						case 'css' :
+							$pre = '<style' . $attributes . '>';
+
+							$post = '</style>';
+						break;
+
+						case 'js' :
+							$pre = '<script' . $attributes . '>';
+							$post = '</script>';
+						break;
+					endswitch;
+				}
 
 				 return $pre . implode($this->return_delimiter[$this->return_format], $return) . $post;
 			break;
