@@ -267,6 +267,12 @@ class Minimee_config {
 			$settings = $this->_from_db();
 		}
 		
+		// Test 4: Legacy config
+		if ($settings === FALSE)
+		{
+			$settings = $this->_from_config_legacy();
+		}
+		
 		// Run on default
 		if ( $settings === FALSE)
 		{
@@ -504,6 +510,41 @@ class Minimee_config {
 		{
 			Minimee_helper::log('No settings found in EE config.', 3);
 		}
+		
+		return $settings;
+	}
+	// ------------------------------------------------------
+	
+
+	/**
+	 * See if person forgot to change config setup
+	 */
+	protected function _from_config_legacy()
+	{
+		$settings = array();
+
+		// loop through entire config
+		foreach($this->EE->config->config as $key => $val)
+		{
+			if(strpos($key, 'minimee_') === 0)
+			{
+				$settings[substr($key, 8)] = $val;
+			}
+		}
+
+        if (count($settings) > 0)
+        {
+			$this->location = 'config';
+
+			Minimee_helper::log('Your Minimee config is using the "legacy" setup from 1.x, please see docs for more.', 2);
+			Minimee_helper::log('Settings taken from EE config "legacy".', 3);
+        }
+        else
+        {
+        	$settings = FALSE;
+
+			Minimee_helper::log('No settings found in EE config as "legacy" format.', 1);
+        }
 		
 		return $settings;
 	}
