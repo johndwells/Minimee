@@ -405,15 +405,8 @@ HEREDOC;
 		// log our error message
 		Minimee_helper::log($log, 1);
 
-		// Return our on_error content, whether from queue or current run
-		if ($this->queue && isset($this->cache[$this->type][$this->queue]))
-		{
-			return $this->cache[$this->type][$this->queue]['on_error'];
-		}
-		else
-		{
-			return $this->on_error;
-		}
+		// return our on_error content
+		return $this->on_error;
 	}
 	// ------------------------------------------------------
 
@@ -590,12 +583,9 @@ HEREDOC;
 			// re-set our tag template
 			$this->template = $this->cache[$this->type][$this->queue]['template'];
 
-			// re-set what to return on error
-			$this->on_error = $this->cache[$this->type][$this->queue]['on_error'];
-
 			// TODO: re-set other runtime properties
 			
-			// order by priority
+			// filesdata: order by priority
 			ksort($this->cache[$this->type][$this->queue]['filesdata']);
 
 			// flatten to one array
@@ -603,6 +593,16 @@ HEREDOC;
 			foreach($this->cache[$this->type][$this->queue]['filesdata'] as $file)
 			{
 				$this->files = array_merge($this->files, $file);
+			}
+
+			// on_error: order by priority
+			ksort($this->cache[$this->type][$this->queue]['on_error']);
+
+			// flatten to one array
+			$this->on_error = '';
+			foreach($this->cache[$this->type][$this->queue]['on_error'] as $error)
+			{
+				$this->on_error .= implode("\n", $error) . "\n";
 			}
 
 			// No files found?
@@ -822,7 +822,7 @@ HEREDOC;
 		{
 			$this->cache[$this->type][$this->queue] = array(
 				'template' => $this->template,
-				'on_error' => '',
+				'on_error' => array(),
 				'filesdata' => array()
 			);
 		}
@@ -834,8 +834,12 @@ HEREDOC;
 			$this->cache[$this->type][$this->queue]['filesdata'][$priority] = array();
 		}
 		
-		// Append $on_error
-		$this->cache[$this->type][$this->queue]['on_error'] .= $this->on_error;
+		// Add $on_error
+		if ( ! isset($this->cache[$this->type][$this->queue]['on_error'][$priority]))
+		{
+			$this->cache[$this->type][$this->queue]['on_error'][$priority] = array();
+		}
+		$this->cache[$this->type][$this->queue]['on_error'][$priority][] = $this->on_error;
 
 		// TODO: save other runtime properties
 
