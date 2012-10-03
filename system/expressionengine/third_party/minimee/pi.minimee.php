@@ -65,13 +65,25 @@ class Minimee {
 
 
 	/**
+	 * Our local property of filenames to cache
+	 */
+	public $files					= array();
+
+
+	/**
+	 * Delimiter when fetching files from string
+	 */
+	public $files_delimiter			= ',';
+
+
+	/**
 	 * What to return if error
 	 */
 	public $on_error				= '';
 
 
 	/**
-	 * Type of format/content to return
+	 * When combine="no", what to separate each cache return value with
 	 */
 	public $return_delimiter		= array('embed' => "\n", 'url' => ',', 'tag' => '');
 
@@ -145,26 +157,33 @@ class Minimee {
 	{
 		if ($this->EE->TMPL->fetch_param('js'))
 		{
-			$asset = $this->EE->TMPL->fetch_param('js');
+			$assets = $this->EE->TMPL->fetch_param('js');
 			$this->type = 'js';
 		}
 
 		if ($this->EE->TMPL->fetch_param('css'))
 		{
-			$asset = $this->EE->TMPL->fetch_param('css');
+			$assets = $this->EE->TMPL->fetch_param('css');
 			$this->type = 'css';
 		}
 
-		$this->on_error = $asset;
+		$this->on_error = $assets;
 		$this->return_format = 'url';
 
 		// set parameters that affect config
 		$this->_fetch_params();
 
+		$this->_fetch_files($assets);
+
+		// should we set our files to queue for later?
+		if($this->queue)
+		{
+			return $this->_set_queue();
+		}
 		try
 		{
 			$filenames = $this->MEE->set_type($this->type)
-								   ->set_filesdata($asset)
+								   ->set_filesdata($this->files)
 								   ->flightcheck()
 								   ->check_headers()
 								   ->cache();
@@ -458,9 +477,12 @@ HEREDOC;
 	 * 
 	 * @return bool TRUE on success of fetching files; FALSE on failure
 	 */
-	protected function _fetch_files()
+	protected function _fetch_files($haystack = FALSE)
 	{
-		$haystack = $this->EE->TMPL->tagdata;
+		if($haystack === FALSE)
+		{
+			$haystack = $this->EE->TMPL->tagdata;
+		}
 
 		// first up substitute stylesheet= for minimee=, because we handle these special
 		$haystack = preg_replace("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", '[minimee=$1]', $haystack);
@@ -481,19 +503,15 @@ HEREDOC;
 			$this->template = str_replace($matches[1][0], '{minimee}', $matches[0][0]);
 
 			// set our files & filesdata arrays
-			$this->MEE->set_filesdata($matches[1]);
+			$this->files = $matches[1];
 		}
 		// no matches; assume entire haystack is our asset
 		// no guarantees what will happen next...
 		else
 		{
-			// set our files & filesdata arrays
-			$this->MEE->set_filesdata($haystack);
+			$this->files = explode($this->files_delimiter, $haystack);
 		}
 
-		// free memory where possible
-		unset($pat, $matches);
-		
 		// chaining
 		return $this;
 	}
@@ -564,48 +582,35 @@ HEREDOC;
 	{
 		if ( ! isset($this->cache[$this->type][$this->queue]))
 		{
-			throw new Exception('Could not find a queue of files by the name of \'' . $this->queue . '\'.');
+			Minimee_helper::log('Could not find a queue of files by the name of \'' . $this->queue . '\'.', 3);
 		}
 
-		// re-set our tag template
-		$this->template = $this->cache[$this->type][$this->queue]['template'];
-
-		// re-set what to return on error
-		$this->on_error = $this->cache[$this->type][$this->queue]['on_error'];
-
-		// TODO: re-set other runtime properties
-		
-		// order by priority
-		ksort($this->cache[$this->type][$this->queue]['filesdata']);
-
-		$queue = array();
-		// first reduce down to one array
-		foreach($this->cache[$this->type][$this->queue]['filesdata'] as $fdata)
+		else
 		{
-			$queue = array_merge($queue, $fdata);
+			// re-set our tag template
+			$this->template = $this->cache[$this->type][$this->queue]['template'];
+
+			// re-set what to return on error
+			$this->on_error = $this->cache[$this->type][$this->queue]['on_error'];
+
+			// TODO: re-set other runtime properties
+			
+			// order by priority
+			ksort($this->cache[$this->type][$this->queue]['filesdata']);
+
+			// flatten to one array
+			$this->files = array();
+			foreach($this->cache[$this->type][$this->queue]['filesdata'] as $file)
+			{
+				$this->files = array_merge($this->files, $file);
+			}
+
+			// No files found?
+			if ( ! is_array($this->files) OR count($this->files) == 0)
+			{
+				Minimee_helper::log('No files found in the queue named \'' . $this->type . '\'.', 3);
+			}
 		}
-
-		// now extract just the filenames to pass to MEE->set_filesdata
-		$filesdata = array();
-		foreach($queue as $fdata)
-		{
-			$filesdata[] = $fdata['name'];
-		}
-
-		// clear filesdata just in case
-		$this->MEE->filesdata = array();
-
-		// set our Minimee::filesdata array
-		$this->MEE->set_filesdata($filesdata);
-
-		// No files found?
-		if ( ! is_array($this->MEE->filesdata) OR count($this->MEE->filesdata) == 0)
-		{
-			throw new Exception('No files found in the queue named \'' . $this->type . '\'.');
-		}
-		
-		// cleanup
-		unset($queue, $filesdata);
 		
 		// chaining
 		return $this;
@@ -734,53 +739,54 @@ HEREDOC;
 			return $out;
 		}
 
-		try
+		// should we be operating off file(s) stored in queue?
+		if($from_queue)
 		{
-			// should we be operating off file(s) stored in queue?
-			if($from_queue)
+			if ($this->EE->TMPL->fetch_param('js'))
 			{
-				if ($this->EE->TMPL->fetch_param('js'))
-				{
-					$this->queue = $this->EE->TMPL->fetch_param('js');
-					$this->type = 'js';
-				}
-
-				if ($this->EE->TMPL->fetch_param('css'))
-				{
-					$this->queue = $this->EE->TMPL->fetch_param('css');
-					$this->type = 'css';
-				}
-
-				// abort error if no queue was provided		
-				if ( ! $this->queue)
-				{
-					return $this->_abort('You must specify a queue name.');
-				}
-
-				// fetch our parameters
-				$this->_fetch_params();
-
-				// OK, let's fetch from our queue
-				$this->_fetch_queue();
+				$this->queue = $this->EE->TMPL->fetch_param('js');
+				$this->type = 'js';
 			}
+
+			if ($this->EE->TMPL->fetch_param('css'))
+			{
+				$this->queue = $this->EE->TMPL->fetch_param('css');
+				$this->type = 'css';
+			}
+
+			// abort error if no queue was provided		
+			if ( ! $this->queue)
+			{
+				return $this->_abort('You must specify a queue name.');
+			}
+
+			// fetch our parameters
+			$this->_fetch_params();
+
+			// OK, let's fetch from our queue
+			$this->_fetch_queue();
+		}
+
+		// fetch our files
+		else
+		{
+			// fetch our parameters
+			$this->_fetch_params();
 
 			// fetch our files
-			else
+			$this->_fetch_files();
+
+			// should we set our files to queue for later?
+			if($this->queue)
 			{
-				// fetch our parameters
-				$this->_fetch_params();
-
-				// fetch our files
-				$this->_fetch_files();
-
-				// should we set our files to queue for later?
-				if($this->queue)
-				{
-					return $this->_set_queue();
-				}
+				return $this->_set_queue();
 			}
+		}
 
+		try
+		{
 			$filenames = $this->MEE->set_type($this->type)
+								   ->set_filesdata($this->files)
 								   ->flightcheck()
 								   ->check_headers()
 								   ->cache();
@@ -834,9 +840,9 @@ HEREDOC;
 		// TODO: save other runtime properties
 
 		// Add all files to the queue cache
-		foreach($this->MEE->filesdata as $filesdata)
+		foreach($this->files as $file)
 		{
-			$this->cache[$this->type][$this->queue]['filesdata'][$priority][] = $filesdata;
+			$this->cache[$this->type][$this->queue]['filesdata'][$priority][] = $file;
 		}
 	}
 	// ------------------------------------------------------
