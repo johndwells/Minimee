@@ -165,10 +165,10 @@ class Minimee_ext {
 			// loop through & call each method
 			foreach($this->cache['template_post_parse'] as $needle => $tag)
 			{
-				Minimee_helper::log('Calling Minimee::' . $tag['method'] . '() during template_post_parse: ' . serialize($tag['tagparams']), 3);
+				Minimee_helper::log('Calling Minimee::display("' . $tag['method'] . '") during template_post_parse: ' . serialize($tag['tagparams']), 3);
 
 				$this->EE->TMPL->tagparams = $tag['tagparams'];
-				$out = $m->{$tag['method']}();
+				$out = $m->display($tag['method']);
 				$template = str_replace(LD.$needle.RD, $out, $template);
 			}
 			

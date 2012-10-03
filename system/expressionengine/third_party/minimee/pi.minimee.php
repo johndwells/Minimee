@@ -207,8 +207,7 @@ class Minimee {
 	 */
 	public function contents()
 	{
-		// alias of Minimee::embed()
-		return $this->embed();
+		return $this->display('embed');
 	}
 	// ------------------------------------------------------
 
@@ -239,10 +238,84 @@ class Minimee {
 	 * 
 	 * @return mixed string or empty
 	 */
-	public function display()
+	public function display($method = '')
 	{
-		// alias of tag
-		return $this->tag();
+		// see if calling via exp:minimee:display:method syntax
+		if($method == '')
+		{
+			$method = $this->EE->TMPL->tagparts[count($this->EE->TMPL->tagparts) - 1];
+		}
+
+		// consolidate our aliases into allowed methods
+		switch($method) :
+			case 'url' :
+			case 'link' :
+				$method = 'url';
+				$this->return_format = 'url';
+			break;
+
+			case 'contents' :
+			case 'embed' :
+				$method = 'embed';
+				$this->return_format = 'embed';
+			break;
+
+			case 'tag' :
+			case 'display' :
+			default :
+				$method = 'tag';
+				$this->return_format = 'tag';
+			break;
+		endswitch;
+
+		// try to postpone until template_post_parse
+		if ($out = $this->_postpone($method))
+		{
+			return $out;
+		}
+
+		// now determine what asset type, and fetch our queue
+		if ($this->EE->TMPL->fetch_param('js'))
+		{
+			$this->queue = $this->EE->TMPL->fetch_param('js');
+			$this->type = 'js';
+		}
+
+		if ($this->EE->TMPL->fetch_param('css'))
+		{
+			$this->queue = $this->EE->TMPL->fetch_param('css');
+			$this->type = 'css';
+		}
+
+		// abort error if no queue was provided		
+		if ( ! $this->queue)
+		{
+			return $this->_abort('You must specify a queue name.');
+		}
+
+		// fetch our parameters
+		$this->_fetch_params();
+
+		// OK, let's fetch from our queue
+		$this->_fetch_queue();
+
+		// let's do this
+		try
+		{
+			$filenames = $this->MEE->set_type($this->type)
+								   ->set_files($this->files)
+								   ->flightcheck()
+								   ->check_headers()
+								   ->cache();
+
+			// format and return
+			return $this->_return($filenames);
+
+		}
+		catch (Exception $e)
+		{
+			return $this->_abort($e);
+		}
 	}
 	// ------------------------------------------------------
 	
@@ -251,20 +324,15 @@ class Minimee {
 	 * Plugin function: exp:minimee:embed
 	 * 
 	 * This fetches files from our queue and embeds the cache
-	 * contents inline. It has no on_error value, and
-	 * the asset type is determined by the queue 
+	 * contents inline. 
 	 * 
 	 * @return mixed string or empty
 	 */
 	public function embed()
 	{
-		// type of output
-		$this->return_format = 'embed';
+		// TODO: Add parameter for output tag parameters
 
-		die('Add parameter for output tag parameters.');
-
-		// let's go
-		return $this->_run('embed', TRUE);
+		return $this->display('embed');
 	}
 	// ------------------------------------------------------
 
@@ -310,24 +378,19 @@ class Minimee {
 	 */
 	public function link()
 	{
-		// alias of Minimee::url()
-		return $this->url();
+		return $this->display('url');
 	}
 	// ------------------------------------------------------
 
 
 	/**
-	 * Plugin function: exp:minimee:display
+	 * Plugin function: exp:minimee:tag
 	 *
 	 * Return the tags for cache
 	 */
 	public function tag()
 	{
-		// set output type
-		$this->return_format = 'tag';
-
-		// let's go
-		return $this->_run('tag', TRUE);
+		return $this->display('tag');
 	}
 	// ------------------------------------------------------
 
@@ -339,11 +402,7 @@ class Minimee {
 	 */
 	public function url()
 	{
-		// set our output type		
-		$this->return_format = 'url';
-
-		// let's go
-		return $this->_run('url', TRUE);
+		return $this->display('url');
 	}
 	// ------------------------------------------------------
 
@@ -727,62 +786,23 @@ HEREDOC;
 	/**
 	 * Called by Minimee:css and Minimee:js, performs basic run command
 	 * 
-	 * @param mixed  Name of method to pass to postpone
-	 * @param bool   Whether we should check for a queue or not
 	 * @return mixed string or empty
 	 */
-	protected function _run($method = FALSE, $from_queue = FALSE)
+	protected function _run()
 	{
-		// try to postpone until template_post_parse
-		if ($method && $out = $this->_postpone($method))
-		{
-			return $out;
-		}
-
-		// should we be operating off file(s) stored in queue?
-		if($from_queue)
-		{
-			if ($this->EE->TMPL->fetch_param('js'))
-			{
-				$this->queue = $this->EE->TMPL->fetch_param('js');
-				$this->type = 'js';
-			}
-
-			if ($this->EE->TMPL->fetch_param('css'))
-			{
-				$this->queue = $this->EE->TMPL->fetch_param('css');
-				$this->type = 'css';
-			}
-
-			// abort error if no queue was provided		
-			if ( ! $this->queue)
-			{
-				return $this->_abort('You must specify a queue name.');
-			}
-
-			// fetch our parameters
-			$this->_fetch_params();
-
-			// OK, let's fetch from our queue
-			$this->_fetch_queue();
-		}
+		// fetch our parameters
+		$this->_fetch_params();
 
 		// fetch our files
-		else
+		$this->_fetch_files();
+
+		// should we set our files to queue for later?
+		if($this->queue)
 		{
-			// fetch our parameters
-			$this->_fetch_params();
-
-			// fetch our files
-			$this->_fetch_files();
-
-			// should we set our files to queue for later?
-			if($this->queue)
-			{
-				return $this->_set_queue();
-			}
+			return $this->_set_queue();
 		}
 
+		// let's do this
 		try
 		{
 			$filenames = $this->MEE->set_type($this->type)
