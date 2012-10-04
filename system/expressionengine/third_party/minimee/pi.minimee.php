@@ -47,15 +47,15 @@ class Minimee {
 
 
 	/**
-	 * Reference to our cache
+	 * An array of attributes to use when wrapping cache contents in a tag
 	 */
-	public $cache 					= NULL;
+	public $attributes				= '';
 
 
 	/**
-	 * Our magical config class
+	 * Reference to our cache
 	 */
-	public $config 					= NULL;
+	public $cache 					= NULL;
 
 
 	/**
@@ -65,15 +65,33 @@ class Minimee {
 
 
 	/**
-	 * Our local property of filenames to cache
+	 * Our magical config class
 	 */
-	public $files					= array();
+	public $config 					= NULL;
 
 
 	/**
-	 * Delimiter when fetching files from string
+	 * Delimiter when exploding files from string
 	 */
-	public $files_delimiter			= ',';
+	public $delimiter				= ',';
+
+
+	/**
+	 * Type of format/content to return (contents, url or tag)
+	 */
+	public $display 				= '';
+
+
+	/**
+	 * When combine="no", what to separate each cache return value with
+	 */
+	public $display_delimiter		= array('contents' => "\n", 'url' => ',', 'tag' => '');
+
+
+	/**
+	 * Our local property of filenames to cache
+	 */
+	public $files					= array();
 
 
 	/**
@@ -83,15 +101,9 @@ class Minimee {
 
 
 	/**
-	 * When combine="no", what to separate each cache return value with
+	 * Name of our queue, if running
 	 */
-	public $return_delimiter		= array('contents' => "\n", 'url' => ',', 'tag' => '');
-
-
-	/**
-	 * Type of format/content to return (contents, url or tag)
-	 */
-	public $display 				= '';
+	public $queue					= '';
 
 
 	/**
@@ -104,18 +116,6 @@ class Minimee {
 	 * What type of asset to process
 	 */
 	public $type					= '';
-
-
-	/**
-	 * Name of our queue, if running
-	 */
-	public $queue					= '';
-
-
-	/**
-	 * An array of attributes to use when wrapping cache contents in a tag
-	 */
-	public $attributes				= '';
 
 
 	// ------------------------------------------------------
@@ -137,18 +137,18 @@ class Minimee {
 		// grab instance of our config object
 		$this->config = Minimee_helper::config();
 
-		// instantiate our Minimee_lib
-		// pass our static config
+		// instantiate our Minimee_lib, pass our static config
 		$this->MEE = new Minimee_lib($this->config);
 
 		// magic: run as our "api"
+		// Tagparts would have a length of 1 if calling minimee like {exp:minimee}...{/exp:minimee}
 		// $str would contain custom field content if used as a field modifier (e.g. {ft_stylesheet:minimee})
-		// tagparts would have a length of 1 if calling minimee like {exp:minimee}...{/exp:minimee}
-		if($str || count($this->EE->TMPL->tagparts) == 1)
+		// Note that this is entirely untested and undocumented, and would require passing a type=""
+		// parameter so that Minimee knows what sort of asset it's operating on. But in theory it's possible.
+		if(count($this->EE->TMPL->tagparts) == 1 || $str)
 		{
 			$this->return_data = $this->api($str);
 		}
-
 	}
 	// ------------------------------------------------------
 
@@ -156,13 +156,23 @@ class Minimee {
 	/**
 	 * API-like interface
 	 *
-	 * @param String 	Filename of asset if being called as field modifier
+	 * @param String 	Filename(s) of asset(s) IFF being called as field modifier
 	 * @return void
 	 */
-	public function api($asset = '')
+	public function api($assets = '')
 	{
-		if ($this->EE->TMPL->fetch_param('css') && $this->EE->TMPL->fetch_param('css'))
+		// a custom field modifier needs a type
+		if ($assets != '' && ! $this->EE->TMPL->fetch_param('type'))
 		{
+			$this->on_error = $assets;
+			return $this->_abort('You must specify a type (css or js) when using custom field modifier.');
+		}
+
+		// can't specify css and js at same time
+		if ($assets == '' && $this->EE->TMPL->fetch_param('css') && $this->EE->TMPL->fetch_param('js'))
+		{
+			// this will be horribly wrong, but it's at least something
+			$this->on_error = $this->EE->TMPL->fetch_param('css') . "\n" . $this->EE->TMPL->fetch_param('js');
 			return $this->_abort('You may not specify css="" and js="" in the same API call.');
 		}
 
@@ -297,8 +307,6 @@ class Minimee {
 	 */
 	public function embed()
 	{
-		// TODO: Add parameter for output tag parameters
-
 		return $this->display('contents');
 	}
 	// ------------------------------------------------------
@@ -529,7 +537,7 @@ HEREDOC;
 		// fetch our parameters
 		$this->_fetch_params();
 
-		// OK, let's fetch from our queue
+		// fetch from our queue
 		$this->_fetch_queue();
 
 		// let's do this
@@ -589,10 +597,10 @@ HEREDOC;
 			$this->files = $matches[1];
 		}
 		// no matches; assume entire haystack is our asset
-		// no guarantees what will happen next...
+		// this should only happen when using API interface
 		else
 		{
-			$this->files = explode($this->files_delimiter, $haystack);
+			$this->files = explode($this->delimiter, $haystack);
 		}
 
 		// chaining
@@ -609,19 +617,23 @@ HEREDOC;
 	protected function _fetch_params()
 	{
 		/*
-		 * Part 1: Parameters that may override defaults
+		 * Part 1: Parameters which may override defaults
 		 */
 		// set type
 		$this->type = $this->EE->TMPL->fetch_param('type', $this->type);
 
-		// override files delimiter
-		$this->files_delimiter = $this->EE->TMPL->fetch_param('files_delimiter', $this->files_delimiter);
-
 		// override display format
 		$this->display = $this->EE->TMPL->fetch_param('display', $this->display);
 
-		// set/override return delimiter
-		$this->return_delimiter[$this->display] = $this->EE->TMPL->fetch_param('return_delimiter', $this->return_delimiter[$this->display]);
+		// override delimiters?
+		if( $this->EE->TMPL->fetch_param('delimiter'))
+		{
+			$this->delimiter = $this->EE->TMPL->fetch_param('delimiter');
+			$this->display_delimiter[$this->display] = $this->EE->TMPL->fetch_param('delimiter');
+		}
+
+		// display delimiter may also be specified
+		$this->display_delimiter[$this->display] = $this->EE->TMPL->fetch_param('display_delimiter', $this->display_delimiter[$this->display]);
 
 		// tag attributes for returning cache contents
 		if(is_array($this->EE->TMPL->tagparams))
@@ -828,7 +840,7 @@ HEREDOC;
 		}
 
 		// glue output based on type
-		return implode($this->return_delimiter[$this->display], $return);
+		return implode($this->display_delimiter[$this->display], $return);
 	}
 	// ------------------------------------------------------
 
