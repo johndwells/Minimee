@@ -419,12 +419,16 @@ HEREDOC;
 	 * Abort and return original tagdata.
 	 * Logs the error message.
 	 *
-	 * @param mixed The caught exception or empty string
-	 * @return string The un-Minimeed tagdata
+	 * @param mixed The caught exception or string
+	 * @return string The value of our Minimee::on_error property
 	 */	
 	protected function _abort($e = FALSE)
 	{
-		if ($e)
+		if ($e && is_string($e))
+		{
+			$log = $e;
+		}
+		elseif ($e)
 		{
 			$log = $e->getMessage();
 		}
