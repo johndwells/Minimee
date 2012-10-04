@@ -782,7 +782,7 @@ HEREDOC;
 					'tagparams' => $tagparams
 				);
 				
-				Minimee_helper::log('Postponing process of Minimee::' . $method . '() until template_post_parse hook.', 3);
+				Minimee_helper::log('Postponing process of Minimee::display(`' . $method . '`) until template_post_parse hook.', 3);
 				
 				// return needle so we can find it later
 				return LD.$needle.RD;
