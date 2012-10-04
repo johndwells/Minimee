@@ -590,6 +590,9 @@ HEREDOC;
 		// set type
 		$this->type = $this->EE->TMPL->fetch_param('type', $this->type);
 
+		// override files delimiter
+		$this->files_delimiter = $this->EE->TMPL->fetch_param('files_delimiter', $this->files_delimiter);
+
 		// override return format
 		$this->return_format = $this->EE->TMPL->fetch_param('return_format', $this->return_format);
 
@@ -799,7 +802,6 @@ HEREDOC;
 
 			endswitch;
 		}
-
 
 		// glue output based on type
 		return implode($this->return_delimiter[$this->return_format], $return);
