@@ -91,7 +91,7 @@ class Minimee {
 	/**
 	 * Type of format/content to return (contents, url or tag)
 	 */
-	public $return_format 			= '';
+	public $display 				= '';
 
 
 	/**
@@ -175,8 +175,8 @@ class Minimee {
 
 		$this->on_error = $assets;
 
-		// set our return format
-		$this->_set_return_format();
+		// set our display format
+		$this->_set_display();
 
 		// set parameters that affect config
 		$this->_fetch_params();
@@ -243,61 +243,46 @@ class Minimee {
 	 */
 	public function display($method = '')
 	{
+		// abort error if no queue was provided		
+		if ( ! $this->EE->TMPL->fetch_param('js') && ! $this->EE->TMPL->fetch_param('css'))
+		{
+			return $this->_abort('You must specify a queue name.');
+		}
+
 		// see if calling via exp:minimee:display:method syntax
-		$this->_set_return_format($method);
+		$this->_set_display($method);
 
 		// try to postpone until template_post_parse
-		if ($out = $this->_postpone($this->return_format))
+		if ($out = $this->_postpone($this->display))
 		{
 			return $out;
 		}
+
+		// walk through both types
+		$return = '';
 
 		// now determine what asset type, and fetch our queue
 		if ($this->EE->TMPL->fetch_param('js'))
 		{
 			$this->queue = $this->EE->TMPL->fetch_param('js');
 			$this->type = 'js';
+
+			$return .= $this->_display();
 		}
 
 		if ($this->EE->TMPL->fetch_param('css'))
 		{
 			$this->queue = $this->EE->TMPL->fetch_param('css');
 			$this->type = 'css';
+
+			$return .= $this->_display();
 		}
 
-		// abort error if no queue was provided		
-		if ( ! $this->queue)
-		{
-			return $this->_abort('You must specify a queue name.');
-		}
-
-		// fetch our parameters
-		$this->_fetch_params();
-
-		// OK, let's fetch from our queue
-		$this->_fetch_queue();
-
-		// let's do this
-		try
-		{
-			$filenames = $this->MEE->set_type($this->type)
-								   ->set_files($this->files)
-								   ->flightcheck()
-								   ->check_headers()
-								   ->cache();
-
-			// format and return
-			return $this->_return($filenames);
-
-		}
-		catch (Exception $e)
-		{
-			return $this->_abort($e);
-		}
+		return $return;
 	}
 	// ------------------------------------------------------
-	
-	
+
+
 	/**
 	 * Plugin function: exp:minimee:embed
 	 * 
@@ -530,6 +515,40 @@ HEREDOC;
 
 
 	/**
+	 * Internal function used by exp:minimee:display
+	 * 
+	 * @return mixed string or empty
+	 */
+	protected function _display()
+	{
+		// fetch our parameters
+		$this->_fetch_params();
+
+		// OK, let's fetch from our queue
+		$this->_fetch_queue();
+
+		// let's do this
+		try
+		{
+			$filenames = $this->MEE->set_type($this->type)
+								   ->set_files($this->files)
+								   ->flightcheck()
+								   ->check_headers()
+								   ->cache();
+
+			// format and return
+			return $this->_return($filenames);
+
+		}
+		catch (Exception $e)
+		{
+			return $this->_abort($e);
+		}
+	}
+	// ------------------------------------------------------
+	
+	
+	/**
 	 * Parse tagdata for <link> and <script> tags,
 	 * pulling out href & src attributes respectively.
 	 * [Adapted from SL Combinator]
@@ -593,11 +612,11 @@ HEREDOC;
 		// override files delimiter
 		$this->files_delimiter = $this->EE->TMPL->fetch_param('files_delimiter', $this->files_delimiter);
 
-		// override return format
-		$this->return_format = $this->EE->TMPL->fetch_param('return_format', $this->return_format);
+		// override display format
+		$this->display = $this->EE->TMPL->fetch_param('display', $this->display);
 
 		// set/override return delimiter
-		$this->return_delimiter[$this->return_format] = $this->EE->TMPL->fetch_param('return_delimiter', $this->return_delimiter[$this->return_format]);
+		$this->return_delimiter[$this->display] = $this->EE->TMPL->fetch_param('return_delimiter', $this->return_delimiter[$this->display]);
 
 		// tag attributes for returning cache contents
 		if(is_array($this->EE->TMPL->tagparams))
@@ -769,7 +788,7 @@ HEREDOC;
 
 
 	/**
-	 * Return contents as determined by $this->return_format
+	 * Return contents as determined by $this->display
 	 * 
 	 * @return mixed string or empty
 	 */
@@ -786,7 +805,7 @@ HEREDOC;
 
 		foreach($filenames as $filename)
 		{
-			switch($this->return_format) :
+			switch($this->display) :
 				case 'contents' :
 					$return[] = $this->_cache_contents($filename);
 				break;
@@ -804,7 +823,7 @@ HEREDOC;
 		}
 
 		// glue output based on type
-		return implode($this->return_delimiter[$this->return_format], $return);
+		return implode($this->return_delimiter[$this->display], $return);
 	}
 	// ------------------------------------------------------
 
@@ -817,7 +836,7 @@ HEREDOC;
 	protected function _run()
 	{
 		// set our return format
-		$this->_set_return_format();
+		$this->_set_display();
 
 		// fetch our parameters
 		$this->_fetch_params();
@@ -863,12 +882,13 @@ HEREDOC;
 
 
 	/** 
-	 * Set our return_format property
+	 * Set our display property
 	 * 
 	 * @return void
 	 */
-	protected function _set_return_format($format = '')
+	protected function _set_display($format = '')
 	{
+		// if not passed, fetch last tagpart
 		if( ! $format)
 		{
 			$format = $this->EE->TMPL->tagparts[count($this->EE->TMPL->tagparts) - 1];
@@ -879,12 +899,12 @@ HEREDOC;
 			case 'minimee' :
 			case 'url' :
 			case 'link' :
-				$this->return_format = 'url';
+				$this->display = 'url';
 			break;
 
 			case 'contents' :
 			case 'embed' :
-				$this->return_format = 'contents';
+				$this->display = 'contents';
 			break;
 
 			case 'css' :
@@ -892,7 +912,7 @@ HEREDOC;
 			case 'tag' :
 			case 'display' :
 			default :
-				$this->return_format = 'tag';
+				$this->display = 'tag';
 			break;
 		endswitch;
 	}
