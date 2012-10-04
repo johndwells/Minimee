@@ -161,6 +161,11 @@ class Minimee {
 	 */
 	public function api($asset = '')
 	{
+		if ($this->EE->TMPL->fetch_param('css') && $this->EE->TMPL->fetch_param('css'))
+		{
+			return $this->_abort('You may not specify css="" and js="" in the same API call.');
+		}
+
 		if ($this->EE->TMPL->fetch_param('js'))
 		{
 			$assets = $this->EE->TMPL->fetch_param('js');
