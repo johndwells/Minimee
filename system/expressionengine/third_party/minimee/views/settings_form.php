@@ -171,7 +171,7 @@
 	 * Spit out our advanced table
 	 */
 ?>
-	<p><a href="#" id="minimee_advanced_handle"><?php echo lang('advanced_config'); ?></a><br /><br /></p>
+	<p><a href="#" id="minimee_advanced_handle"><?php echo lang('advanced_config'); ?></a> (<?php echo lang('optional'); ?>)<br /><br /></p>
 	<div id="minimee_advanced_table"><?php echo $this->table->generate(); ?></div>
 <?php
 
