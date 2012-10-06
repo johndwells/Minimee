@@ -297,7 +297,6 @@ class Minimee_config {
 		{
 			$settings['minify_css'] = $settings['minify'];
 			$settings['minify_js'] = $settings['minify'];
-			$settings['minify_html'] = $settings['minify'];
 			unset($settings['minify']);
 		}
 
