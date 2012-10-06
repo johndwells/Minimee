@@ -560,7 +560,7 @@ class Minimee_config {
         {
         	$settings = FALSE;
 
-			Minimee_helper::log('No settings found in EE config as "legacy" format.', 1);
+			Minimee_helper::log('No settings found in EE config as "legacy" format.', 3);
         }
 		
 		return $settings;
