@@ -125,6 +125,17 @@ class Minimee_ext {
 
 
 	/**
+	 * Alias for backwards-compatibility with M1
+	 */
+	public function minify_html($template, $sub, $site_id)
+	{
+		return $this->template_post_parse($template, $sub, $site_id);
+	}
+	// ------------------------------------------------------
+
+
+
+	/**
 	 * Method for template_post_parse hook
 	 *
 	 * @param 	string	Parsed template string
