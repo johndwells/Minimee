@@ -267,10 +267,16 @@ class Minimee_config {
 			$settings = $this->_from_db();
 		}
 		
-		// Test 4: Legacy config
+		// Test 4: Legacy backwards-compatibility
 		if ($settings === FALSE)
 		{
 			$settings = $this->_from_config_legacy();
+
+			// global vars??
+			if ($settings === FALSE)
+			{
+				$settings = $this->_from_global_vars_legacy();
+			}
 		}
 		
 		// Run on default
@@ -632,6 +638,43 @@ class Minimee_config {
 		return $settings;
 	}
 	// ------------------------------------------------------
+
+
+	/**
+	 * See if person forgot to change config setup when upgrading from 1.x.
+	 */
+	protected function _from_global_vars_legacy()
+	{
+		$settings = array();
+
+		// loop through entire _global_vars array
+		foreach($this->EE->config->_global_vars as $key => $val)
+		{
+			if(strpos($key, 'minimee_') === 0)
+			{
+				$settings[substr($key, 8)] = $val;
+			}
+		}
+
+        if (count($settings) > 0)
+        {
+			$this->location = 'global_vars';
+
+			Minimee_helper::log('Minimee is using the "legacy" setup from 1.x, setting via the global vars, which has been deprecated. Please see docs for more.', 2);
+			Minimee_helper::log('Settings taken from EE global vars "legacy".', 3);
+        }
+        else
+        {
+        	$settings = FALSE;
+
+			Minimee_helper::log('No settings found in EE global vars as "legacy" format.', 3);
+        }
+		
+		return $settings;
+	}
+	// ------------------------------------------------------
+	
+	
 }
 // END CLASS
 
