@@ -284,6 +284,23 @@ class Minimee_config {
 			$settings = array();
 		}
 
+		// Legacy check: combine= ?
+		if(array_key_exists('combine', $settings))
+		{
+			$settings['combine_css'] = $settings['combine'];
+			$settings['combine_js'] = $settings['combine'];
+			unset($settings['combine']);
+		}
+
+		// Legacy check: minify= ?
+		if(array_key_exists('minify', $settings))
+		{
+			$settings['minify_css'] = $settings['minify'];
+			$settings['minify_js'] = $settings['minify'];
+			$settings['minify_html'] = $settings['minify'];
+			unset($settings['minify']);
+		}
+
 		// Default cache_path?
 		if ( ! array_key_exists('cache_path', $settings) || $settings['cache_path'] == '')
 		{
@@ -517,7 +534,7 @@ class Minimee_config {
 	
 
 	/**
-	 * See if person forgot to change config setup
+	 * See if person forgot to change config setup when upgrading from 1.x.
 	 */
 	protected function _from_config_legacy()
 	{
