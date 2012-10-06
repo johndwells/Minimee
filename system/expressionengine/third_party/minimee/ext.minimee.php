@@ -326,20 +326,20 @@ class Minimee_ext {
 			{
 				$settings = unserialize($query->row()->settings);
 
-				// migrate combine if 'no'
-				if(array_key_exists('combine', $settings) && $settings['combine'] == 'no')
+				// migrate combine
+				if(array_key_exists('combine', $settings))
 				{
-					$settings['combine_css'] = 'no';
-					$settings['combine_js'] = 'no';
+					$settings['combine_css'] = $settings['combine'];
+					$settings['combine_js'] = $settings['combine'];
 					unset($settings['combine']);
 				}
 
-				// migrate minify if 'no'
-				if(array_key_exists('minify', $settings) && $settings['minify'] == 'no')
+				// migrate minify
+				if(array_key_exists('minify', $settings))
 				{
-					$settings['minify_css'] = 'no';
-					$settings['minify_js'] = 'no';
-					$settings['minify_html'] = 'no';
+					$settings['minify_css'] = $settings['minify'];
+					$settings['minify_js'] = $settings['minify'];
+					$settings['minify_html'] = $settings['minify'];
 					unset($settings['minify']);
 				}
 
