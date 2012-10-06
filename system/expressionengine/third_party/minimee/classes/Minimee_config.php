@@ -520,7 +520,7 @@ class Minimee_config {
 	        {
 	        	$settings = FALSE;
 
-				Minimee_helper::log('Settings taken from EE config must be a non-empty array.', 1);
+				Minimee_helper::log('Settings taken from EE config must be a non-empty array.', 2);
 	        }
 		}
 		else
