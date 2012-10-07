@@ -212,7 +212,18 @@ class Minimee_ext {
 
 		Minimee_helper::library('html');
 
-		return Minify_HTML::minify($template);
+		// run css & js minification?
+		$opts = array();
+		if($this->config->is_yes('minify_css'))
+		{
+			$opts['cssMinifier'] = array('Minify_CSS', 'minify');
+		}
+		if($this->config->is_yes('minify_js'))
+		{
+			$opts['jsMinifier'] = array('JSMin', 'minify');
+		}
+
+		return Minify_HTML::minify($template, $opts);
 	}
 	// ------------------------------------------------------
 
