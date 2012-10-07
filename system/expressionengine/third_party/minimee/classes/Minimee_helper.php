@@ -112,6 +112,10 @@ class Minimee_helper {
 			@ini_set('memory_limit', '128M');
 			@ini_set('memory_limit', '256M');
 
+			// Latest changes to Minify adopt a "loader" over sprinkled require's
+			require_once('Minify/Loader.php');
+			Minify_Loader::register();
+
 			// don't do this again
 			get_instance()->session->cache['include_path'] = TRUE;
 		}
