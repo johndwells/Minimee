@@ -7,19 +7,18 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 * [Forum Support](http://devot-ee.com/add-ons/support/minimee/)
 
 
-# Version 2.1.2
+# Version 2.4.8
 
 ## Requirements:
 
-* PHP5
-* ExpressionEngine 2.1 or later
-* For HTML Minification, EE2.4 or later is required
-* For the "Croxton Queue" (see below), EE2.4 or later is required
-
+* PHP5+
+* ExpressionEngine 2.1+
 
 ## Optional Requirements:
 
-* If using `{stylesheet=}` or external URLs, either cURL or file_get_contents() is required
+* EE2.4+ is required for HTML minification
+* EE2.4+ is required for the "Croxton Queue" (see below)
+* cURL or file_get_contents() is required if using `{stylesheet=}` or external URLs
 * If using `file_get_contents()`, PHP must be compiled with support for fopen wrappers (allow_url_fopen must be set to true in PHP.ini)
 * If using `file_get_contents()` and combining/minifying files over `https`, PHP must be compiled with OpenSSL support
 
@@ -30,9 +29,9 @@ Minimize, combine & cache your CSS and JS files. Minify your HTML. Because size 
 
 Minimee watches your filesystem for changes to your CSS & JS assets, and automatically combines, minifies & caches these assets whenever changes are detected. It can also detect changes to stylesheet templates (whether saved as files or not).
 
-Version 2's substantial re-write has ushered in a host of changes big and small. __Depending on your setup, you may need to make some adjustments prior to _upgrading_ from Minimee 1.x.__ See 'Upgrading from 1.x' below for more.
+Version 2's substantial re-write has ushered in a host of changes big and small. It is the same Minimee you've come to rely on, with more power, intelligence, and fun-ness.
 
-Minimee is inspired and influenced by [SL Combinator](http://experienceinternet.co.uk/software/sl-combinator/) from Experience Internet, and [Carabiner Asset Management Library](http://codeigniter.com/wiki/Carabiner/) from Tony Dewan. It is released under a BSD License.
+Minimee is inspired and influenced by [SL Combinator](http://experienceinternet.co.uk/software/sl-combinator/) from Experience Internet, and [Carabiner Asset Management Library](http://codeigniter.com/wiki/Carabiner/) from Tony Dewan.
 
 
 ## Companion Add-Ons
@@ -47,17 +46,24 @@ The architecture of Minimee2 has given me the opportunity to build other add-ons
 
 ## New for 2.x:
 
-* Hooks for 3rd party integration (see [Minimee+LESS](https://github.com/johndwells/Minimee-LESS), [MSMinimee](https://github.com/johndwells/MSMinimee))
-* ALL settings can be specified via config or extension, _as well as_ via tag parameters
+
+* **ALL settings** can be specified via config or extension, *as well as* via tag parameters
+* Ability to turn on and off minification and/or combining **per asset type**
+* Better, more verbose debugging with EE's [Template Debugging](http://expressionengine.com/user_guide/cp/admin/output_and_debugging_preferences.html)
+* **New API available for 3rd party add-ons**
 * Path & URL settings can now be relative to site
-* New `exp:minimee:url` tag returns just the URL to your minimee'd asset
+* Out-of-the-box default configuration means near zero setup
+* New shorthand `exp:minimee` tag allows for quick caching, plus access to a powerful API "interface"
+* New ways to display your cache: in a tag, embedded inline, or just the URL
+* Purpose-built compatibility with RequireJS, LABjs, etc
 * Disable or override the URLs which are prepended to image & @import paths in CSS
 * New `priority=""` parameter allows you to queue assets into a specific order
-* For EE2.4 and above, assets are queue'd **after** the `exp:minimee:display` tag is parsed
+* For EE2.4 and above, assets are queue'd and sorted **after** all templates have been parsed (see the "Croxton Queue" below)
 * New `cleanup=""` setting for automatically deleting expired caches
 * Verbose template debugging messages to help easily track down errors
-* Improved handling of fully-qualified URLs of local assets
-* Individually turn off and on minification & combining for all assets (CSS, JS and HTML)
+* Hooks for 3rd party integration (see [Minimee+LESS](https://github.com/johndwells/Minimee-LESS), [MSMinimee](https://github.com/johndwells/MSMinimee))
+* **Plus bug fixes, more fine-grained control, and other improvements!**
+
 
 ## Since 1.x:
 
@@ -68,39 +74,34 @@ The architecture of Minimee2 has given me the opportunity to build other add-ons
 * Compatible with server-side compression & caching
 
 
-# Significant Changes in 2.x
+# Installing Minimee
 
-### Configuration
-Configuring via Global Variables is no longer supported, and __configuring via EE's $config variable has changed__; consult the Upgrade notes (below) for more.
-
-### Debug
-The `debug="yes"` setting has been removed. Instead, simply turn on EE's [Template Debugging](http://expressionengine.com/user_guide/cp/admin/output_and_debugging_preferences.html), visit your front end and search the debugging output for messages prefixed with:
-
-* __Minimee [INFO]:__ Debugging messages at important stages in Minimee's processing
-* __Minimee [DEBUG]:__ Indicates a potential issue to resolve
-* __Minimee [ERROR]:__ Something has gone wrong, and Minimee has failed
-
-### Specify combine & minify rules per asset type
-
-There are 5 new settings/parameters that allow fine-grained control of turning on & off combining and minification for each asset type:
-
-* `combine_css`
-* `combine_js`
-* `minify_css`
-* `minify_js`
-* `minify_html`
-
-Because of these new settings/parameters, `combine="no"` and `minify="no"` have been removed (as of 2.0.3).
-
-It may also be worth noting that in Minimee 1.x, if you set both `combine="no"` and `minify="no"`, you would effectively disable Minimee.  This is no longer the case - even if every `combine_` and `minify_` is set to `no`, Minimee will continue to run and create cache files (albeit unminified and uncombined). The only way to truly disable Minimee is via `disable`.
-
-### Cachebusting
-A new "Cachebust" setting allows you to manually trigger Minimee to create new cache files. For most setups this is unneccessary, however edge cases will find this useful - such as when [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) needs to be re-run due to a modified `@import` file,  which Minimee is unable to detect.
+1. Create a cache folder on your server, accessible by a URL, and ensure permissions allow for reading & writing.
+2. Copy the minimee folder to your system/expressionengine/third_party folder
+3. Follow **Configuration** steps below
 
 
 # Upgrading from 1.x
 
-### Filename Case Sensitivity
+Despite Minimee2's significant changes, it has been built to ensure full backwards-compatibility with Minimee 1.x.  So if you're a cow(boy|girl) and like to upgrade add-ons before reading upgrade notes, then we've got you covered.  But to get the most out of Minimee's new abilities and performance, be sure to make it past Step 1.
+
+## Step 1: Update third_party/minimee folder
+
+It's obvious, and it just works. Replace your old `system/ee/third_party/minimee` folder with the new, and you're in business.
+
+## Step 2a: Visit the Extensions CP
+
+If you have Minimee's Extension installed, you will want to visit the Extensions page so that Minimee can upgrade its settings the new architecture.
+
+## Step 2b: Update Config.php
+
+In lieu of Minimee's Extension, you may have Minimee configured via EE's config option, or via EE's Global Variables. If so, please note:
+
+* **EE's Global Variables are deprecated. Please switch to using EE's config instead.**
+
+Additionally, when configuring via EE's `$config`, __setting keys have changed to be a single array__. See the **Configuration** section below for more.
+
+## Step 3: Filename Case Sensitivity
 
 There is a file who's name has **_changed case_**, which may go unrecognised with versioning systems such as SVN/Git; while a check is in place to account for this, it is recommended that you double-check the filename's casing has been properly maintained (subsequent versions of Minimee may drop this check to save time). The file is:
 
@@ -113,29 +114,11 @@ There is a file who's name has **_changed case_**, which may go unrecognised wit
 Once you have upgraded Minimee on your server, either through deployment or FTP, you should make sure that this file has its proper case as above.
 
 
-### Configuration Changes
-
-if you have configured Minimee via EE's `$config` or Global Variables, please note:
-
-* Configuring via global variables is __no longer supported__
-* When configuring via EE's `$config`, __setting keys have changed to be a single array__. See below for details.
-
-
-### Setting Changes
-
-As mentioned above, `combine="y|n"` and `minify="y|n"` have been removed in favor of per-asset options.
-
-
-# Installation
-
-1. Copy the minimee folder to your system/expressionengine/third_party folder
-2. Create a cache folder on your server, accessible by a URL, and ensure permissions allow for reading & writing
-3. Follow "Configuration" steps below
-
-
 # Configuration
 
 _Out-of-the-box and left un-configured, Minimee 2.x will look for a 'cache' folder at the root of your site, e.g. `http://yoursite.com/cache`._
+
+To get the most out of Minimee's performance offering, configure via EE's `$config` variable; use the Extension for simplicity and convenience, but at the cost of an extra database call.
 
 ## Config via Extension
 
@@ -155,7 +138,7 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 		/**
 		 * ==============================================
-		 * BASIC PREFERENCES
+		 * BASIC PREFERENCES (REQUIRED)
 		 * ==============================================
 		 */
 
@@ -209,7 +192,7 @@ To configure Minimee via EE's `$config` array, the following values are availabl
 
 		/**
 		 * ==============================================
-		 * DISABLING PREFERENCES
+		 * DISABLING MINIMEE
 		 * ==============================================
 		 */
 
@@ -302,21 +285,53 @@ In addition to any configuration values mentioned above, the following parameter
 
 ### exp:minimee:css and exp:minimee:js
 
-* `priority=""` For use with `queue` feature. Value specified is a number; lower numbers are placed earlier in queue order.
-* `combine=""`
-* `minify=""`
-* `output=""` tag, link or embed
-* `output_delimiter=""` what to place between cache outputs
+##### Optional
 
-### exp:minimee:url
+* `queue=` To "queue" assets for output; receives a "key" value (e.g. "head_css"), which is used later to lookup and retrieve the queue'd cache
+* `priority=` For use with `queue` feature. Value specified is a number; lower numbers are placed earlier in queue order.
+* `combine=` Shorthand, runtime override of the combine_(css|js) config option
+* `minify=` Shorthand, runtime override of the minify_(css|js) config option
+* `display=` Modify what the tag will return upon success; default is "tag"; also available values are "contents" (embedding cache contents inline), or "url" (returning just the cache URL).
+* `delimiter=` When not combining, this is the string to place between cache output
+* `attribute:name="value"` Override the tag output; useful if changing `display="contents"`, since you will need to specify tag output to avoid contents being returned without a containing tag. See **Advanced Usage** section below.
 
-* `files=""` a pipe- or comma-delimited string of files
+### exp:minimee:display
+
+##### Required
+
+* `css=` OR `js=` the "key" value of the queue, to fetch and return
+
+##### Optional
+
+* `combine=` Shorthand, runtime override of the combine_(css|js) config option
+* `minify=` Shorthand, runtime override of the minify_(css|js) config option
+* `display=` Modify what the tag will return upon success; default is "tag"; also available values are "contents" (embedding cache contents inline), or "url" (returning just the cache URL).
+* `delimiter=` When not combining, this is the string to place between cache output
+* `attribute:name="value"` Override the tag output; useful if changing `display="contents"`, since you will need to specify tag output to avoid contents being returned without a containing tag. See **Advanced Usage** section below.
+
+### exp:minimee
+
+##### Required
+
+* `css=` OR `js=` filename(s) of assets to cache. Cannot specify both in same call.
+
+##### Optional
+
+* `delimiter=` if multiple filenames are supplied, the delimiter used to separate multiple files is by default a comma (`,`). Override with this parameter.
+* `display=` specify type of output to display (url, contents or tag); default is `url`
+* `display_delimiter=` When not combining cache assets, the results will be delimited by the `delimiter=` string by default; this can be overridden with this value. Defaults to `,`
+* `attribute:name="value"` When `display="tag"`, this allows you to format the containing tag output. See **Advanced Usage** section below.
+* `queue=` To "queue" assets for output; receives a value 
+* `priority=` For use with `queue` feature. Value specified is a number; lower numbers are placed earlier in queue order.
+* `combine=` Shorthand, runtime override of the combine_(css|js) config option
+* `minify=` Shorthand, runtime override of the minify_(css|js) config option
 
 
 
-# Usage
 
-Every configuration setting mentioned above can also be passed as a tag parameter; __tag parameters will override settings__. Basic usage is as follows:
+# Basic Usage
+
+Once configured, basic use of Minimee is as simple and beautiful as:
 
 ## CSS:
 
@@ -344,13 +359,54 @@ Every configuration setting mentioned above can also be passed as a tag paramete
 	<script type="text/javascript" src="http://site.com/cache/16b6345ae6f4b24dd2b1cba102cbf2fa.js?m=1298784512"></script>
 
 
+# Advanced Usage
+
+
+## LABjs
+
+If using the [LABjs](http://labjs.com/) script loading library, you can use the `exp:minimee` API tag to seamlessly integrate with your application:
+
+	<script>
+		$LAB
+		.script("{exp:minimee js='framework.js'}").wait()
+		.script("{exp:minimee js='plugin.framework.js'}")
+		.script("{exp:minimee js='myplugin.framework.js'}").wait()
+		.script("{exp:minimee js='init.js'}").wait();
+	</script>
+
+What's more, you can still combine & cache JS assets using a similar syntax. When doing so, consider setting it up so that should Minimee encounter an error - or be disabled manually - the resulting output can still work with LABjs.
+
+Consider the follwing example from LABjs:
+
+	<script>
+		$LAB
+		.script("script1.js", "script2.js", "script3.js")
+		.wait(function(){
+			 // wait for all scripts to execute first
+		});
+	</script>
+
+By modifying the delimiter which Minimee uses to parse assets, we can do the following:
+
+	<script>
+		$LAB
+		.script("{exp:minimee js='script1.js", "script2.js", "script3.js' delimiter='", "'}")
+		.wait(function(){
+			// wait for all scripts to execute first
+		});
+	</script>
+
+If all goes well, $LAB.script() will receive a single cache file; if not - or if Minimee has been temporarily disabled - it receives the original example's equivalent.
+
 # Special Notes / FAQs
 
 ## Minimee isn't working. Where do I start?
 
-Start by turning on EE's template debugging, and visiting the front end of your site. Search for Minimee's debugging messages (see above), which may help track down the root of trouble.
+Start by turning on EE's template debugging, and visiting the front end of your site. Minieme's debugging messages are each prefixed with one of three labels:
 
-And unless you have specific reason to do otherwise, all "Advanced Settings" should be left to Minimee's defaults.
+* __Minimee [INFO]:__ Debugging messages at important stages in Minimee's processing
+* __Minimee [DEBUG]:__ Indicates a potential issue to resolve
+* __Minimee [ERROR]:__ Something has gone wrong, and Minimee has failed
 
 For official support please head over to the @devot-ee forum. When posting, please specify what version of EE and Minimee you are running: [Minimee Support Forums on @devotee](devot-ee.com/add-ons/support/minimee).
 
@@ -376,6 +432,9 @@ This approach means that:
 * Any change to the list of files Minimee is to process will result in a new cache filename
 * Changing Minimee's settings, _with the exception of the cachebust string_, will __NOT__ create a new cache filename.
 
+## What does Minimee do when it encounters an error?
+
+Sometimes Minimee runs into trouble; a file cannot be found, or perhaps the base path has been incorrectly set.  When this happens, Minimee does its best to return your template content ontouched. Keep in mind though that queue'ing may have unintended consequences when an error is encountered; original tagdata may be returned, but it will be returned at the point in which you have asked to `display` the queue'd contents. So code will still be re-ordered.
 
 ## Keeping your cache folder tidy
 The new "cleanup" setting will delete any cache files it has determined have expired. This is done by looking at the timestamp segment of the filename (see above).
@@ -396,6 +455,53 @@ You may also prefer to simply use the cachebust string as part of tracking your 
     {exp:minimee:css cachebust="{gv_cachebust}"}
         ...
     {/exp:minimee:css}
+
+## Tag aliases, and why your Minimee 1.x syntax Just Works
+
+The astute Minimee'er may have noticed that old Minimee 1.x tags such as `exp:minimee:embed` continue to work on 2.x. This is because in 2.x, all "display" methods run through our master exp:minimee:display tag. This ensures we can maintain compatibility with our term aliases ("embed" is synonymous with "contents"). What's more, there's some syntax sugary goodness tossed in there for fun.
+
+### Term Synonyms
+
+* `embed` == `contents`
+* `url` == `link`
+* `tag` == `display` (since the default `display` behaviour is to output tags)
+
+### Alias tag pairs:
+
+* `exp:minimee:embed` == `exp:minimee:display display="contents"`
+* `exp:minimee:contents` == `exp:minimee:display display="contents"`
+* `exp:minimee:url` == `exp:minimee:display display="url"`
+* `exp:minimee:link` == `exp:minimee:display display="url"`
+* `exp:minimee:tag` == `exp:minimee:display display="tag"` == `exp:minimee:display`
+
+### Tag pair "modifiers":
+
+If you append a 4th segment to your tag pair, you can *invoke the display mode automatically*. Check it out:
+
+* `exp:minimee:display:embed` == `exp:minimee:display display="contents"`
+* `exp:minimee:display:contents` == `exp:minimee:display display="contents"`
+* `exp:minimee:display:url` == `exp:minimee:display display="url"`
+* `exp:minimee:display:link` == `exp:minimee:display display="url"`
+* `exp:minimee:display:tag` == `exp:minimee:display display="tag"` == `exp:minimee:display`
+
+OK, so that might not be too exciting, but the tag pair modifer also works on our standard `exp:minimee:css` and `exp:minimee:js` tags:
+
+* `exp:minimee:css:embed` == `exp:minimee:css display="contents"`
+* `exp:minimee:css:contents` == `exp:minimee:css display="contents"`
+* `exp:minimee:css:url` == `exp:minimee:css display="url"`
+* `exp:minimee:css:link` == `exp:minimee:css display="url"`
+* `exp:minimee:css:tag` == `exp:minimee:css display="tag"` == `exp:minimee:css`
+
+and
+
+* `exp:minimee:js:embed` == `exp:minimee:js display="contents"`
+* `exp:minimee:js:contents` == `exp:minimee:js display="contents"`
+* `exp:minimee:js:url` == `exp:minimee:js display="url"`
+* `exp:minimee:js:link` == `exp:minimee:js display="url"`
+* `exp:minimee:js:tag` == `exp:minimee:js display="tag"` == `exp:minimee:js`
+
+And while that may be pretty cool, use these with informed caution - consider what might happen if Minimee encounters an error.
+
 
 ## Does Minimee support `{path=}`?
 
@@ -529,6 +635,13 @@ When Minimee runs, it looks at the first tag for that particular asset type as t
 	...
     
 	<link rel="stylesheet" href="{exp:minimee:link css='css_head'}" />
+
+## Does Minimee process inline CSS and JS?
+
+No. There are performance implications, error handling gotchas, and it over-complicates what should remain a simple utility.
+
+If you need to "queue" your inline content to appear after other Minimee'd assets, I suggest you consider [Croxton's Stash](github.com/croxton/Stash), which is an incredibly powerful, fast, and *free* tool.
+
 
 ## Does Minimee minify & cache `@import`'ed CSS?
 
