@@ -65,7 +65,7 @@
 							<a class="btn" href="https://github.com/johndwells/Minimee/tarball/master">Download<br /><strong>TAR Ball</strong></a>
 							<a class="btn btn-info" href="https://github.com/johndwells/Minimee">Fork On<br /><strong>GitHub</strong></a>
 						</div>
-						<p style="font-size: .95em">&nbsp;<i class="icon-bookmark icon-white"></i> Version 2.1.0, <small>Released 9 October 2012</small></p>
+						<p style="font-size: .95em">&nbsp;<i class="icon-bookmark icon-white"></i> Version 2.x, <small>Releasing October 2012</small></p>
 					</div>
 				</div>
 			</div>
@@ -747,6 +747,36 @@
 				<h2>Advanced Usage</h2>
 
 				<p>There is a wealth of power and flexibility at your fingertips should you choose to go beyond Minimee's basic setup. This section will continue to grow with more 
+
+				<hr />
+
+				<h3>Queueing + Display</h3>
+
+				<p>Since Minimee 1.x there has been the ability to "queue" assets and then display the final cache later in your EE template.  The process is a simple two step process:</p>
+
+				<h5>Step <span class="badge">1</span>: Add <code>queue=</code> parameter to your <code>exp:minimee:css</code> or <code>exp:minimee:js</code> opening tag:</h5>
+
+				<pre>{exp:minimee:css queue="head_css"}
+    &lt;link rel="stylesheet" href="css/reset.css"&gt;
+{/exp:minimee:css}
+</pre>
+
+				<h5>Step <span class="badge">2</span>: For subsequent queue'ing, be sure to use the same parameter value:</h5>
+
+				<pre>{exp:minimee:css queue="head_css"}
+    &lt;link rel="stylesheet" href="{stylesheet='css/webfonts'}"&gt;
+{/exp:minimee:css}
+</pre>
+
+				<h5>Step <span class="badge">3</span>: Once all assets have been queue'd, you can finally display your tag output with the <code>exp:minimee:display</code> tag; use <code>css=</code> or <code>js=</code> as your tag parameter depending on the type of asset, and specify the name of the queue:</h5>
+
+				<pre>{exp:minimee:display css="head_css"}
+
+{!-- will render something like: --}
+&lt;link rel="stylesheet" href="http://site.com/cache/b488f65d0085dcc6b8f536f533b5f2da.1345797433.css"&gt;
+</pre>
+
+				<hr />
 
 				<h3>Integration with LABjs</h3>
 
