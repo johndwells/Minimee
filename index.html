@@ -174,7 +174,7 @@
 						</ul>
 					</div>
 
-					<div class="alert alert-block alert-notice">
+					<div class="">
 						<h5>Optional requirements include:</h5>
 
 						<ul>
@@ -223,7 +223,7 @@
 
 				<p>There is a file who's name has <strong><em>changed case</em></strong>, which may go unrecognised with versioning systems such as SVN/Git; while a check is in place to account for this, it is recommended that you double-check the filename's casing has been properly maintained (subsequent versions of Minimee may drop this check to save time). The file is:</p>
 
-<pre>// correct:
+<pre class="brush:plain">// correct:
 /system/expressionengine/third_party/minimee/libraries/JSMin.php
 
 // incorrect:
@@ -231,6 +231,7 @@
 </pre>
 
 				<p>Once you have upgraded Minimee on your server, either through deployment or FTP, you should make sure that this file has its proper case as above.</p>
+
 			</div> <!-- /#installation -->
 
 
@@ -991,7 +992,7 @@
 							<div class="accordion-inner">
 								<p>A cache filename begins with an md5() hash created from the list of assets being cached together. Minimee then appends the last modified timestamp, and if an optional cachebusting string has been specified, comes next. The result format is:</p>
 
-								<pre>// md5.timestamp.[cachebust].ext
+								<pre class="brush:plain">// md5.timestamp.[cachebust].ext
 03b5614606d3e8d2f28d0b07f802fbbb.1332460675.v2.5.css
 </pre>
 
@@ -1294,6 +1295,7 @@
 		<script src="js/vendor/shCore.js"></script>
 		<script src="js/vendor/shBrushJScript.js"></script>
 		<script src="js/vendor/shBrushPhp.js"></script>
+		<script src="js/vendor/shBrushPlain.js"></script>
 		<script src="js/vendor/shBrushEE.js"></script>
 		<script src="js/vendor/bootstrap-transition.js"></script>
 		<script src="js/vendor/bootstrap-collapse.js"></script>
