@@ -125,6 +125,17 @@ class Minimee_ext {
 
 
 	/**
+	 * Alias for backwards-compatibility with M1
+	 */
+	public function minify_html($template, $sub, $site_id)
+	{
+		return $this->template_post_parse($template, $sub, $site_id);
+	}
+	// ------------------------------------------------------
+
+
+
+	/**
 	 * Method for template_post_parse hook
 	 *
 	 * @param 	string	Parsed template string
@@ -165,10 +176,10 @@ class Minimee_ext {
 			// loop through & call each method
 			foreach($this->cache['template_post_parse'] as $needle => $tag)
 			{
-				Minimee_helper::log('Calling Minimee::' . $tag['method'] . '() during template_post_parse: ' . serialize($tag['tagparams']), 3);
+				Minimee_helper::log('Calling Minimee::display("' . $tag['method'] . '") during template_post_parse: ' . serialize($tag['tagparams']), 3);
 
 				$this->EE->TMPL->tagparams = $tag['tagparams'];
-				$out = $m->{$tag['method']}();
+				$out = $m->display($tag['method']);
 				$template = str_replace(LD.$needle.RD, $out, $template);
 			}
 			
@@ -201,7 +212,18 @@ class Minimee_ext {
 
 		Minimee_helper::library('html');
 
-		return Minify_HTML::minify($template);
+		// run css & js minification?
+		$opts = array();
+		if($this->config->is_yes('minify_css'))
+		{
+			$opts['cssMinifier'] = array('Minify_CSS', 'minify');
+		}
+		if($this->config->is_yes('minify_js'))
+		{
+			$opts['jsMinifier'] = array('JSMin', 'minify');
+		}
+
+		return Minify_HTML::minify($template, $opts);
 	}
 	// ------------------------------------------------------
 
@@ -326,20 +348,20 @@ class Minimee_ext {
 			{
 				$settings = unserialize($query->row()->settings);
 
-				// migrate combine if 'no'
-				if(array_key_exists('combine', $settings) && $settings['combine'] == 'no')
+				// migrate combine
+				if(array_key_exists('combine', $settings))
 				{
-					$settings['combine_css'] = 'no';
-					$settings['combine_js'] = 'no';
+					$settings['combine_css'] = $settings['combine'];
+					$settings['combine_js'] = $settings['combine'];
 					unset($settings['combine']);
 				}
 
-				// migrate minify if 'no'
-				if(array_key_exists('minify', $settings) && $settings['minify'] == 'no')
+				// migrate minify
+				if(array_key_exists('minify', $settings))
 				{
-					$settings['minify_css'] = 'no';
-					$settings['minify_js'] = 'no';
-					$settings['minify_html'] = 'no';
+					$settings['minify_css'] = $settings['minify'];
+					$settings['minify_js'] = $settings['minify'];
+					$settings['minify_html'] = $settings['minify'];
 					unset($settings['minify']);
 				}
 

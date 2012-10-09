@@ -18,13 +18,7 @@ class Minimee_config {
 	
 
 	/**
-	 * Alias of our EE session cache
-	 */
-	public $cache = FALSE;
-
-
-	/**
-	 * Where we find our config - 'db', 'config', 'hook' or 'default'.
+	 * Where we find our config - 'db', 'config', 'hook', 'default' or 'manual'.
 	 * A 3rd party hook may also rename to something else.
 	 */
 	public $location = FALSE;
@@ -77,20 +71,16 @@ class Minimee_config {
 	/**
 	 * Constructor function
 	 *
-	 * If an array is passed, then we clearly expect to init itself
+	 * If an array is passed, then we will avoid our own internal init
 	 * 
-	 * @param Array	An array of settings to extend runtime
+	 * @param Array	An array of settings to override normal init()
 	 */
-	public function __construct($extend = array())
+	public function __construct($override = FALSE)
 	{
+		// We need EE for normal operations
 		$this->EE =& get_instance();
-		
-		// by 'extend' we mean merge runtime with defaults
-		if ($extend)
-		{
-			// grab our config settings, will become our defaults
-			$this->init()->extend($extend);
-		}
+	
+		$this->init($override);
 	}
 	// ------------------------------------------------------
 
@@ -243,114 +233,127 @@ class Minimee_config {
 	 *
 	 * @return void
 	 */
-	public function init()
+	public function init($override = FALSE)
 	{
-		// grab alias of our cache
-		$this->cache =& Minimee_helper::cache();
+		// we are trying to turn this into an array full of goodness.
+		$settings = FALSE;
 
-		// see if we have already configured our defaults
-		if (isset($this->cache['config']))
+		//Test: See if anyone is hooking in
+		// Skip this if we're doing anything with our own extension settings
+		if ( ! (isset($_GET['M']) && $_GET['M'] == 'extension_settings' && $_GET['file'] == 'minimee'))
 		{
-			$this->_default = $this->cache['config'];
-
-			Minimee_helper::log('Settings have been retrieved from session.', 3);
+			$settings = $this->_from_hook();
 		}
-		else
+		
+		// Test: Manually passed?
+		if ($settings === FALSE && is_array($override))
 		{
-			// we are trying to turn this into an array full of goodness.
-			$settings = FALSE;
+			Minimee_helper::log('Settings have been manually passed.', 3);
 
-			/*
-			 * Test 1: See if anyone is hooking in
-			 * Skip this if we're doing anything with our own extension settings
-			 */
-			if ( ! (isset($_GET['M']) && $_GET['M'] == 'extension_settings' && $_GET['file'] == 'minimee'))
-			{
-				$settings = $this->_from_hook();
-			}
-			
-			/*
-			 * Test 2: Look in config
-			 */
+			$this->location = 'manual';
+
+			$settings = $override;
+		}
+
+		// Test: Look in config
+		if ($settings === FALSE)
+		{
+			$settings = $this->_from_config();
+		}
+		
+		// Test 3: Look in db
+		if ($settings === FALSE)
+		{
+			$settings = $this->_from_db();
+		}
+		
+		// Test 4: Legacy backwards-compatibility
+		if ($settings === FALSE)
+		{
+			$settings = $this->_from_config_legacy();
+
+			// global vars??
 			if ($settings === FALSE)
 			{
-				$settings = $this->_from_config();
+				$settings = $this->_from_global_vars_legacy();
 			}
-			
-			/*
-			 * Test 3: Look in db
-			 */
-			if ($settings === FALSE)
-			{
-				$settings = $this->_from_db();
-			}
-			
-			/*
-			 * Set some defaults
-			 */
-			if ( $settings === FALSE)
-			{
-				Minimee_helper::log('Could not find any settings to use. Trying defaults.', 3);
-				
-				$this->location = 'default';
-				
-				// start with an empty array
-				$settings = array();
-			}
-
-			/*
-			 * Set some defaults
-			 */
-			if ( ! array_key_exists('cache_path', $settings) || $settings['cache_path'] == '')
-			{
-				// use global FCPATH if nothing set
-				$settings['cache_path'] = FCPATH . '/cache';
-			}
-
-			if ( ! array_key_exists('cache_url', $settings) || $settings['cache_url'] == '')
-			{
-				// use config base_url if nothing set
-				$settings['cache_url'] = $this->EE->config->item('base_url') . '/cache';
-			}
-			
-			if ( ! array_key_exists('base_path', $settings) || $settings['base_path'] == '')
-			{
-				// use global FCPATH if nothing set
-				$settings['base_path'] = FCPATH;
-			}
-			
-			if ( ! array_key_exists('base_url', $settings) || $settings['base_url'] == '')
-			{
-				// use config base_url if nothing set
-				$settings['base_url'] = $this->EE->config->item('base_url');
-			}
-	
-			/*
-			 * Now make a complete & sanitised settings array, and set as our default
-			 */
-			$this->_default = $this->sanitise_settings(array_merge($this->_allowed, $settings));
-	
-			// cleanup
-			unset($settings);
-	
-			/*
-			 * See if we need to inject ourselves into extensions hook.
-			 * This allows us to bind to the template_post_parse hook without installing our extension
-			 */
-			if ($this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
-			{
-				// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
-				$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
-		  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
-
-				Minimee_helper::log('Manually injected into template_post_parse extension hook.', 3);
-			}
-
-			// set our settings to cache for retrieval later on
-			$this->cache['config'] = $this->_default;
-			
-			Minimee_helper::log('Settings have been saved in session cache. Settings came from: ' . $this->location, 3);
 		}
+		
+		// Run on default
+		if ( $settings === FALSE)
+		{
+			Minimee_helper::log('Could not find any settings to use. Trying defaults.', 3);
+			
+			$this->location = 'default';
+			
+			// start with an empty array
+			$settings = array();
+		}
+
+		// Legacy check: combine= ?
+		if(array_key_exists('combine', $settings))
+		{
+			$settings['combine_css'] = $settings['combine'];
+			$settings['combine_js'] = $settings['combine'];
+			unset($settings['combine']);
+		}
+
+		// Legacy check: minify= ?
+		if(array_key_exists('minify', $settings))
+		{
+			$settings['minify_css'] = $settings['minify'];
+			$settings['minify_js'] = $settings['minify'];
+			unset($settings['minify']);
+		}
+
+		// Default cache_path?
+		if ( ! array_key_exists('cache_path', $settings) || $settings['cache_path'] == '')
+		{
+			// use global FCPATH if nothing set
+			$settings['cache_path'] = FCPATH . '/cache';
+		}
+
+		// Default cache_url?
+		if ( ! array_key_exists('cache_url', $settings) || $settings['cache_url'] == '')
+		{
+			// use config base_url if nothing set
+			$settings['cache_url'] = $this->EE->config->item('base_url') . '/cache';
+		}
+		
+		// Default base_path?
+		if ( ! array_key_exists('base_path', $settings) || $settings['base_path'] == '')
+		{
+			// use global FCPATH if nothing set
+			$settings['base_path'] = FCPATH;
+		}
+		
+		// Default base_url?
+		if ( ! array_key_exists('base_url', $settings) || $settings['base_url'] == '')
+		{
+			// use config base_url if nothing set
+			$settings['base_url'] = $this->EE->config->item('base_url');
+		}
+
+		//Now make a complete & sanitised settings array, and set as our default
+		$this->_default = $this->sanitise_settings(array_merge($this->_allowed, $settings));
+
+		// cleanup
+		unset($settings);
+
+		/*
+		 * See if we need to inject ourselves into extensions hook.
+		 * This allows us to bind to the template_post_parse hook without installing our extension
+		 */
+		if ($this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
+		{
+			// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
+			$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
+	  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
+
+			Minimee_helper::log('Manually injected into template_post_parse extension hook.', 3);
+		}
+		
+		Minimee_helper::log('Settings have been saved in session cache. Settings came from: ' . $this->location, 3);
 		
 		// chaining
 		return $this;
@@ -522,13 +525,48 @@ class Minimee_config {
 	        {
 	        	$settings = FALSE;
 
-				Minimee_helper::log('Settings taken from EE config must be a non-empty array.', 1);
+				Minimee_helper::log('Settings taken from EE config must be a non-empty array.', 2);
 	        }
 		}
 		else
 		{
 			Minimee_helper::log('No settings found in EE config.', 3);
 		}
+		
+		return $settings;
+	}
+	// ------------------------------------------------------
+	
+
+	/**
+	 * See if person forgot to change config setup when upgrading from 1.x.
+	 */
+	protected function _from_config_legacy()
+	{
+		$settings = array();
+
+		// loop through entire config
+		foreach($this->EE->config->config as $key => $val)
+		{
+			if(strpos($key, 'minimee_') === 0)
+			{
+				$settings[substr($key, 8)] = $val;
+			}
+		}
+
+        if (count($settings) > 0)
+        {
+			$this->location = 'config';
+
+			Minimee_helper::log('Your Minimee config is using the "legacy" setup from 1.x, please see docs for more.', 2);
+			Minimee_helper::log('Settings taken from EE config "legacy".', 3);
+        }
+        else
+        {
+        	$settings = FALSE;
+
+			Minimee_helper::log('No settings found in EE config as "legacy" format.', 3);
+        }
 		
 		return $settings;
 	}
@@ -600,6 +638,43 @@ class Minimee_config {
 		return $settings;
 	}
 	// ------------------------------------------------------
+
+
+	/**
+	 * See if person forgot to change config setup when upgrading from 1.x.
+	 */
+	protected function _from_global_vars_legacy()
+	{
+		$settings = array();
+
+		// loop through entire _global_vars array
+		foreach($this->EE->config->_global_vars as $key => $val)
+		{
+			if(strpos($key, 'minimee_') === 0)
+			{
+				$settings[substr($key, 8)] = $val;
+			}
+		}
+
+        if (count($settings) > 0)
+        {
+			$this->location = 'global_vars';
+
+			Minimee_helper::log('Minimee is using the "legacy" setup from 1.x, setting via the global vars, which has been deprecated. Please see docs for more.', 2);
+			Minimee_helper::log('Settings taken from EE global vars "legacy".', 3);
+        }
+        else
+        {
+        	$settings = FALSE;
+
+			Minimee_helper::log('No settings found in EE global vars as "legacy" format.', 3);
+        }
+		
+		return $settings;
+	}
+	// ------------------------------------------------------
+	
+	
 }
 // END CLASS
 

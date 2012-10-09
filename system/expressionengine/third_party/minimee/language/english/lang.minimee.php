@@ -4,6 +4,7 @@ $lang = array(
 
 	'advanced_config' => 'Advanced Preferences',
 	'basic_config' => 'Basic Preferences',
+	'optional' => 'optional',
 	'config_location_warning' => '<strong class="notice">Minimee appears to be configured elsewhere.</strong> There is likely no need to have this extension installed. Consult the <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
 
 	'save' => 'Save Settings',

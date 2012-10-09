@@ -11,6 +11,7 @@ require_once PATH_THIRD . 'minimee/classes/Minimee_config.php';
  */
 class Minimee_helper {
 
+
 	/**
 	 * Logging levels
 	 */
@@ -19,7 +20,8 @@ class Minimee_helper {
 		2 => 'DEBUG',
 		3 => 'INFO'
 	);
-	
+
+
 	/**
 	 * Our 'Singleton' config
 	 */
@@ -56,18 +58,12 @@ class Minimee_helper {
 	 *
 	 * @return 	Array	Instance Minimee_config
 	 */
-	public static function config($extend = array())
+	public static function config()
 	{
 		if (self::$_config === FALSE)
 		{
 			self::$_config = new Minimee_config();
 			self::$_config->init();
-		}
-		
-		// 'extend' our defaults with runtime settings?
-		if ($extend)
-		{
-			self::$_config->extend($extend);
 		}
 		
 		return self::$_config;
@@ -116,6 +112,10 @@ class Minimee_helper {
 			@ini_set('memory_limit', '128M');
 			@ini_set('memory_limit', '256M');
 
+			// Latest changes to Minify adopt a "loader" over sprinkled require's
+			require_once('Minify/Loader.php');
+			Minify_Loader::register();
+
 			// don't do this again
 			get_instance()->session->cache['include_path'] = TRUE;
 		}
@@ -124,42 +124,63 @@ class Minimee_helper {
 		switch ($which) :
 
 			case ('minify') :
-				require_once('Minify/CSS.php');
+				if ( ! class_exists('Minify_CSS'))
+				{
+					require_once('Minify/CSS.php');
+				}
 			break;
 
 			case ('cssmin') :
-				require_once('CSSMin.php');
+				if ( ! class_exists('CSSmin'))
+				{
+					require_once('CSSMin.php');
+				}
 			break;
 			
 			case ('css_urirewriter') :
-				require_once('Minify/CSS/UriRewriter.php');
+				if ( ! class_exists('Minify_CSS_UriRewriter'))
+				{
+					require_once('Minify/CSS/UriRewriter.php');
+				}
 			break;
 
 			case ('curl') :
-				require_once('EpiCurl.php');
+				if ( ! class_exists('EpiCurl'))
+				{
+					require_once('EpiCurl.php');
+				}
 			break;
 			
 			case ('jsmin') :
 			
-				// this sucks, but it's a case-insensitivity issue that we need to protect ourselves against
-				if (glob(PATH_THIRD . 'minimee/libraries/JSM*n.php'))
+				if ( ! class_exists('JSMin'))
 				{
-					require_once('JSMin.php');
-				}
-			
-				else
-				{
-					self::log('jsmin.php in minimee/libraries needs to be renamed to the proper capitalisation of "JSMin.php".', 2);
-					require_once('jsmin.php');
+					// this sucks, but it's a case-insensitivity issue that we need to protect ourselves against
+					if (glob(PATH_THIRD . 'minimee/libraries/JSM*n.php'))
+					{
+						require_once('JSMin.php');
+					}
+				
+					else
+					{
+						self::log('jsmin.php in minimee/libraries needs to be renamed to the proper capitalisation of "JSMin.php".', 2);
+						require_once('jsmin.php');
+					}
 				}
 			break;
 			
 			case ('jsminplus') :
-				require_once('JSMinPlus.php');
+				if ( ! class_exists('JSMinPlus'))
+				{
+					require_once('JSMinPlus.php');
+				}
 			break;
 			
 			case ('html') :
-				require_once('Minify/HTML.php');
+				if ( ! class_exists('Minify_HTML'))
+				{
+					require_once('Minify/HTML.php');
+				}
 			break;
 
 		endswitch;
@@ -204,7 +225,6 @@ class Minimee_helper {
 	/**
 	 * Helper function to parse content looking for CSS and JS tags.
 	 * Returns array of links found.
-
 	 * @param 	string	String to search
 	 * @param 	string	Which type of tags to search for - CSS or JS
 	 * @return 	array	Array of found matches
@@ -220,6 +240,10 @@ class Minimee_helper {
 
 			case 'js' :
 				$pat = "/<script{1}.*?src=['|\"]{1}(.*?)['|\"]{1}[^>]*>(.*?)<\/script>/i";
+			break;
+
+			default :
+				return FALSE;
 			break;
 
 		endswitch;
