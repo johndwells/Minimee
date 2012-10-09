@@ -3251,6 +3251,21 @@ body {
   max-height: 500px !important;
   overflow-y: scroll;
 }
+.syntaxhighlighter .line.alt2 {
+  background-color: #111 !important;
+}
+.syntaxhighlighter .line.alt1 {
+  background-color: #000 !important;
+}
+.syntaxhighlighter,
+.syntaxhighlighter div,
+.syntaxhighlighter code,
+.syntaxhighlighter table,
+.syntaxhighlighter table td,
+.syntaxhighlighter table tr,
+.syntaxhighlighter table tbody {
+  line-height: 1.5em !important;
+}
 .page-header {
   margin-top: 2em;
   padding-top: 5em;
@@ -3259,7 +3274,7 @@ body {
   bottom: 25px;
 }
 .footer {
-  padding: 80px 0 3px 0;
+  padding: 80px 0 40px 0;
 }
 .footer p {
   margin: 0;

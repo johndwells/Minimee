@@ -7,14 +7,14 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<title>Minimee by John D Wells</title>
-		
-		<link rel="stylesheet" href="css/bootstrap.css">
-		<link rel="stylesheet" href="css/responsive.css">
 
-		<!-- Syntax Highlighter
+		<!-- Syntax Highlighter -->
 		<link rel="stylesheet" href="css/sh/shCore.css">
 		<link rel="stylesheet" href="css/sh/shThemeFadeToGrey.css">
-		<link rel="stylesheet" href="css/sh/shEE.css"> -->
+		<link rel="stylesheet" href="css/sh/shEE.css">
+
+		<link rel="stylesheet" href="css/bootstrap.css">
+		<link rel="stylesheet" href="css/responsive.css">
 
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 		<!--[if lt IE 9]>
@@ -42,7 +42,7 @@
 							<li><a href="#configuration">Configuration</a></li>
 							<li><a href="#parameters">Tags &amp; Parameters</a></li>
 							<li><a href="#examples">Examples</a></li>
-							<li><a href="#faq">FAQs</a></li>
+							<li><a href="#frequent">FAQs</a></li>
 						</ul>
 					</div>
 				</div>
@@ -105,7 +105,7 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</div> <!-- /#description -->
 
 
 			<!-- ========================================================================
@@ -148,7 +148,7 @@
 					<li>Embed combined &amp; minified content directly inline to your template</li>
 					<li>Compatible with server-side compression &amp; caching</li>
 				</ul>
-			</div>
+			</div> <!-- /#features -->
 
 
 			<!-- ========================================================================
@@ -228,7 +228,7 @@
 </pre>
 
 				<p>Once you have upgraded Minimee on your server, either through deployment or FTP, you should make sure that this file has its proper case as above.</p>
-			</div>
+			</div> <!-- /#installation -->
 
 
 			<!-- ========================================================================
@@ -253,7 +253,7 @@
 				<ul class="thumbnails">
 					<li class="span11">
 						<div class="thumbnail">
-							<img src="img/config-basic.png" />
+							<img src="img/config-basic.png" alt="Screenshot of Basic Preferences">
 
 							<h3>Basic Preferences</h3>
 							<p>The first panel allows for basic configuration of Minimee, including whether to combine and/or minify each asset type.</p>
@@ -263,7 +263,7 @@
 					</li>
 					<li class="span11">
 						<div class="thumbnail">
-							<img src="img/config-advanced.png" />
+							<img src="img/config-advanced.png" alt="Screenshot of Advanced Preferences">
 
 							<h3>Advanced Preferences</h3>
 							<p>For 90% of all setups, you will not need to edit the Advanced Preferences. If you do and encounter problems, these should be the first things you reset or change.</p>
@@ -436,7 +436,7 @@
     'remote_mode'       =&gt; 'auto'
 );
 </pre>
-			</div>
+			</div> <!-- /#configuration -->
 
 
 			<!-- ========================================================================
@@ -537,7 +537,7 @@
 								<p>To "queue" assets for output; receives a "key" value (e.g. "head_css"), which is used later to lookup and retrieve the queue'd cache</p>
 							</td>
 						</tr>
-					</tody>
+					</tbody>
 				</table>
 
 				<br />
@@ -548,8 +548,8 @@
 						<tr>
 							<th>Parameter</th>
 							<th>Required?</th>
-							<th>Values</th>
 							<th>Default</th>
+							<th>Values</th>
 							<th>Description</th>
 						</tr>
 					</thead>
@@ -557,8 +557,8 @@
 						<tr>
 							<td><code>attribute:name="value"</code></td>
 							<td>no</td>
-							<td>String</td>
 							<td><em>none</em></td>
+							<td>String</td>
 							<td>
 								<p>By default Minimee uses the first tag it encounters as a template for the cache tag output (e.g. <code>&lt;link ... &gt;</code> or <code>&lt;script ... &gt;</code>). You may override this by specifying one or more tag attributes using this parameter format.</p>
 							</td>
@@ -566,8 +566,8 @@
 						<tr>
 							<td><code>combine=</code></td>
 							<td>no</td>
-							<td>yes | no</td>
 							<td><em>none</em></td>
+							<td>yes | no</td>
 							<td>
 								<p>Shorthand, runtime override of the combine_(css|js) config option</p>
 							</td>
@@ -575,8 +575,8 @@
 						<tr>
 							<td><code>css=</code> OR <code>js=</code></td>
 							<td><strong>yes</strong></td>
-							<td>String</td>
 							<td>&nbsp;</td>
+							<td>String</td>
 							<td>
 								<p>The "key" value of the queue, to fetch and return</p>
 							</td>
@@ -584,26 +584,38 @@
 						<tr>
 							<td><code>delimiter=</code></td>
 							<td>no</td>
-							<td>String</td>
 							<td>,</td>
+							<td>String</td>
 							<td>
 								<p>When not combining, this is the string to place between cache output</p>
 							</td>
 						</tr>
 						<tr>
-							<td><code>display=</code></td>
-							<td>no</td>
-							<td>tag | url | contents</td>
+							<td rowspan="3"><code>display=</code></td>
+							<td rowspan="3">no</td>
+							<td rowspan="3">tag</td>
 							<td>tag</td>
 							<td>
-								<p>Modify what the tag will return upon success; default is "tag"; also available values are "contents" (embedding cache contents inline), or "url" (returning just the cache URL).</p>
+								<p>Specify which format to display as the cache results; the default is "tag", returning the appropriate asset tag (e.g. <code>&lt;link ...&gt;</code> or <code>&lt;script...&gt;&lt;/script&gt;</code>).</p>
+							</td>
+						</tr>
+						<tr>
+							<td>url</td>
+							<td>
+								<p>This option will only return the URL to the cache, e.g. <code>http://site.com/cache/cachefile.name.ext</code>. When specifying URL, be aware that if Minimee encounters an error, you may experience unexpected results.</p>
+							</td>
+						</tr>
+						<tr>
+							<td>contents</td>
+							<td>
+								<p>Instruct Minimee to return the contents of the cache, for embedding inline in your template. By default, only the contents are returned; specify one or more <code>attribute:name="type"</code> values to instruct Minimee to wrap the contents in the appropriate HTML tag (e.g. <code>&lt;style&gt;...&lt;/style&gt;</code> or <code>&lt;script&gt;...&lt;/script&gt;</code></p>
 							</td>
 						</tr>
 						<tr>
 							<td><code>minify=</code></td>
 							<td>no</td>
-							<td>yes | no</td>
 							<td><em>none</em></td>
+							<td>yes | no</td>
 							<td>
 								<p>Shorthand, runtime override of the minify_(css|js) config option</p>
 							</td>
@@ -619,8 +631,8 @@
 						<tr>
 							<th>Parameter</th>
 							<th>Required?</th>
-							<th>Values</th>
 							<th>Default</th>
+							<th>Values</th>
 							<th>Description</th>
 						</tr>
 					</thead>
@@ -628,8 +640,8 @@
 						<tr>
 							<td><code>css=</code> OR <code>js=</code></td>
 							<td><strong>yes</strong></td>
-							<td>String</td>
 							<td>&nbsp;</td>
+							<td>String</td>
 							<td>
 								<p>filename(s) of assets to cache. Cannot specify both in same call.</p>
 							</td>
@@ -637,8 +649,8 @@
 						<tr>
 							<td><code>combine=</code></td>
 							<td>no</td>
-							<td>yes | no</td>
 							<td><em>none</em></td>
+							<td>yes | no</td>
 							<td>
 								<p>Shorthand, runtime override of the combine_(css|js) config option</p>
 							</td>
@@ -646,8 +658,8 @@
 						<tr>
 							<td><code>priority=</code></td>
 							<td>no</td>
-							<td>Numeric</td>
 							<td>0</td>
+							<td>Numeric</td>
 							<td>
 								<p>For use with <code>queue</code> feature. Value specified is a number; lower numbers are placed earlier in queue order.</p>
 							</td>
@@ -655,8 +667,8 @@
 						<tr>
 							<td><code>queue=</code></td>
 							<td>no</td>
-							<td>String</td>
 							<td><em>none</em></td>
+							<td>String</td>
 							<td>
 								<p>To "queue" assets for output; receives a "key" value (e.g. "head_css"), which is used later to lookup and retrieve the queue'd cache</p>
 							</td>
@@ -664,26 +676,38 @@
 						<tr>
 							<td><code>minify=</code></td>
 							<td>no</td>
-							<td>yes | no</td>
 							<td><em>none</em></td>
+							<td>yes | no</td>
 							<td>
 								<p>Shorthand, runtime override of the minify_(css|js) config option</p>
 							</td>
 						</tr>
 						<tr>
-							<td><code>display=</code></td>
-							<td>no</td>
-							<td>tag | url | contents</td>
+							<td rowspan="3"><code>display=</code></td>
+							<td rowspan="3">no</td>
+							<td rowspan="3">tag</td>
 							<td>tag</td>
 							<td>
-								<p>Modify what the tag will return upon success; default is "tag"; also available values are "contents" (embedding cache contents inline), or "url" (returning just the cache URL).</p>
+								<p>Specify which format to display as the cache results; the default is "tag", returning the appropriate asset tag (e.g. <code>&lt;link ...&gt;</code> or <code>&lt;script...&gt;&lt;/script&gt;</code>).</p>
+							</td>
+						</tr>
+						<tr>
+							<td>url</td>
+							<td>
+								<p>This option will only return the URL to the cache, e.g. <code>http://site.com/cache/cachefile.name.ext</code>. When specifying URL, be aware that if Minimee encounters an error, you may experience unexpected results.</p>
+							</td>
+						</tr>
+						<tr>
+							<td>contents</td>
+							<td>
+								<p>Instruct Minimee to return the contents of the cache, for embedding inline in your template. By default, only the contents are returned; specify one or more <code>attribute:name="type"</code> values to instruct Minimee to wrap the contents in the appropriate HTML tag (e.g. <code>&lt;style&gt;...&lt;/style&gt;</code> or <code>&lt;script&gt;...&lt;/script&gt;</code></p>
 							</td>
 						</tr>
 						<tr>
 							<td><code>delimiter=</code></td>
 							<td>no</td>
-							<td>String</td>
 							<td>,</td>
+							<td>String</td>
 							<td>
 								<p>When not combining, this is the string to place between cache output</p>
 							</td>
@@ -691,15 +715,15 @@
 						<tr>
 							<td><code>attribute:name="value"</code></td>
 							<td>no</td>
-							<td>String</td>
 							<td><em>none</em></td>
+							<td>String</td>
 							<td>
-								<p>Override the tag output; useful if changing <code>display="contents"</code>, since you will need to specify tag output to avoid contents being returned without a containing tag. See <a href="examples">Advanced Usage</a> section below.</p>
+								<p>Override the tag output; useful if changing <code>display="contents"</code>, since you will need to specify tag output to avoid contents being returned without a containing tag. See <a href="#examples">Advanced Usage</a> section below.</p>
 							</td>
 						</tr>
 					</tbody>
 				</table>
-			</div>
+			</div> <!-- /#parameters -->
 
 
 			<!-- ========================================================================
@@ -739,38 +763,45 @@
 {/exp:minimee:js}
 
 {!- will render something like: --}
-&lt;script type="text/javascript" src="http://site.com/cache/16b6345ae6f4b24dd2b1cba102cbf2fa.js?m=1298784512"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="http://site.com/cache/16b6345ae6f4b24dd2b1cba102cbf2fa.1298784512.js"&gt;&lt;/script&gt;
 </pre>
 
 				<hr />
 
 				<h2>Advanced Usage</h2>
 
-				<p>There is a wealth of power and flexibility at your fingertips should you choose to go beyond Minimee's basic setup. This section will continue to grow with more 
+				<p>There is a wealth of power and flexibility at your fingertips should you choose to go beyond Minimee's basic setup. This section will continue to grow with more examples as time goes on.</p>
 
 				<hr />
 
+
 				<h3>Queueing + Display</h3>
 
-				<p>Since Minimee 1.x there has been the ability to "queue" assets and then display the final cache later in your EE template.  The process is a simple two step process:</p>
+				<p>Since Minimee 1.x there has been the ability to "queue" assets and then display the final cache later in your EE template.  It's a simple two-step process:</p>
 
 				<h5>Step <span class="badge">1</span>: Add <code>queue=</code> parameter to your <code>exp:minimee:css</code> or <code>exp:minimee:js</code> opening tag:</h5>
 
-				<pre>{exp:minimee:css queue="head_css"}
+				<pre class="brush:ee">{exp:minimee:css queue="head_css"}
     &lt;link rel="stylesheet" href="css/reset.css"&gt;
 {/exp:minimee:css}
 </pre>
 
-				<h5>Step <span class="badge">2</span>: For subsequent queue'ing, be sure to use the same parameter value:</h5>
+				<p>For subsequent queue'ing, continue to use the same parameter value:</p>
 
-				<pre>{exp:minimee:css queue="head_css"}
+				<pre class="brush:ee">{exp:minimee:css queue="head_css"}
     &lt;link rel="stylesheet" href="{stylesheet='css/webfonts'}"&gt;
+{/exp:minimee:css}
+    ...
+
+{exp:minimee:css queue="head_css"}
+    &lt;link rel="stylesheet" href="http://site.com/css/global.css"&gt;
+    &lt;link rel="stylesheet" href="css/forms.css"&gt;
 {/exp:minimee:css}
 </pre>
 
-				<h5>Step <span class="badge">3</span>: Once all assets have been queue'd, you can finally display your tag output with the <code>exp:minimee:display</code> tag; use <code>css=</code> or <code>js=</code> as your tag parameter depending on the type of asset, and specify the name of the queue:</h5>
+				<h5>Step <span class="badge">2</span>: Once all assets have been queue'd, you can finally display your tag output with the <code>exp:minimee:display</code> tag; use <code>css=</code> or <code>js=</code> as your tag parameter depending on the type of asset, and specify the name of the queue:</h5>
 
-				<pre>{exp:minimee:display css="head_css"}
+				<pre class="brush:ee">{exp:minimee:display css="head_css"}
 
 {!-- will render something like: --}
 &lt;link rel="stylesheet" href="http://site.com/cache/b488f65d0085dcc6b8f536f533b5f2da.1345797433.css"&gt;
@@ -778,9 +809,86 @@
 
 				<hr />
 
+				<h3>The 'Croxton Queue' for EE2.4+</h3>
+
+				<p><a href="https://github.com/croxton">Mark Croxton</a> submitted this <a href="http://devot-ee.com/add-ons/support/minimee/viewthread/4552#15417">feature request</a> to delay the processing of <code>exp:minimee:display</code> until all other template parsing has been completed, by way of leveraging EE2.4's new <code>template_post_parse</code> hook. It was a brilliant idea and indication of his mad scientist skills. In his wise words:</p>
+
+				<blockquote><p><em>"Then you would never need worry about parse order when injecting assets into the header or footer of your page using queues."</em></p></blockquote>
+
+				<p>This, combined with the new <code>priority=""</code> parameter, means you can do something like:</p>
+
+				<pre class="brush:ee">{exp:minimee:display css="header_css"}
+
+{!-- sometime LATER in EE's parse order --}
+
+{exp:minimee:css queue="header_css" priority="10"}
+    &lt;link href="css/forms.css" rel="stylesheet" type="text/css" /&gt;
+{/exp:minimee:css}
+
+{!-- and even later in parse order, also note the priority --}
+
+{exp:minimee:css queue="header_css" priority="0"}
+    &lt;link href="css/reset.css" rel="stylesheet" type="text/css" /&gt;
+{/exp:minimee:css}
+</pre>
+
+				<p>And then what ends up happening is that <code>exp:minimee:display</code> outputs a cached css that contains, in this order:</p>
+
+				<ol>
+				<li>css/reset.css (first because of priority="0")</li>
+				<li>css/forms.css (second because of priority="10")</li>
+				</ol>
+
+				<hr />
+
+				<h3>Embedding Cache Contents Inline</h3>
+
+				<p>There are now multiple approaches to "embedding" the contents of your cache inline with the rest of your HTML content. Let's cover 2 basic options:</p>
+
+				<h5>Option 1: Using a Queue + Display method</h5>
+
+				<p>Begin with Step <span class="badge">1</span> above under <strong>Queueing + Display</strong>.  This will queue one or more assets for display.</p>
+
+				<p>As a Step 2, specify a display output of <code>contents</code>. Just as with Minimee 1.x, be sure to wrap it within the appropriate HTML tag:</p>
+
+				<pre class="brush:ee">&lt;style type="text/css"&gt;
+    {exp:minimee:display css="head_css" display="contents"}
+&lt;/style&gt;
+</pre>
+
+				<p>However, by also specifying one or more <code>attribute:name="value"</code> parameters to <code>exp:minimee:display</code>, Minimee will automatically wrap the contents of the cache in the appropriate HTML tag for you, using the attributes you specified:</p>
+
+				<pre class="brush:ee">{exp:minimee:display css="head_css" display="contents" attribute:type="text/css"}
+
+{!-- Will output something like: --}
+&lt;style type="text/css"&gt;
+    /* your CSS here */
+&lt;/style&gt;
+</pre>
+
+				<h5>Option 2: Directly changing display mode</h5>
+
+				<p>The return mode of <code>exp:minimee:js</code> and <code>exp:minimee:css</code> tags can now be altered in a single call, by specifying the <code>display</code> value at the same time. When doing so, it is recommended to also provide the appropriate <code>attribute:name="value"</code> parameters as well, so that the contents are automatically wrapped in tags:</p>
+
+				<pre class="brush:ee">{exp:minimee:css display="contents" attribute:type="text/css"}
+    &lt;link rel="stylesheet" href="css/reset.css"&gt;
+    &lt;link rel="stylesheet" href="{stylesheet='css/webfonts'}"&gt;
+    &lt;link rel="stylesheet" href="http://site.com/css/global.css"&gt;
+    &lt;link rel="stylesheet" href="css/forms.css"&gt;
+{/exp:minimee:css}
+
+{!-- Will output something like: --}
+&lt;style type="text/css"&gt;
+    /* your CSS here */
+&lt;/style&gt;
+</pre>
+
+
+				<hr />
+
 				<h3>Integration with LABjs</h3>
 
-				<p>If using the <a href="http://labjs.com/">LABjs <i class="icon-share icon-white"></i></a> script loading library, you can use the <code>exp:minimee</code> API tag to seamlessly integrate with your application:</p>
+				<p>If using the <a href="http://labjs.com/">LABjs</a> script loading library, you can use the <code>exp:minimee</code> API tag to seamlessly integrate with your application:</p>
 
 				<pre class="brush:js">&lt;script&gt;
     $LAB
@@ -816,13 +924,14 @@
 </pre>
 
 				<p>If all goes well, $LAB.script() will receive a single cache file; if not - or if Minimee has been temporarily disabled - it receives the original example's equivalent.</p>
-			</div>
+
+			</div> <!-- /#examples -->
 
 
 			<!-- ========================================================================
 				 FAQS
 				 ==================================================================== -->
-			<div id="faq">
+			<div id="frequent">
 
 				<div class="page-header">
 					<h1>Special Notes / FAQs</h1>
@@ -831,13 +940,13 @@
 				<div class="accordion" id="faqAccordion">
 					<div class="accordion-group">
 						<div class="accordion-heading">
-							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqOne">
+							<a class="accordion-toggle open" data-toggle="collapse" data-parent="#faqAccordion" href="#faqOne">
 								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Minimee isn't working. Where do I start?
 							</a>
 						</div>
-						<div id="faqOne" class="accordion-body collapse">
+						<div id="faqOne" class="accordion-body collapse in">
 							<div class="accordion-inner">
-								<p>Start by turning on EE's template debugging, and visiting the front end of your site. Minieme's debugging messages are each prefixed with one of three labels:</p>
+								<p>Start by turning on EE's <a href="http://expressionengine.com/user_guide/cp/admin/output_and_debugging_preferences.html">Template Debugging</a>, and visiting the front end of your site. Minieme's debugging messages are each prefixed with one of three labels:</p>
 
 								<ul>
 									<li><span class="label label-info">Minimee [INFO]:</span> Informational messages logged at important stages in Minimee's processing</li>
@@ -1024,54 +1133,6 @@
 					</div>
  					<div class="accordion-group">
 						<div class="accordion-heading">
-							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqNine">
-								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;The 'Croxton Queue' for EE2.4+
-							</a>
-						</div>
-						<div id="faqNine" class="accordion-body collapse">
-							<div class="accordion-inner">
-								<p><a href="https://github.com/croxton">Mark Croxton</a> submitted this <a href="http://devot-ee.com/add-ons/support/minimee/viewthread/4552#15417">feature request</a> to delay the processing of <code>exp:minimee:display</code> until all other template parsing has been completed, by way of leveraging EE2.4's new <code>template_post_parse</code> hook. It was a brilliant idea and indication of his mad scientist skills. In his wise words:</p>
-
-								<blockquote><p><em>"Then you would never need worry about parse order when injecting assets into the header or footer of your page using queues."</em></p></blockquote>
-
-								<p>This, combined with the new <code>priority=""</code> parameter, means you can do something like:</p>
-
-								<pre class="brush:ee">{exp:minimee:display css="header_css"}
-
-{!-- sometime LATER in EE's parse order --}
-
-{exp:minimee:css queue="header_css" priority="10"}
-    &lt;link href="css/forms.css" rel="stylesheet" type="text/css" /&gt;
-{/exp:minimee:css}
-
-{!-- and even later in parse order, also note the priority --}
-
-{exp:minimee:css queue="header_css" priority="0"}
-    &lt;link href="css/reset.css" rel="stylesheet" type="text/css" /&gt;
-{/exp:minimee:css}
-</pre>
-
-								<p>And then what ends up happening is that <code>exp:minimee:display</code> outputs a cached css that contains, in this order:</p>
-
-								<ol>
-								<li>css/reset.css (first because of priority="0")</li>
-								<li>css/forms.css (second because of priority="10")</li>
-								</ol>
-
-								<p>Note that this parse-order-be-damned technique is available for all of Minimee's tags which harness "queueing", namely:</p>
-
-								<ul>
-								<li><code>{exp:minimee:display}</code></li>
-								<li><code>{exp:minimee:embed}</code></li>
-								<li><code>{exp:minimee:link}</code></li>
-								</ul>
-
-
-							</div>
-						</div>
-					</div>
- 					<div class="accordion-group">
-						<div class="accordion-heading">
 							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqTen">
 								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;SSL: mixing <code>http</code> &amp; <code>https</code>
 							</a>
@@ -1199,78 +1260,95 @@
 							</div>
 						</div>
 					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqSixteen">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Alternatives to Minimee
+							</a>
+						</div>
+						<div id="faqSixteen" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>There are currently two alternative add-ons that help you compress your CSS &amp; JS (for EE2). &nbsp;These are:</p>
+								<p><a href="http://devot-ee.com/add-ons/automin/">AutoMin</a>&nbsp;- By Jesse Bunch, this has been recently re-written shares many similarities with Minimee. &nbsp;Syntax is nearly identical, plus it has built-in support of LESS. Setup requirements differ slightly from Minimee.</p>
+								<p><a href="http://devot-ee.com/add-ons/nsm-minify/">NSM Minify</a> - By Leevi Graham, this too only works on local files, but actually runs very different from Minimee &amp; AutoMin. The setup is more similar to SL Combinator, and in fact it's possible to use without any EE tags whatsoever. So if you're after the ultimate in lightweight compression of your assets, NSM Minify might suit your tastes.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div> <!-- /#frequent -->
 
+		</div> <!-- /#container -->
+
+		<div class="footer">
+			<div class="container">
+				<p>Hosted on GitHub Pages &mdash; maintained by <a href="https://github.com/johndwells">johndwells</a></p>
 			</div>
 		</div>
-	</div>
 
-	<div class="footer">
-		<p>Hosted on GitHub Pages &mdash; maintained by <a href="https://github.com/johndwells">johndwells</a></p>
-	</div>
+	    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+	    <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.0.min.js"><\/script>')</script>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.0.min.js"><\/script>')</script>
+		<script src="js/vendor/shCore.js"></script>
+		<script src="js/vendor/shBrushJScript.js"></script>
+		<script src="js/vendor/shBrushPhp.js"></script>
+		<script src="js/vendor/shBrushEE.js"></script>
+		<script src="js/vendor/bootstrap-transition.js"></script>
+		<script src="js/vendor/bootstrap-collapse.js"></script>
+		<script src="js/vendor/bootstrap-scrollspy.js"></script>
+		<script src="js/vendor/jquery.idle-timer.js"></script>
+		<script>
+			jQuery(document).ready(function($) {
 
-	<script src="js/vendor/bootstrap-transition.js"></script>
-	<script src="js/vendor/bootstrap-collapse.js"></script>
-	<script src="js/vendor/bootstrap-scrollspy.js"></script>
-	<script src="js/vendor/jquery.idle-timer.js"></script>
-	<script>
-		jQuery(document).ready(function($) {
+				// SyntaxHighlighter
+				SyntaxHighlighter.all();
 
-			// hook to accordion
-			$('.accordion-body').on('show', function (o) {
-				$(this).parent().find('a').addClass('open'); //add active state to button on open
+				// Refresh Scrollspy after SyntaxHighlighter has run
+				// we have no callback, so just running setTimeout
+				setTimeout(function() {
+					$('[data-spy="scroll"]').each(function () {
+						var $spy = $(this).scrollspy('refresh')
+					});
+				}, 300);
+
+				// hook to accordion
+				$('.accordion-body').on('show', function (o) {
+					$(this).parent().find('a').addClass('open'); //add active state to button on open
+				});
+
+				$('.accordion-body').on('hide', function (i, e) {
+					$(this).parent().find('a').removeClass('open'); //remove active state to button on close
+				});
+
+				var $nav = $('.navbar');
+
+				// idleTimer() takes an optional argument that defines the idle timeout
+				// timeout is in milliseconds; defaults to 30000
+				$.idleTimer(1000);
+				
+				// fade away navbar when idle
+				$(document).bind("idle.idleTimer", function(){
+					$nav.animate({
+						opacity : 0
+					}, 10000);
+				});
+
+				// fade in navbar if active
+				$(document).bind("active.idleTimer", function(){
+					$nav.stop()
+						.animate({
+						opacity : 1.0
+						}, 300);
+				});
+
+				// allow scrollTO - but not for FAQ
+				$('a[href^=#]').not('a[href^=#faq]').on('click', function(e) {
+					e.preventDefault();
+
+					$('html, body').animate({
+						scrollTop : $($(this).attr('href')).offset().top
+					}, 500);
+				});
 			});
-
-			$('.accordion-body').on('hide', function (i, e) {
-				$(this).parent().find('a').removeClass('open'); //remove active state to button on close
-			});
-
-			var $nav = $('.navbar');
-
-			// idleTimer() takes an optional argument that defines the idle timeout
-			// timeout is in milliseconds; defaults to 30000
-			$.idleTimer(1000);
-			
-			// fade away navbar when idle
-			$(document).bind("idle.idleTimer", function(){
-				$nav.animate({
-					opacity : 0
-				}, 10000);
-			});
-
-			// fade in navbar if active
-			$(document).bind("active.idleTimer", function(){
-				$nav.stop()
-					.animate({
-					opacity : 1.0
-					}, 300);
-			});
-
-			// allow scrollTO
-			$('a[href^=#]').on('click', function(e) {
-				e.preventDefault();
-
-				$('html, body').animate({
-					scrollTop : $($(this).attr('href')).offset().top
-				}, 500);
-			});
-		});
-	</script>
-
-<!--
-	<script src="js/vendor/shCore.js"></script>
-	<script src="js/vendor/shBrushJScript.js"></script>
-	<script src="js/vendor/shBrushPhp.js"></script>
-	<script src="js/vendor/shBrushEE.js"></script>
-	<script>
-		jQuery(document).ready(function($) {
-
-			// SyntaxHighlighter
-			SyntaxHighlighter.all();
-		});
-	</script>
--->
-</body>
+		</script>
+	</body>
 </html>
