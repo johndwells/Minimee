@@ -1,3 +1,8 @@
+@import "sh/shCore.css";
+
+@import "sh/shThemeFadeToGrey.css";
+
+@import "sh/shEE.css";
 /*!
  * Bootstrap v2.1.1
  *
@@ -3233,17 +3238,6 @@ a.badge:hover {
   line-height: 30px;
   color: #ffffff;
 }
-.alert h1,
-.alert h2,
-.alert h3,
-.alert h4,
-.alert h5,
-.alert h6 {
-  color: inherit;
-}
-body {
-  padding-top: 40px;
-}
 .syntaxhighlighter {
   margin-top: 0 !important;
   padding-top: 10px;
@@ -3265,6 +3259,17 @@ body {
 .syntaxhighlighter table tr,
 .syntaxhighlighter table tbody {
   line-height: 1.5em !important;
+}
+.alert h1,
+.alert h2,
+.alert h3,
+.alert h4,
+.alert h5,
+.alert h6 {
+  color: inherit;
+}
+body {
+  padding-top: 40px;
 }
 .page-header {
   margin-top: 2em;

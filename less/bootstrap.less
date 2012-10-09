@@ -58,16 +58,10 @@
 //@import "carousel.less";
 @import "hero-unit.less";
 
-// Page Styles
-.alert {
-	h1, h2, h3, h4, h5, h6 {
-		color: inherit;
-	}
-}
-
-body {
-	padding-top: 40px;
-}
+// 3rd Party Component: SyntaxHighlighter
+@import "sh/shCore.css";
+@import "sh/shThemeFadeToGrey.css";
+@import "sh/shEE.css";
 
 .syntaxhighlighter {
 	margin-top: 0 !important;
@@ -93,6 +87,17 @@ body {
 .syntaxhighlighter table tr,
 .syntaxhighlighter table tbody {
 	line-height: 1.5em !important;	
+}
+
+// Page Styles
+.alert {
+	h1, h2, h3, h4, h5, h6 {
+		color: inherit;
+	}
+}
+
+body {
+	padding-top: 40px;
 }
 
 .page-header {
