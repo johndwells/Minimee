@@ -1309,7 +1309,7 @@
 			jQuery(document).ready(function($) {
 
 				// Try to track downloads as events
-				$('a.btn').filter('[rel^=event-').on('click', function(e) {
+				$('a.btn').filter('[rel^=event-]').on('click', function(e) {
 					_gaq.push(['_trackEvent', 'Buttons', 'Download', $(this).attr('rel')]);
 				});
 
