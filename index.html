@@ -1,66 +1,1246 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Minimee by johndwells</title>
-    
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>Minimee</h1>
-        <p>Minimee: minimize &amp; combine your CSS and JS files.</p>
-        <p class="view"><a href="https://github.com/johndwells/Minimee">View the Project on GitHub <small>johndwells/Minimee</small></a></p>
-        <ul>
-          <li><a href="https://github.com/johndwells/Minimee/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/johndwells/Minimee/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/johndwells/Minimee">Fork On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>Minimee</h1>
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
+		<title>Minimee by John D Wells</title>
+		
+		<link rel="stylesheet" href="css/bootstrap.css">
+		<link rel="stylesheet" href="css/responsive.css">
 
-<ul>
-<li>Author: <a href="http://johndwells.com">John D Wells</a>
-</li>
-</ul><h2>Version 1.1.7</h2>
+		<!-- Syntax Highlighter
+		<link rel="stylesheet" href="css/sh/shCore.css">
+		<link rel="stylesheet" href="css/sh/shThemeFadeToGrey.css">
+		<link rel="stylesheet" href="css/sh/shEE.css"> -->
 
-<h3>Requirements:</h3>
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+		<!--[if lt IE 9]>
+		<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+		<![endif]-->
+	</head>
+	<body data-spy="scroll" data-target=".navbar">
 
-<ul>
-<li>PHP5</li>
-<li>ExpressionEngine 2.1 or later</li>
-<li>For HTML Minification, EE2.4 or later is required</li>
-</ul><h2>Description</h2>
+		<div class="navbar navbar-fixed-top navbar-inverse">
+			<div class="navbar-inner">
+				<div class="container">
 
-<p>Minimize, combine &amp; cache your CSS and JS files. Minify your HTML. Because size DOES matter.</p>
+					<!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+					<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</a>
 
-<p>Minimee is to EE2 what SL Combinator is to EE1.  But with a few twists:</p>
+					<div class="nav-collapse">
+						<ul class="nav">
+							<li class="active"><a href="#home"><i class="icon-home"></i></a></li>
+							<li><a href="#features">Features</a></li>
+							<li><a href="#installation">Installation</a></li>
+							<li><a href="#configuration">Configuration</a></li>
+							<li><a href="#parameters">Tags &amp; Parameters</a></li>
+							<li><a href="#examples">Examples</a></li>
+							<li><a href="#faq">FAQs</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
 
-<ul>
-<li>for EE2.4 and above, can minify your HTML</li>
-<li>works with the global variables, even {stylesheet}</li>
-<li>works with external files, over cURL or file_get_contents()</li>
-<li>embed combined &amp; minified content directly inline to your template</li>
-<li>queue files for later</li>
-<li>compatible with server-side compression &amp; caching</li>
-</ul><p>Minimee is inspired and influenced by <a href="http://experienceinternet.co.uk/software/sl-combinator/">SL Combinator</a> from Experience Internet, and <a href="http://codeigniter.com/wiki/Carabiner/">Carabiner Asset Management Library</a> from Tony Dewan. It is released under a BSD License.</p>
+		<div id="home" class="hero-unit">
+			<div class="container">
+				<h1>Minimee<sup><span style="font-size: .6em">(2)</span></sup></h1>
 
-<p>Complete and up-to-date documentation can be found on <a href="http://johndwells.com/software/minimee">Minimee’s homepage</a>.</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/johndwells">johndwells</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
-  </body>
+				<div class="row">
+					<div class="span7">
+						<p>Minimize, combine &amp; cache your CSS and JS files. Minify your HTML. Because size (still) DOES matter.</p>
+						<br />
+					</div>
+
+					<div class="span4 offset1">
+						<div class="btn-group">
+							<a class="btn" href="https://github.com/johndwells/Minimee/zipball/master">Download<br /><strong>ZIP File</strong></a>
+							<a class="btn" href="https://github.com/johndwells/Minimee/tarball/master">Download<br /><strong>TAR Ball</strong></a>
+							<a class="btn btn-info" href="https://github.com/johndwells/Minimee">Fork On<br /><strong>GitHub</strong></a>
+						</div>
+						<p style="font-size: .95em">&nbsp;<i class="icon-bookmark icon-white"></i> Version 2.x, <small>Launching Fall 2012</small></p>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="container">
+
+			<div id="description">
+
+				<div class="row">
+
+					<div class="span7">
+						<blockquote>
+							<p>"Minimee combines and compresses JavaScript and CSS files, thereby reducing file sizes and HTTP requests, and turning your puddle of online molasses into a digital fire hose."
+							<small>Stephen Lewis, founder, <a href="http://experienceinternet.co.uk/">Experience Internet</a></small></p>
+						</blockquote>
+
+						<p>Minimee watches your filesystem for changes to your CSS &amp; JS assets, and automatically combines, minifies &amp; caches these assets whenever changes are detected. It can also detect changes to stylesheet templates (whether saved as files or not).</p>
+
+						<p>Version 2's substantial re-write has ushered in a host of changes big and small. It is the same Minimee you've come to rely on, with more power, intelligence, and fun-ness.</p>
+
+						<p><em>Minimee is inspired and influenced by <a href="http://experienceinternet.co.uk/software/sl-combinator/">SL Combinator</a> from Experience Internet, and <a href="http://codeigniter.com/wiki/Carabiner/">Carabiner Asset Management Library</a> from Tony Dewan.</em></p>
+					</div>
+
+					<div class="span4 offset1">
+
+						<div class="alert alert-block alert-info">
+
+							<h4>Companion Add-Ons</h4>
+							<div>
+								<p>The architecture of Minimee<sup>(2)</sup> has given me the opportunity to build other add-ons that extend Minimee's capabilities.  So if you're curious, have a look at:</p>
+								<ul>
+									<li><a href="https://github.com/johndwells/MSMinimee">MSMinimee</a> - a module that brings full MSM-compatibility to Minimee</li>
+									<li><a href="https://github.com/johndwells/Minimee-LESS">Minimee+LESS</a> - adds LESS processing to Minimee</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- ========================================================================
+				 FEATURES
+				 ==================================================================== -->
+			<div id="features">
+
+				<div class="page-header">
+					<h1>Key Features</h1>
+				</div>
+	
+				<h2>New for 2.x:</h2>
+
+				<ul>
+					<li><strong>ALL settings</strong> can be specified via config or extension, <em>as well as</em> via tag parameters</li>
+					<li>Ability to turn on and off minification and/or combining <strong>per asset type</strong></li>
+					<li>Better, more verbose debugging with EE's <a href="http://expressionengine.com/user_guide/cp/admin/output_and_debugging_preferences.html">Template Debugging</a></li>
+					<li><strong>New API available for 3rd party add-ons</strong></li>
+					<li>Path &amp; URL settings can now be relative to site</li>
+					<li>Out-of-the-box default configuration means near zero setup</li>
+					<li>New shorthand <code>exp:minimee</code> tag allows for quick caching, plus access to a powerful API "interface"</li>
+					<li>New ways to display your cache: in a tag, embedded inline, or just the URL</li>
+					<li>Purpose-built compatibility with RequireJS, LABjs, etc</li>
+					<li>Disable or override the URLs which are prepended to image &amp; @import paths in CSS</li>
+					<li>New <code>priority=""</code> parameter allows you to queue assets into a specific order</li>
+					<li>For EE2.4 and above, assets are queue'd and sorted <strong>after</strong> all templates have been parsed (see the "Croxton Queue" below)</li>
+					<li>New <code>cleanup=""</code> setting for automatically deleting expired caches</li>
+					<li>Verbose template debugging messages to help easily track down errors</li>
+					<li>Hooks for 3rd party integration (see <a href="https://github.com/johndwells/Minimee-LESS">Minimee+LESS</a>, <a href="https://github.com/johndwells/MSMinimee">MSMinimee</a>)</li>
+					<li><strong>Plus bug fixes, more fine-grained control, and other improvements!</strong></li>
+				</ul>
+
+
+				<h2>Since 1.x:</h2>
+
+				<ul>
+					<li>For EE2.4 and above, can minify your HTML</li>
+					<li>Works with EE global variables and <code>{stylesheet=""}</code></li>
+					<li>Works with external files, over cURL or file_get_contents()</li>
+					<li>Embed combined &amp; minified content directly inline to your template</li>
+					<li>Compatible with server-side compression &amp; caching</li>
+				</ul>
+			</div>
+
+
+			<!-- ========================================================================
+				 INSTALLATION
+				 ==================================================================== -->
+			<div id="installation">
+
+				<div class="page-header">
+					<h1>Installation</h1>
+				</div>
+
+				<div class="well pull-right offset1 span5">
+
+					<div class="alert alert-error">
+
+						<h3>System Requirements:</h3>
+						<ul>
+							<li>PHP5+</li>
+							<li>ExpressionEngine 2.1+</li>
+						</ul>
+					</div>
+
+					<div class="alert alert-block alert-notice">
+						<h5>Optional requirements include:</h5>
+
+						<ul>
+							<li>EE2.4+ is required for HTML minification</li>
+							<li>EE2.4+ is required for the "Croxton Queue" (see below)</li>
+							<li>cURL or file_get_contents() is required if using <code>{stylesheet=}</code> or external URLs</li>
+							<li>If using <code>file_get_contents()</code>, PHP must be compiled with support for fopen wrappers (allow_url_fopen must be set to true in PHP.ini)</li>
+							<li>If using <code>file_get_contents()</code> and combining/minifying files over <code>https</code>, PHP must be compiled with OpenSSL support</li>
+						</ul>
+					</div>
+				</div>
+
+				<h2>Installing Minimee</h2>
+
+				<ol>
+					<li>Create a cache folder on your server, accessible by a URL, and ensure permissions allow for reading &amp; writing.</li>
+					<li>Copy the minimee folder to your system/expressionengine/third_party folder</li>
+					<li>Follow <a href="#configuration">Configuration</a> steps below</li>
+				</ol>
+
+				<hr />
+
+				<h2>Upgrading from 1.x</h2>
+
+				<p>Despite Minimee2's significant changes, it has been built to ensure full backwards-compatibility with Minimee 1.x.  So if you're a cow(boy|girl) and like to upgrade add-ons before reading upgrade notes, then we've got you covered.  But to get the most out of Minimee's new abilities and performance, be sure to make it past Step 1.</p>
+
+				<h3>Step 1: Update third_party/minimee folder</h3>
+
+				<p>It's obvious, and it just works. Replace your old <code>system/ee/third_party/minimee</code> folder with the new, and you're in business.</p>
+
+				<h3>Step 2a: Visit the Extensions CP</h3>
+
+				<p>If you have Minimee's Extension installed, you will want to visit the Extensions page so that Minimee can upgrade its settings the new architecture.</p>
+
+				<h3>Step 2b: Update Config.php</h3>
+
+				<p>In lieu of Minimee's Extension, you may have Minimee configured via EE's config option, or via EE's Global Variables. If so, please note:</p>
+
+				<ul>
+					<li><strong>EE's Global Variables are deprecated. Please switch to using EE's config instead.</strong></li>
+				</ul>
+
+				<p>Additionally, when configuring via EE's <code>$config</code>, <strong>setting keys have changed to be a single array</strong>. See the <a href="#configuration">Configuration</a> section below for more.</p>
+
+				<h3>Step 3: Filename Case Sensitivity</h3>
+
+				<p>There is a file who's name has <strong><em>changed case</em></strong>, which may go unrecognised with versioning systems such as SVN/Git; while a check is in place to account for this, it is recommended that you double-check the filename's casing has been properly maintained (subsequent versions of Minimee may drop this check to save time). The file is:</p>
+
+<pre>// correct:
+/system/expressionengine/third_party/minimee/libraries/JSMin.php
+
+// incorrect:
+/system/expressionengine/third_party/minimee/libraries/jsmin.php
+</pre>
+
+				<p>Once you have upgraded Minimee on your server, either through deployment or FTP, you should make sure that this file has its proper case as above.</p>
+			</div>
+
+
+			<!-- ========================================================================
+				 CONFIGURATION
+				 ==================================================================== -->
+			<div id="configuration">
+
+				<div class="page-header">
+					<h1>Configuration</h1>
+				</div>
+
+				<div class="alert alert-info alert-block span3 offset1 pull-right">
+					<p>Out-of-the-box and left un-configured, Minimee 2.x will look for a 'cache' folder at the root of your site, e.g. <code>http://yoursite.com/cache</code>.</p>
+				</div>
+
+				<p>To get the most out of Minimee's performance offering, configure via EE's <code>$config</code> variable; use the Extension for simplicity and convenience, but at the cost of an extra database call.</p>
+
+				<h3>Config via Extension</h3>
+
+				<p>Each field of Minimee's Extension screen contains helpful hints and instructions. Screenshots of the page follow:</p>
+
+				<ul class="thumbnails">
+					<li class="span11">
+						<div class="thumbnail">
+							<img src="img/config-basic.png" />
+
+							<h3>Basic Preferences</h3>
+							<p>The first panel allows for basic configuration of Minimee, including whether to combine and/or minify each asset type.</p>
+							<p>If no values are supplied for Cache Path or Cache URL, Minimee will automatically look for a `cache` folder at your root.</p>
+							<p class="alert alert-info">You may specify relative paths by ommitting a leading slash (e.g. `cache/path`).</p>
+						</div>
+					</li>
+					<li class="span11">
+						<div class="thumbnail">
+							<img src="img/config-advanced.png" />
+
+							<h3>Advanced Preferences</h3>
+							<p>For 90% of all setups, you will not need to edit the Advanced Preferences. If you do and encounter problems, these should be the first things you reset or change.</p>
+						</div>
+					</li>
+				</ul>
+
+				<hr />
+
+				<h2>Config via EE's $config object</h2>
+
+				<p>Configuring Minimee via EE's <code>$config</code> has the advantage of not requiring any DB calls to initialise or run, saving precious time on your page loads. Going this route requires editing your /system/expressionengine/config/config.php file; alternatively you are encouraged to adopt any of the community-developed "bootstrap" methods, such as:</p>
+
+				<ul>
+					<li><a href="http://ee-garage.com/nsm-config-bootstrap">NSM Config Boostrap</a> from <a href="http://ee-garage.com">EE-Garage</a></li>
+					<li><a href="https://github.com/focuslabllc/ee-master-config">EE Master Config</a> from <a href="http://focuslabllc.com">Focus Lab LLC</a></li>
+					<li><a href="https://gist.github.com/1329538">This little-known gist</a> from <a href="https://twitter.com/airways">@airways</a></li>
+				</ul>
+
+				<p>To configure Minimee via EE's <code>$config</code> array, the following values are available:</p>
+
+				<pre class="pre-scrollable">$config['minimee'] = array(
+
+    /**
+     * ==============================================
+     * BASIC PREFERENCES (REQUIRED)
+     * ==============================================
+     */
+
+    /**
+     * The path to the cache folder.
+     * Defaults to site's FCPATH + '/cache'
+     */
+    'cache_path'        =&gt; '/path/to/site.com/cache',
+
+    /**
+     * The URL to the cache folder.
+     * Defaults to $EE-&gt;config-&gt;item('base_url') + '/cache'
+     */
+    'cache_url'         =&gt; 'http://site.com/cache',
+
+    /**
+     * ==============================================
+     * BASIC PREFERENCES (OPTIONAL)
+     * ==============================================
+     */
+
+    /**
+     * Turn on or off combining of CSS assets only. 'yes' or 'no'.
+     * Values: 'yes' or 'no'
+     * Default: yes
+     */
+    'combine_css'       =&gt; 'yes',
+
+    /**
+     * Turn on or off combining of JS assets only. 'yes' or 'no'.
+     * Values: 'yes' or 'no'
+     * Default: yes
+     */
+    'combine_js'        =&gt; 'yes',
+
+    /**
+     * Turn on or off minifying of CSS assets. 'yes' or 'no'.
+     * Values: 'yes' or 'no'
+     * Default: yes
+     */
+    'minify_css'        =&gt; 'yes',
+
+    /**
+     * Turn on or off minifying of the template HTML.
+     * Values: 'yes' or 'no'
+     * Default: no
+     */
+    'minify_html'       =&gt; 'no',
+
+    /**
+     * Turn on or off minifying of JS assets.
+     * Values: 'yes' or 'no'
+     * Default: yes
+     */
+    'minify_js'         =&gt; 'yes',
+
+
+    /**
+     * ==============================================
+     * DISABLING MINIMEE
+     * ==============================================
+     */
+
+    /**
+     * Disable Minimee entirely; aborts all activity
+     * and returns all tags untouched.
+     * Values: 'yes' or 'no'
+     * Default: no
+     */
+    'disable'           =&gt; 'no',
+
+
+    /**
+     * ==============================================
+     * ADVANCED PREFERENCES
+     * It is recommended to not specify these unless
+     * you are intending to override their default values.
+     * ==============================================
+     */
+
+    /**
+     * The base path of your local source assets.
+     * Defaults to site's FCPATH
+     */
+    'base_path'         =&gt; '/path/to/site.com',
+
+    /**
+     * The base URL of your local source assets.
+     * Defaults to $EE-&gt;config-&gt;item('base_url')
+     */
+    'base_url'          =&gt; 'http://site.com',
+
+    /**
+     * An optional unique 'cachebusting' string to force
+     * Minimee to generate a new cache whenever updated.
+     */
+    'cachebust'         =&gt; '',
+
+    /**
+     * When 'yes', Minimee will attempt to delete caches
+     * it has determined to have expired.
+     * Values: 'yes' or 'no'
+     * Default: no
+     */
+    'cleanup'       =&gt; 'no',
+
+    /**
+     * Specify which minification library to use for your CSS.
+     * Values: 'minify' or 'cssmin'
+     * Default: minify
+     */
+    'css_library'   =&gt; 'minify',
+
+    /**
+     * Whether or not to prepend the base URL to relative
+     * @import and image paths in CSS. 'yes' or 'no'.
+     * Values: 'yes' or 'no'
+     * Default: yes
+     */
+    'css_prepend_mode'  =&gt; 'yes',
+
+    /**
+     * Override the URL used when prepending URL to relative
+     * @import and image paths in CSS.
+     * Defaults to Base URL.
+     */
+    'css_prepend_url'   =&gt; '/path/to/site.com',
+
+    /**
+     * Specify which minification library to use for your JS.
+     * Please note that JSMinPlus is VERY memory-intensive. Not recommended
+     * unless you really know what you're doing. Seriously.
+     *
+     * Values: 'jsmin' or 'jsminplus'
+     * Default: jsmin
+     */
+    'js_library'    =&gt; 'jsmin',
+
+    /**
+     * Specify the method with which Minimee should fetch external &amp; {stylesheet=} assets.
+     * Values: 'auto', 'fgc', or 'curl'
+     * Default: auto
+     */
+    'remote_mode'       =&gt; 'auto'
+);
+</pre>
+			</div>
+
+
+			<!-- ========================================================================
+				 PARAMETERS
+				 ==================================================================== -->
+			<div id="parameters">
+
+				<div class="page-header">
+					<h1>Tags &amp; Parameters</h1>
+				</div>
+
+				<p class="alert alert-info">In addition to any <a href="#configuration">Configuration</a> values mentioned above, the following parameters can also be passed at runtime:</p>
+
+				<table class="table table-bordered table-striped">
+					<caption><h3>exp:minimee:css <small>and</small> exp:minimee:js</h3></caption>
+					<thead>
+						<tr>
+							<th>Parameter</th>
+							<th>Required?</th>
+							<th>Default</th>
+							<th>Values</th>
+							<th>Description</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>attribute:name="value"</code></td>
+							<td>no</td>
+							<td><em>none</em></td>
+							<td>String</td>
+							<td>
+								<p>By default Minimee uses the first tag it encounters as a template for the cache tag output (e.g. <code>&lt;link ... &gt;</code> or <code>&lt;script ... &gt;</code>). You may override this by specifying one or more tag attributes using this parameter format.</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>combine=</code></td>
+							<td>no</td>
+							<td><em>none</em></td>
+							<td>yes | no</td>
+							<td>
+								<p>Shorthand, runtime override of the combine_(css|js) config option</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>delimiter=</code></td>
+							<td>no</td>
+							<td>,</td>
+							<td>String</td>
+							<td>
+								<p>When not combining, this is the string to place between cache output</p>
+							</td>
+						</tr>
+						<tr>
+							<td rowspan="3"><code>display=</code></td>
+							<td rowspan="3">no</td>
+							<td rowspan="3">tag</td>
+							<td>tag</td>
+							<td>
+								<p>Specify which format to display as the cache results; the default is "tag", returning the appropriate asset tag (e.g. <code>&lt;link ...&gt;</code> or <code>&lt;script...&gt;&lt;/script&gt;</code>).</p>
+							</td>
+						</tr>
+						<tr>
+							<td>url</td>
+							<td>
+								<p>This option will only return the URL to the cache, e.g. <code>http://site.com/cache/cachefile.name.ext</code>. When specifying URL, be aware that if Minimee encounters an error, you may experience unexpected results.</p>
+							</td>
+						</tr>
+						<tr>
+							<td>contents</td>
+							<td>
+								<p>Instruct Minimee to return the contents of the cache, for embedding inline in your template. By default, only the contents are returned; specify one or more <code>attribute:name="type"</code> values to instruct Minimee to wrap the contents in the appropriate HTML tag (e.g. <code>&lt;style&gt;...&lt;/style&gt;</code> or <code>&lt;script&gt;...&lt;/script&gt;</code></p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>minify=</code></td>
+							<td>no</td>
+							<td><em>none</em></td>
+							<td>yes | no</td>
+							<td>
+								<p>Shorthand, runtime override of the minify_(css|js) config option</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>priority=</code></td>
+							<td>no</td>
+							<td>0</td>
+							<td>Numeric</td>
+							<td>
+								<p>For use with <code>queue</code> feature. Value specified is a number; lower numbers are placed earlier in queue order.</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>queue=</code></td>
+							<td>no</td>
+							<td><em>none</em></td>
+							<td>String</td>
+							<td>
+								<p>To "queue" assets for output; receives a "key" value (e.g. "head_css"), which is used later to lookup and retrieve the queue'd cache</p>
+							</td>
+						</tr>
+					</tody>
+				</table>
+
+				<br />
+
+				<table class="table table-bordered table-striped">
+					<caption><h3>exp:minimee:display</h3></caption>
+					<thead>
+						<tr>
+							<th>Parameter</th>
+							<th>Required?</th>
+							<th>Values</th>
+							<th>Default</th>
+							<th>Description</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>attribute:name="value"</code></td>
+							<td>no</td>
+							<td>String</td>
+							<td><em>none</em></td>
+							<td>
+								<p>By default Minimee uses the first tag it encounters as a template for the cache tag output (e.g. <code>&lt;link ... &gt;</code> or <code>&lt;script ... &gt;</code>). You may override this by specifying one or more tag attributes using this parameter format.</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>combine=</code></td>
+							<td>no</td>
+							<td>yes | no</td>
+							<td><em>none</em></td>
+							<td>
+								<p>Shorthand, runtime override of the combine_(css|js) config option</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>css=</code> OR <code>js=</code></td>
+							<td><strong>yes</strong></td>
+							<td>String</td>
+							<td>&nbsp;</td>
+							<td>
+								<p>The "key" value of the queue, to fetch and return</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>delimiter=</code></td>
+							<td>no</td>
+							<td>String</td>
+							<td>,</td>
+							<td>
+								<p>When not combining, this is the string to place between cache output</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>display=</code></td>
+							<td>no</td>
+							<td>tag | url | contents</td>
+							<td>tag</td>
+							<td>
+								<p>Modify what the tag will return upon success; default is "tag"; also available values are "contents" (embedding cache contents inline), or "url" (returning just the cache URL).</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>minify=</code></td>
+							<td>no</td>
+							<td>yes | no</td>
+							<td><em>none</em></td>
+							<td>
+								<p>Shorthand, runtime override of the minify_(css|js) config option</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+				<br />
+
+				<table class="table table-bordered table-striped">
+					<caption><h3>exp:minimee</h3></caption>
+					<thead>
+						<tr>
+							<th>Parameter</th>
+							<th>Required?</th>
+							<th>Values</th>
+							<th>Default</th>
+							<th>Description</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>css=</code> OR <code>js=</code></td>
+							<td><strong>yes</strong></td>
+							<td>String</td>
+							<td>&nbsp;</td>
+							<td>
+								<p>filename(s) of assets to cache. Cannot specify both in same call.</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>combine=</code></td>
+							<td>no</td>
+							<td>yes | no</td>
+							<td><em>none</em></td>
+							<td>
+								<p>Shorthand, runtime override of the combine_(css|js) config option</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>priority=</code></td>
+							<td>no</td>
+							<td>Numeric</td>
+							<td>0</td>
+							<td>
+								<p>For use with <code>queue</code> feature. Value specified is a number; lower numbers are placed earlier in queue order.</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>queue=</code></td>
+							<td>no</td>
+							<td>String</td>
+							<td><em>none</em></td>
+							<td>
+								<p>To "queue" assets for output; receives a "key" value (e.g. "head_css"), which is used later to lookup and retrieve the queue'd cache</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>minify=</code></td>
+							<td>no</td>
+							<td>yes | no</td>
+							<td><em>none</em></td>
+							<td>
+								<p>Shorthand, runtime override of the minify_(css|js) config option</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>display=</code></td>
+							<td>no</td>
+							<td>tag | url | contents</td>
+							<td>tag</td>
+							<td>
+								<p>Modify what the tag will return upon success; default is "tag"; also available values are "contents" (embedding cache contents inline), or "url" (returning just the cache URL).</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>delimiter=</code></td>
+							<td>no</td>
+							<td>String</td>
+							<td>,</td>
+							<td>
+								<p>When not combining, this is the string to place between cache output</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>attribute:name="value"</code></td>
+							<td>no</td>
+							<td>String</td>
+							<td><em>none</em></td>
+							<td>
+								<p>Override the tag output; useful if changing <code>display="contents"</code>, since you will need to specify tag output to avoid contents being returned without a containing tag. See <a href="examples">Advanced Usage</a> section below.</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+
+			<!-- ========================================================================
+				 USAGE
+				 ==================================================================== -->
+			<div id="examples">
+
+				<div class="page-header">
+					<h1>Examples of Usage</h1>
+				</div>
+
+				<h2>Basic Usage</h2>
+
+				<p>Once configured, basic use of Minimee is as simple and beautiful as:</p>
+
+				<h3>CSS:</h3>
+
+				<pre class="brush:ee">{exp:minimee:css}
+    &lt;link rel="stylesheet" href="css/reset.css"&gt;
+    &lt;link rel="stylesheet" href="{stylesheet='css/webfonts'}"&gt;
+    &lt;link rel="stylesheet" href="http://site.com/css/global.css"&gt;
+    &lt;link rel="stylesheet" href="css/forms.css"&gt;
+{/exp:minimee:css}
+
+{!-- will render something like: --}
+&lt;link rel="stylesheet" href="http://site.com/cache/b488f65d0085dcc6b8f536f533b5f2da.1345797433.css"&gt;
+</pre>
+
+				<h3>JS:</h3>
+
+				<pre class="brush:ee">{exp:minimee:js}
+    &lt;script type="text/javascript" src="/js/mylibs/jquery.easing.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="/js/mylibs/jquery.cycle.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="/js/mylibs/jquery.forms.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="/js/scripts.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="/js/plugins.js"&gt;&lt;/script&gt;
+{/exp:minimee:js}
+
+{!- will render something like: --}
+&lt;script type="text/javascript" src="http://site.com/cache/16b6345ae6f4b24dd2b1cba102cbf2fa.js?m=1298784512"&gt;&lt;/script&gt;
+</pre>
+
+				<hr />
+
+				<h2>Advanced Usage</h2>
+
+				<p>There is a wealth of power and flexibility at your fingertips should you choose to go beyond Minimee's basic setup. This section will continue to grow with more 
+
+				<h3>Integration with LABjs</h3>
+
+				<p>If using the <a href="http://labjs.com/">LABjs <i class="icon-share icon-white"></i></a> script loading library, you can use the <code>exp:minimee</code> API tag to seamlessly integrate with your application:</p>
+
+				<pre class="brush:js">&lt;script&gt;
+    $LAB
+    .script("{exp:minimee js='framework.js'}").wait()
+    .script("{exp:minimee js='plugin.framework.js'}")
+    .script("{exp:minimee js='myplugin.framework.js'}").wait()
+    .script("{exp:minimee js='init.js'}").wait();
+&lt;/script&gt;
+</pre>
+
+				<p>What's more, you can still combine &amp; cache JS assets using a similar syntax. When doing so, consider setting it up so that should Minimee encounter an error - or be disabled manually - the resulting output can still work with LABjs.</p>
+
+				<p>Consider the follwing example from LABjs:</p>
+
+				<pre class="brush:js">&lt;script&gt;
+    $LAB
+    .script("script1.js", "script2.js", "script3.js")
+    .wait(function(){
+         // wait for all scripts to execute first
+    });
+&lt;/script&gt;
+</pre>
+
+				<p>By modifying the delimiter which Minimee uses to parse assets, we can do the following:</p>
+
+				<pre class="brush:js">&lt;script&gt;
+    $LAB
+    .script("{exp:minimee js='script1.js", "script2.js", "script3.js' delimiter='", "'}")
+    .wait(function(){
+        // wait for all scripts to execute first
+    });
+&lt;/script&gt;
+</pre>
+
+				<p>If all goes well, $LAB.script() will receive a single cache file; if not - or if Minimee has been temporarily disabled - it receives the original example's equivalent.</p>
+			</div>
+
+
+			<!-- ========================================================================
+				 FAQS
+				 ==================================================================== -->
+			<div id="faq">
+
+				<div class="page-header">
+					<h1>Special Notes / FAQs</h1>
+				</div>
+
+				<div class="accordion" id="faqAccordion">
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqOne">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Minimee isn't working. Where do I start?
+							</a>
+						</div>
+						<div id="faqOne" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>Start by turning on EE's template debugging, and visiting the front end of your site. Minieme's debugging messages are each prefixed with one of three labels:</p>
+
+								<ul>
+									<li><span class="label label-info">Minimee [INFO]:</span> Informational messages logged at important stages in Minimee's processing</li>
+									<li><span class="label label-warning">Minimee [DEBUG]:</span> Indicates a potential issue to resolve</li>
+									<li><span class="label label-important">Minimee [ERROR]:</span> Something has gone wrong, and Minimee has failed</li>
+								</ul>
+
+								<p>For official support please head over to the <a href="http://devot-ee.com" title="Devot:ee">@devot-ee</a> forum. When posting, please specify what version of EE and Minimee you are running: <a href="devot-ee.com/add-ons/support/minimee" title="Minimee Support Forums on @devot-ee">Minimee Support Forums on @devot-ee</a>.</p>
+							</div>
+						</div>
+					</div>
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqTwo">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;When/how does Minimee know to create a new file?
+							</a>
+						</div>
+						<div id="faqTwo" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>As a general rule, Minimee creates a new cache if it can detect that an asset's modification date is later than the cache's creation date, <strong>OR</strong> if the list of assets to cache has been changed in some way.</p>
+
+								<p>More specifically, note:</p>
+
+								<ul>
+									<li>If the asset is a local file (e.g. /home/your/site/css/styles.css), Minimee checks for the file's modification date</li>
+									<li>If the asset is a <code>{stylesheet=}</code> template, Minimee first checks the database modification date (and if that template is saved as a file, also checks the file’s modification date)</li>
+									<li>If the asset is an “external” file, or a <code>{path=}</code> template (see below for more), then <strong>Minimee does not compare anything and only fetches the contents at the time of creating a cache</strong>.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqThree">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;What determins a cache's filename?
+							</a>
+						</div>
+						<div id="faqThree" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>A cache filename begins with an md5() hash created from the list of assets being cached together. Minimee then appends the last modified timestamp, and if an optional cachebusting string has been specified, comes next. The result format is:</p>
+
+								<pre>// md5.timestamp.[cachebust].ext
+03b5614606d3e8d2f28d0b07f802fbbb.1332460675.v2.5.css
+</pre>
+
+								<p>This approach means that:</p>
+
+								<ul>
+									<li>Any change to the list of files Minimee is to process will result in a new cache filename</li>
+									<li>Changing Minimee's settings, <em>with the exception of the cachebust string</em>, will <strong>NOT</strong> create a new cache filename.</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqFour">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;What does Minimee do when it encounters an error?
+							</a>
+						</div>
+						<div id="faqFour" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>Sometimes Minimee runs into trouble; a file cannot be found, or perhaps the base path has been incorrectly set.  When this happens, Minimee does its best to return your template content ontouched. Keep in mind though that queue'ing may have unintended consequences when an error is encountered; original tagdata may be returned, but it will be returned at the point in which you have asked to <code>display</code> the queue'd contents. So code will still be re-ordered.</p>
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqFive">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Keeping your cache folder tidy
+							</a>
+						</div>
+						<div id="faqFive" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>The new "cleanup" setting will delete any cache files it has determined have expired. This is done by looking at the timestamp segment of the filename (see above).</p>
+								<p>Minimee will not attempt to clean up files that are simply older than some unspecified time. Nor will it know to delete caches that are now obsolete, e.g. were created out of a combination of files that is no longer used any more.</p>
+							</div>
+						</div>
+					</div>
+
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqSix">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;How to use the 'cachebust'
+							</a>
+						</div>
+						<div id="faqSix" class="accordion-body collapse">
+							<div class="accordion-inner">
+
+								<p>When you specify a cachebust value, such as <code>v1.0</code>, this value is appended toward the end of the cache filename (see above). In most situations this is not necessary, since Minimee will continue to look at file timestamps and create new cache files as required.</p>
+
+								<p>However one case where it does come in handy is when you are using Minimee+LESS, and having LESS process <code>@import</code> files.  Since these files are processed outside of Minimee, it will be unaware of filesystem changes.</p>
+
+								<p>Another scenario is when you have a requirement to run your assets through EE's parsing engine and therefore must use the <code>{path=}</code> global variable. Since Minimee cannot check for updates on <code>{path=}</code> assets (see below), you might use <code>cachebust</code> to prompt Minimee to create a new cache.</p>
+
+								<p>You may also prefer to simply use the cachebust string as part of tracking your website "revisions". You can create a global variable <code>{gv_cachebust}</code>, and pass this as a parameter to each of minimee's opening tags like so:</p>
+
+								<pre class="brush:ee">{exp:minimee:css cachebust="{gv_cachebust}"}
+    ...
+{/exp:minimee:css}
+</pre>
+
+							</div>
+						</div>
+					</div>
+
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqSeven">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Tag aliases, and why your Minimee 1.x syntax Just Works &trade;
+							</a>
+						</div>
+						<div id="faqSeven" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>The astute Minimee'er may have noticed that old Minimee 1.x tags such as <code>exp:minimee:embed</code> continue to work on 2.x. This is because in 2.x, all "display" methods run through our master exp:minimee:display tag. This ensures we can maintain compatibility with our term aliases ("embed" is synonymous with "contents"). What's more, there's some syntax sugary goodness tossed in there for fun.</p>
+
+								<h3>Term Synonyms</h3>
+
+								<ul>
+								<li><code>embed</code> == <code>contents</code></li>
+								<li><code>url</code> == <code>link</code></li>
+								<li><code>tag</code> == <code>display</code> (since the default <code>display</code> behaviour is to output tags)</li>
+								</ul>
+
+
+								<h3>Alias tag pairs:</h3>
+
+								<ul>
+								<li><code>exp:minimee:embed</code> == <code>exp:minimee:display display="contents"</code></li>
+								<li><code>exp:minimee:contents</code> == <code>exp:minimee:display display="contents"</code></li>
+								<li><code>exp:minimee:url</code> == <code>exp:minimee:display display="url"</code></li>
+								<li><code>exp:minimee:link</code> == <code>exp:minimee:display display="url"</code></li>
+								<li><code>exp:minimee:tag</code> == <code>exp:minimee:display display="tag"</code> == <code>exp:minimee:display</code></li>
+								</ul>
+
+
+								<h3>Tag pair "modifiers":</h3>
+
+								<p>If you append a 4th segment to your tag pair, you can <em>invoke the display mode automatically</em>. Check it out:</p>
+
+								<ul>
+								<li><code>exp:minimee:display:embed</code> == <code>exp:minimee:display display="contents"</code></li>
+								<li><code>exp:minimee:display:contents</code> == <code>exp:minimee:display display="contents"</code></li>
+								<li><code>exp:minimee:display:url</code> == <code>exp:minimee:display display="url"</code></li>
+								<li><code>exp:minimee:display:link</code> == <code>exp:minimee:display display="url"</code></li>
+								<li><code>exp:minimee:display:tag</code> == <code>exp:minimee:display display="tag"</code> == <code>exp:minimee:display</code></li>
+								</ul>
+
+								<p>OK, so that might not be too exciting, but the tag pair modifer also works on our standard <code>exp:minimee:css</code> and <code>exp:minimee:js</code> tags:</p>
+
+								<ul>
+								<li><code>exp:minimee:css:embed</code> == <code>exp:minimee:css display="contents"</code></li>
+								<li><code>exp:minimee:css:contents</code> == <code>exp:minimee:css display="contents"</code></li>
+								<li><code>exp:minimee:css:url</code> == <code>exp:minimee:css display="url"</code></li>
+								<li><code>exp:minimee:css:link</code> == <code>exp:minimee:css display="url"</code></li>
+								<li><code>exp:minimee:css:tag</code> == <code>exp:minimee:css display="tag"</code> == <code>exp:minimee:css</code></li>
+								</ul>
+
+								<p>and</p>
+
+								<ul>
+								<li><code>exp:minimee:js:embed</code> == <code>exp:minimee:js display="contents"</code></li>
+								<li><code>exp:minimee:js:contents</code> == <code>exp:minimee:js display="contents"</code></li>
+								<li><code>exp:minimee:js:url</code> == <code>exp:minimee:js display="url"</code></li>
+								<li><code>exp:minimee:js:link</code> == <code>exp:minimee:js display="url"</code></li>
+								<li><code>exp:minimee:js:tag</code> == <code>exp:minimee:js display="tag"</code> == <code>exp:minimee:js</code></li>
+								</ul>
+
+								<p>And while that may be pretty cool, use these with informed caution - consider what might happen if Minimee encounters an error.</p>
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqEight">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Does Minimee support <code>{path=}</code>?
+							</a>
+						</div>
+						<div id="faqEight" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>Yes, and no - If you have CSS/JS in a template that must be run through EE's parsing engine, you may use the <code>{path=}</code> global and Minimee will fetch the file's contents, BUT <strong>it will not attempt to detect changes to the template's contents</strong>. This is because there's no reliable way for Minimee to "know" when a change has been made. So consider a <code>{path=}</code> asset as the same as any other external asset (e.g. http://static.jquery.com/ui/css/base2.css).</p>
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqNine">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;The 'Croxton Queue' for EE2.4+
+							</a>
+						</div>
+						<div id="faqNine" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p><a href="https://github.com/croxton">Mark Croxton</a> submitted this <a href="http://devot-ee.com/add-ons/support/minimee/viewthread/4552#15417">feature request</a> to delay the processing of <code>exp:minimee:display</code> until all other template parsing has been completed, by way of leveraging EE2.4's new <code>template_post_parse</code> hook. It was a brilliant idea and indication of his mad scientist skills. In his wise words:</p>
+
+								<blockquote><p><em>"Then you would never need worry about parse order when injecting assets into the header or footer of your page using queues."</em></p></blockquote>
+
+								<p>This, combined with the new <code>priority=""</code> parameter, means you can do something like:</p>
+
+								<pre class="brush:ee">{exp:minimee:display css="header_css"}
+
+{!-- sometime LATER in EE's parse order --}
+
+{exp:minimee:css queue="header_css" priority="10"}
+    &lt;link href="css/forms.css" rel="stylesheet" type="text/css" /&gt;
+{/exp:minimee:css}
+
+{!-- and even later in parse order, also note the priority --}
+
+{exp:minimee:css queue="header_css" priority="0"}
+    &lt;link href="css/reset.css" rel="stylesheet" type="text/css" /&gt;
+{/exp:minimee:css}
+</pre>
+
+								<p>And then what ends up happening is that <code>exp:minimee:display</code> outputs a cached css that contains, in this order:</p>
+
+								<ol>
+								<li>css/reset.css (first because of priority="0")</li>
+								<li>css/forms.css (second because of priority="10")</li>
+								</ol>
+
+								<p>Note that this parse-order-be-damned technique is available for all of Minimee's tags which harness "queueing", namely:</p>
+
+								<ul>
+								<li><code>{exp:minimee:display}</code></li>
+								<li><code>{exp:minimee:embed}</code></li>
+								<li><code>{exp:minimee:link}</code></li>
+								</ul>
+
+
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqTen">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;SSL: mixing <code>http</code> &amp; <code>https</code>
+							</a>
+						</div>
+						<div id="faqTen" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>When you need Minimee to support a mix of <code>http</code> &amp; <code>https</code>, you can specify a <a href="https://www.google.co.uk/search?q=protocol+relative+url">Protocol Relative URL</a> in Minimee's Cache URL and Base URL:</p>
+
+								<pre class="brush:php">$config['minimee'] = array(
+
+    ...
+
+    // Note the two leading slashes
+    'cache_url'         =&gt; '//site.com/cache',
+    'base_url'          =&gt; '//site.com',
+
+    ...
+);
+</pre>
+
+								<p>Take note that if you are also changing the URL that is prepended to CSS assets (<code>css_prepend_url</code>), you will want to be sure this too is protocol 'agnostic'.</p>
+
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqEleven">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Different settings for different assets
+							</a>
+						</div>
+						<div id="faqEleven" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>To specify unique settings for each asset, you must use the <code>queue</code> + <code>display</code> tags. Take for example you are using a theme from jQuery UI, and would like to cache &amp; combine a copy of the theme CSS.  To do so, any <code>url()</code> properties must have a different URL prepended to them than your site.  Here's how you would accomplish this:</p>
+
+<pre class="brush:ee">// Our first tag will specify an external URL to prepend to all url() paths
+{exp:minimee:css
+    queue="css_head"
+    css_prepend_url="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/"
+}
+    &lt;link rel="stylesheet" href="http://static.jquery.com/ui/css/base2.css" /&gt;
+{/exp:minimee:css}
+
+// Our second tag does not specify a special prepend URL, so the default (base URL) will be used    
+{exp:minimee:css queue="css_head"}
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+{/exp:minimee:css}
+
+// Finally we display our combined output
+{exp:minimee:display css="css_head"}
+</pre>
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqTwelve">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Specifying the output of Minimee's link &amp; script tags
+							</a>
+						</div>
+						<div id="faqTwelve" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>When Minimee runs, it looks at the first tag for that particular asset type as the template for a final cache output. If you would like more fine-grained control over the tag output, use the <code>exp:minimee:link</code> tag to output only the path to the cache:</p>
+
+<pre class="brush:ee">{exp:minimee:css queue="css_head"}
+    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
+{/exp:minimee:css}
+
+...
+
+&lt;link rel="stylesheet" href="{exp:minimee:link css='css_head'}" /&gt;
+</pre>
+
+								<p class="alert alert-notice">This behaviour can be overridden by specifying a `display=` method, or by alternatively using the display <em>modifier</em> syntax.</p>
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqThirteen">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Does Minimee process inline CSS and JS?
+							</a>
+						</div>
+						<div id="faqThirteen" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>No. There are performance implications, error handling gotchas, and it over-complicates what should remain a simple utility.</p>
+
+								<p>If you need to "queue" your inline content to appear after other Minimee'd assets, I suggest you consider <a href="github.com/croxton/Stash">Croxton's Stash</a>, which is an incredibly powerful, fast, and <em>free</em> tool.</p>
+
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqFourteen">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Does Minimee minify &amp; cache <code>@import</code>'ed CSS?
+							</a>
+						</div>
+						<div id="faqFourteen" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>No, but the <code>@import</code> rule will remain in the cached file, and the path to the imported CSS file will be adjusted so that the file can still be included by the browser.</p>
+							</div>
+						</div>
+					</div>
+ 					<div class="accordion-group">
+						<div class="accordion-heading">
+							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqFifteen">
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;MSM Compatibility
+							</a>
+						</div>
+						<div id="faqFifteen" class="accordion-body collapse">
+							<div class="accordion-inner">
+								<p>Minimee is already MSM-compatible as long as each Site's cache folder is located in the same relative location. For example:</p>
+
+								<ul>
+									<li>http://siteone.com/cache</li>
+									<li>http://siteone.com/site2/cache</li>
+									<li>http://sitethree.com/cache</li>
+								</ul>
+
+								<p>To ensure compatibility in these situations, either configure Minimee via config.php using a bootstrap method (examples mentioned above), or config Minimee via the extension but use <em>relative path and url values</em>, e.g. <code>'cache'</code>, instead of <code>/cache</code>.</p>
+
+								<p class="alert alert-success">If your setup does not match the above, and you need per-site configuration, check out <a href="http://github.com/johndwells/MSMinimee">MSMinimee</a>.</p>
+
+							</div>
+						</div>
+					</div>
+
+			</div>
+		</div>
+	</div>
+
+	<div class="footer">
+		<p>Hosted on GitHub Pages &mdash; maintained by <a href="https://github.com/johndwells">johndwells</a></p>
+	</div>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.8.0.min.js"><\/script>')</script>
+
+	<script src="js/vendor/bootstrap-transition.js"></script>
+	<script src="js/vendor/bootstrap-collapse.js"></script>
+	<script src="js/vendor/bootstrap-scrollspy.js"></script>
+	<script src="js/vendor/jquery.idle-timer.js"></script>
+	<script>
+		jQuery(document).ready(function($) {
+
+			// hook to accordion
+			$('.accordion-body').on('show', function (o) {
+				$(this).parent().find('a').addClass('open'); //add active state to button on open
+			});
+
+			$('.accordion-body').on('hide', function (i, e) {
+				$(this).parent().find('a').removeClass('open'); //remove active state to button on close
+			});
+
+			var $nav = $('.navbar');
+
+			// idleTimer() takes an optional argument that defines the idle timeout
+			// timeout is in milliseconds; defaults to 30000
+			$.idleTimer(1000);
+			
+			// fade away navbar when idle
+			$(document).bind("idle.idleTimer", function(){
+				$nav.animate({
+					opacity : 0
+				}, 10000);
+			});
+
+			// fade in navbar if active
+			$(document).bind("active.idleTimer", function(){
+				$nav.stop()
+					.animate({
+					opacity : 1.0
+					}, 300);
+			});
+
+			// allow scrollTO
+			$('a[href^=#]').on('click', function(e) {
+				e.preventDefault();
+
+				$('html, body').animate({
+					scrollTop : $($(this).attr('href')).offset().top
+				}, 500);
+			});
+		});
+	</script>
+
+<!--
+	<script src="js/vendor/shCore.js"></script>
+	<script src="js/vendor/shBrushJScript.js"></script>
+	<script src="js/vendor/shBrushPhp.js"></script>
+	<script src="js/vendor/shBrushEE.js"></script>
+	<script>
+		jQuery(document).ready(function($) {
+
+			// SyntaxHighlighter
+			SyntaxHighlighter.all();
+		});
+	</script>
+-->
+</body>
 </html>

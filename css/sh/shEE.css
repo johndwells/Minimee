@@ -1,0 +1,5 @@
+.syntaxhighlighter .coloree1, .syntaxhighlighter .coloree1 a { color: #3bb0bb !important; } /* exp:tag parameter */
+.syntaxhighlighter .coloree2, .syntaxhighlighter .coloree2 a { color: #88b835 !important; } /* exp:tag parameter value */
+.syntaxhighlighter .coloree3, .syntaxhighlighter .coloree3 a { color: #bb3b63 !important; } /* standard EE exp:tag */
+.syntaxhighlighter .coloree4, .syntaxhighlighter .coloree4 a { color: #5d85ca !important; } /* EE variables */
+.syntaxhighlighter .coloree5, .syntaxhighlighter .coloree5 a { color: #773481 !important; } /* third-party EE exp:tag */

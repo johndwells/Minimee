@@ -1,0 +1,43 @@
+//
+// Accordion
+// --------------------------------------------------
+
+
+// Core variables and mixins
+@import "variables.less";
+
+
+// Parent container
+.accordion {
+  margin-bottom: @baseLineHeight;
+}
+
+// Group == heading + body
+.accordion-group {
+  margin-bottom: 2px;
+  border: 1px solid @gray;
+  .border-radius(4px);
+}
+.accordion-heading {
+  border-bottom: 0;
+  a {
+    color: @grayLighter;
+  }
+}
+.accordion-heading .accordion-toggle {
+  display: block;
+  padding: 8px 15px;
+}
+
+// General toggle styles
+.accordion-toggle {
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: 0;
+}
+
+// Inner needs the styles because you can't animate properly with any styles on the element
+.accordion-inner {
+  padding: 9px 15px;
+  border-top: 1px solid @gray;
+}
