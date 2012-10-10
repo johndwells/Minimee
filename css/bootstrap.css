@@ -3286,6 +3286,9 @@ body {
   text-align: right;
   font-size: .9em;
 }
+tr.warning td {
+  color: #000000;
+}
 .accordion-toggle:hover,
 .accordion-toggle.open {
   text-decoration: none;

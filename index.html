@@ -586,10 +586,10 @@
 								<p>Shorthand, runtime override of the combine_(css|js) config option</p>
 							</td>
 						</tr>
-						<tr>
+						<tr class="warning">
 							<td><code>css=</code> OR <code>js=</code></td>
-							<td><strong>yes</strong></td>
-							<td>&nbsp;</td>
+							<td>yes</td>
+							<td><em>none</em></td>
 							<td>String</td>
 							<td>
 								<p>The "key" value of the queue, to fetch and return</p>
@@ -652,12 +652,12 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td><code>css=</code> OR <code>js=</code></td>
-							<td><strong>yes</strong></td>
-							<td>&nbsp;</td>
+							<td><code>attribute:name="value"</code></td>
+							<td>no</td>
+							<td><em>none</em></td>
 							<td>String</td>
 							<td>
-								<p>filename(s) of assets to cache. Cannot specify both in same call.</p>
+								<p>Override the tag output; useful if changing <code>display="contents"</code>, since you will need to specify tag output to avoid contents being returned without a containing tag. See <a href="#examples">Advanced Usage</a> section below.</p>
 							</td>
 						</tr>
 						<tr>
@@ -669,31 +669,22 @@
 								<p>Shorthand, runtime override of the combine_(css|js) config option</p>
 							</td>
 						</tr>
-						<tr>
-							<td><code>priority=</code></td>
-							<td>no</td>
-							<td>0</td>
-							<td>Numeric</td>
-							<td>
-								<p>For use with <code>queue</code> feature. Value specified is a number; lower numbers are placed earlier in queue order.</p>
-							</td>
-						</tr>
-						<tr>
-							<td><code>queue=</code></td>
-							<td>no</td>
+						<tr class="warning">
+							<td><code>css=</code> OR <code>js=</code></td>
+							<td>yes</td>
 							<td><em>none</em></td>
 							<td>String</td>
 							<td>
-								<p>To "queue" assets for output; receives a "key" value (e.g. "head_css"), which is used later to lookup and retrieve the queue'd cache</p>
+								<p>filename(s) of assets to cache. Cannot specify both in same call.</p>
 							</td>
 						</tr>
 						<tr>
-							<td><code>minify=</code></td>
+							<td><code>delimiter=</code></td>
 							<td>no</td>
-							<td><em>none</em></td>
-							<td>yes | no</td>
+							<td>,</td>
+							<td>String</td>
 							<td>
-								<p>Shorthand, runtime override of the minify_(css|js) config option</p>
+								<p>When not combining, this is the string to place between cache output</p>
 							</td>
 						</tr>
 						<tr>
@@ -718,21 +709,30 @@
 							</td>
 						</tr>
 						<tr>
-							<td><code>delimiter=</code></td>
+							<td><code>minify=</code></td>
 							<td>no</td>
-							<td>,</td>
-							<td>String</td>
+							<td><em>none</em></td>
+							<td>yes | no</td>
 							<td>
-								<p>When not combining, this is the string to place between cache output</p>
+								<p>Shorthand, runtime override of the minify_(css|js) config option</p>
 							</td>
 						</tr>
 						<tr>
-							<td><code>attribute:name="value"</code></td>
+							<td><code>priority=</code></td>
+							<td>no</td>
+							<td>0</td>
+							<td>Numeric</td>
+							<td>
+								<p>For use with <code>queue</code> feature. Value specified is a number; lower numbers are placed earlier in queue order.</p>
+							</td>
+						</tr>
+						<tr>
+							<td><code>queue=</code></td>
 							<td>no</td>
 							<td><em>none</em></td>
 							<td>String</td>
 							<td>
-								<p>Override the tag output; useful if changing <code>display="contents"</code>, since you will need to specify tag output to avoid contents being returned without a containing tag. See <a href="#examples">Advanced Usage</a> section below.</p>
+								<p>To "queue" assets for output; receives a "key" value (e.g. "head_css"), which is used later to lookup and retrieve the queue'd cache</p>
 							</td>
 						</tr>
 					</tbody>
