@@ -133,7 +133,17 @@ class Minimee_helper {
 			case ('cssmin') :
 				if ( ! class_exists('CSSmin'))
 				{
-					require_once('CSSMin.php');
+					// this sucks, but it's a case-insensitivity issue that we need to protect ourselves against
+					if (glob(PATH_THIRD . 'minimee/libraries/CSSmin.php'))
+					{
+						require_once('CSSmin.php');
+					}
+				
+					else
+					{
+						self::log('CSSMin.php in minimee/libraries needs to be renamed to the proper capitalisation of "CSSmin.php".', 2);
+						require_once('CSSMin.php');
+					}
 				}
 			break;
 			
