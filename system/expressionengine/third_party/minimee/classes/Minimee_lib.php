@@ -35,7 +35,7 @@ class Minimee_lib {
 	 * runtime variables
 	 */
 	public $cache_lastmodified		= '';		// lastmodified value for cache
-	public $cache_filename_md5		= '';		// an md5 of settings & filenames
+	public $cache_filename_hash		= '';		// a hash of settings & filenames
 	public $cache_filename			= '';		// eventual filename of cache
 	public $filesdata				= array();	// array of assets to process
 	public $remote_mode				= '';		// 'fgc' or 'curl'
@@ -632,31 +632,39 @@ class Minimee_lib {
 
 		Minimee_helper::log('Creating cache name from `' . $name . '`.', 3);
 
-		// use original filename if preserve_filename='no'
-		if($this->config->is_yes('preserve_filename'))
-		{
-			// first, remove leading slashes and replace the rest with periods
-			$name = preg_replace(array('/^\//', '/\//'), array('', '.'), $name);
-			// now sanitise
-			$this->cache_filename_md5 = $this->EE->security->sanitize_filename($name);
+		// create our cache filename by selected hash
+		switch($this->config->filename_hash) :
 
-			// reduce length to be safe?
-			if(strlen($this->cache_filename_md5) > 200)
-			{
-				$this->cache_filename_md5 = substr($this->cache_filename_md5, 0, 200);
-			}
-		}
-		else
-		{
-			// md5 hash of name
-			$this->cache_filename_md5 = md5($name);
-		}
+			case 'sanitise' :
+			case 'sanitize' :
+				// first, remove leading slashes and replace the rest with periods
+				$name = preg_replace(array('/^\//', '/\//'), array('', '.'), $name);
+				// now sanitise
+				$this->cache_filename_hash = $this->EE->security->sanitize_filename($name);
+
+				// reduce length to be safe?
+				if(strlen($this->cache_filename_hash) > 200)
+				{
+					$this->cache_filename_hash = substr($this->cache_filename_hash, 0, 200);
+				}
+			break;
+
+			case 'md5' :
+				$this->cache_filename_hash = md5($name);
+			break;
+
+			default :
+			case 'sha1' :
+				$this->cache_filename_hash = sha1($name);
+			break;
+
+		endswitch;
 
 		// include cachebust if provided
 		$cachebust = ($this->config->cachebust) ? '.' . $this->EE->security->sanitize_filename($this->config->cachebust) : '';
 
 		// put it all together
-		return $this->cache_filename_md5 . '.' . $this->cache_lastmodified . $cachebust . '.' . $this->type;
+		return $this->cache_filename_hash . '.' . $this->cache_lastmodified . $cachebust . '.' . $this->type;
 	}
 	// ------------------------------------------------------
 	
@@ -734,7 +742,7 @@ class Minimee_lib {
 	{
 		// (re)set our usage vars
 		$this->cache_filename = '';
-		$this->cache_filename_md5 = '';
+		$this->cache_filename_hash = '';
 		$this->cache_lastmodified = '';
 
 		// loop through our files once
@@ -1023,7 +1031,7 @@ class Minimee_lib {
 					if ($file == '.' || $file == '..' || $file === $this->cache_filename) continue;
 
 					// matches should be deleted
-					if (strpos($file, $this->cache_filename_md5) === 0)
+					if (strpos($file, $this->cache_filename_hash) === 0)
 					{
 						@unlink($this->config->cache_path . '/' . $file);
 						Minimee_helper::log('Cache file `' . $this->cache_filename . '` has expired. File deleted.', 3);

@@ -41,11 +41,11 @@ class Minimee_config {
 		'css_prepend_mode'		=> '',
 		'css_prepend_url'		=> '',
 		'disable'				=> '',
+		'filename_hash'			=> '',
 		'js_library'			=> '',
 		'minify_css'			=> '',
 		'minify_html'			=> '',
 		'minify_js'				=> '',
-		'preserve_filename'		=> '',
 		'remote_mode'			=> ''
 	);
 	
@@ -444,7 +444,6 @@ class Minimee_config {
 			case('cleanup') :
 			case('disable') :
 			case('minify_html') :
-			case('preserve_filename') :
 				return ($value === TRUE OR preg_match('/1|true|on|yes|y/i', $value)) ? 'yes' : 'no';
 			break;
 		
@@ -458,6 +457,10 @@ class Minimee_config {
 			break;
 
 			/* ENUM */
+			case('filename_hash') :
+				return preg_match('/sha1|md5|sanitize|sanitise/i', $value) ? $value : 'sha1';
+			break;
+			
 			case('remote_mode') :
 				return preg_match('/auto|curl|fgc/i', $value) ? $value : 'auto';
 			break;

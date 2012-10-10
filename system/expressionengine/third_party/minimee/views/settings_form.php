@@ -127,10 +127,10 @@
 	
 
 	/**
-	 * Preserve Filename
+	 * Filename Hash
 	 */
-	$label = lang('preserve_filename', 'preserve_filename') . sprintf($note_format, lang('preserve_filename_note'));
-	$setting = form_dropdown('preserve_filename', array('no' => lang('No'),'yes' => lang('Yes')), $settings['preserve_filename'], 'id="preserve_filename"');
+	$label = lang('filename_hash', 'filename_hash') . sprintf($note_format, lang('filename_hash_note'));
+	$setting = form_dropdown('filename_hash', array('sha1' => lang('sha1'),'md5' => lang('md5'), 'sanitize' => lang('sanitize')), $settings['filename_hash'], 'id="filename_hash"');
 	$this->table->add_row($label, $setting);
 	
 
