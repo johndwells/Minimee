@@ -24,3 +24,9 @@ The architecture of Minimee2 has given me the opportunity to build other add-ons
 
 * [MSMinimee](https://github.com/johndwells/MSMinimee) - a module that brings full MSM-compatibility to Minimee
 * [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) - adds LESS processing to Minimee
+
+## Want Bleeding Edge?
+
+This master branch will always contain the "stable" release of Minimee, where the version number should match what is listed on the [Full Documentation](http://johndwells.github.com/Minimee) page, as well as [on @devot-ee](http://devot-ee.com/add-ons/minimee) and on my [personal website](http://johndwells.com/software/minimee).
+
+To follow development of Version 2.x, refer to the [version2 branch](https://github.com/johndwells/Minimee/tree/version2). Note that the reported version number for that branch (e.g. `2.1.0` found in minimee/config.php) will not increment, despite any changes made.  Version increments will always happen at the master branch first.
