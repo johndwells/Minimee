@@ -23,7 +23,9 @@
 
 		  var _gaq = _gaq || [];
 		  _gaq.push(['_setAccount', 'UA-1352094-14']);
-		  _gaq.push(['_trackPageview']);
+		  //_gaq.push(['_trackPageview']);
+		  // http://www.searchenginepeople.com/blog/how-to-track-clicks-on-anchors-in-google-analytics.html
+		  _gaq.push(['_trackPageview', location.pathname + location.search + location.hash]);
 
 		  (function() {
 		    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
@@ -1338,6 +1340,9 @@
 				// allow scrollTO - but not for FAQ
 				$('a[href^=#]').not('a[href^=#faq]').on('click', function(e) {
 					e.preventDefault();
+
+					// GA track
+				    _gaq.push(['_trackPageview', location.pathname + location.search + location.hash]);
 
 					$('html, body').animate({
 						scrollTop : $($(this).attr('href')).offset().top
