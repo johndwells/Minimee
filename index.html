@@ -1207,29 +1207,6 @@
 					</div>
  					<div class="accordion-group">
 						<div class="accordion-heading">
-							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqTwelve">
-								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Specifying the output of Minimee's link &amp; script tags
-							</a>
-						</div>
-						<div id="faqTwelve" class="accordion-body collapse">
-							<div class="accordion-inner">
-								<p>When Minimee runs, it looks at the first tag for that particular asset type as the template for a final cache output. If you would like more fine-grained control over the tag output, use the <code>exp:minimee:link</code> tag to output only the path to the cache:</p>
-
-<pre class="brush:ee">{exp:minimee:css queue="css_head"}
-    &lt;link rel="stylesheet" href="/css/styles.css" /&gt;
-{/exp:minimee:css}
-
-...
-
-&lt;link rel="stylesheet" href="{exp:minimee:link css='css_head'}" /&gt;
-</pre>
-
-								<p class="alert alert-notice">This behaviour can be overridden by specifying a `display=` method, or by alternatively using the display <em>modifier</em> syntax.</p>
-							</div>
-						</div>
-					</div>
- 					<div class="accordion-group">
-						<div class="accordion-heading">
 							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqThirteen">
 								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;Does Minimee process inline CSS and JS?
 							</a>
