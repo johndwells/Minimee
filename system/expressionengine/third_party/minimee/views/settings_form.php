@@ -127,6 +127,14 @@
 	
 
 	/**
+	 * Preserve Filename
+	 */
+	$label = lang('preserve_filename', 'preserve_filename') . sprintf($note_format, lang('preserve_filename_note'));
+	$setting = form_dropdown('preserve_filename', array('no' => lang('No'),'yes' => lang('Yes')), $settings['preserve_filename'], 'id="preserve_filename"');
+	$this->table->add_row($label, $setting);
+	
+
+	/**
 	 * CSS Prepend Mode
 	 */
 	$label = lang('css_prepend_mode', 'css_prepend_mode') . sprintf($note_format, lang('css_prepend_mode_note'));

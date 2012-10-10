@@ -631,9 +631,26 @@ class Minimee_lib {
 		$name = Minimee_helper::replace_url_with($this->config->base_url, '', $name);
 
 		Minimee_helper::log('Creating cache name from `' . $name . '`.', 3);
-		
-		// md5 hash of name
-		$this->cache_filename_md5 = md5($name);
+
+		// use original filename if preserve_filename='no'
+		if($this->config->is_yes('preserve_filename'))
+		{
+			// first, remove leading slashes and replace the rest with periods
+			$name = preg_replace(array('/^\//', '/\//'), array('', '.'), $name);
+			// now sanitise
+			$this->cache_filename_md5 = $this->EE->security->sanitize_filename($name);
+
+			// reduce length to be safe?
+			if(strlen($this->cache_filename_md5) > 200)
+			{
+				$this->cache_filename_md5 = substr($this->cache_filename_md5, 0, 200);
+			}
+		}
+		else
+		{
+			// md5 hash of name
+			$this->cache_filename_md5 = md5($name);
+		}
 
 		// include cachebust if provided
 		$cachebust = ($this->config->cachebust) ? '.' . $this->EE->security->sanitize_filename($this->config->cachebust) : '';

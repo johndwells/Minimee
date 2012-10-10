@@ -52,6 +52,9 @@ $lang = array(
 	'minify' => 'Minify Assets',
 	'minify_note' => 'Specify which types of assets to run through minification engine.<br />Note: HTML minification only available for EE2.4+',
 
+	'preserve_filename' => 'Preserve Filenames',
+	'preserve_filename_note' => 'When specified, Minimee will try to preserve the path & name of cache file(s) rather than using a hash string. Recommended only during testing.',
+
 	'remote_mode' => 'Remote file mode?',
 	'remote_mode_note' => 'Specify how to fetch remote and {stylesheet=} URLs. \'Auto\' mode will try cURL first.',
 	
