@@ -242,6 +242,9 @@
 
 				<p>Once you have upgraded Minimee on your server, either through deployment or FTP, you should make sure that this file has its proper case as above.</p>
 
+				<h3>Step 4: Cache folder cleanup</h3>
+
+				<p>Minimee 2.x's naming convention differs from 1.x, and therefore upon first run will create new cache files. If you'd like to tidy up your cache folder, now would be a good time. Also see Minimee's new <code>cleanup=</code> setting to automatically delete expired caches.</p>
 			</div> <!-- /#installation -->
 
 
@@ -1023,7 +1026,9 @@
 						</div>
 						<div id="faqFour" class="accordion-body collapse">
 							<div class="accordion-inner">
-								<p>Sometimes Minimee runs into trouble; a file cannot be found, or perhaps the base path has been incorrectly set.  When this happens, Minimee does its best to return your template content ontouched. Keep in mind though that queue'ing may have unintended consequences when an error is encountered; original tagdata may be returned, but it will be returned at the point in which you have asked to <code>display</code> the queue'd contents. So code will still be re-ordered.</p>
+								<p>Sometimes Minimee runs into trouble; a file cannot be found, or perhaps the base path has been incorrectly set.  When this happens, Minimee does its best to return your template content ontouched.</p>
+								<p>This is the same behaviour Minimee follows when it has been disabled (either via config or parameter).</p>
+								<p>With that in mind, be careful when you set <code>display=</code> to a format other than the input (e.g., original tag data contains <code>&lt;link&gt;</code> tags, but displaying just cache url). Disabling or encountering an error may have unintended consequences if, for example, your site expects a URL but receives a list of <code>&lt;link&gt;</code> tags.</p>
 							</div>
 						</div>
 					</div>
