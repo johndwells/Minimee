@@ -1003,7 +1003,7 @@ class Minimee {
 			);
 
 			// from old _isURL() file from Carabiner Asset Management Library
-			if (preg_match('@(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)@', $this->filesdata[$key]['name']) > 0)
+			if (preg_match('@((https?:)?//([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)@', $this->filesdata[$key]['name']) > 0)
 			{
 				$this->filesdata[$key]['type'] = 'remote';
 			}
