@@ -1518,6 +1518,9 @@ table [class*=span],
 .collapse.in {
   height: auto;
 }
+a.btn {
+  border-bottom: 0;
+}
 .btn {
   display: inline-block;
   *display: inline;
