@@ -446,9 +446,9 @@
 
     /**
      * Specify what algorithm to use when creating cache filenames.
-     * 'serialize' enforces a 200 character limit, and is
+     * 'sanitize' enforces a 200 character limit, and is
      * only recommended during development.
-     * Values: 'md5', 'sha1', or 'serialize'/'serialise'
+     * Values: 'md5', 'sha1', or 'sanitize'/'sanitise'
      * Default: sha1
      */
     'hash_method'   =&gt; 'sha1',
@@ -1304,7 +1304,7 @@
 				<h3>Version 2.1.1 <small>October 2012</small</h3>
 
 				<ul>
-					<li>Add <code>hash_method</code> with option to serialise filenames, useful for debugging</li>
+					<li>NEW: <code>hash_method</code> with ability to sanitise, rather than hash, cache filenames. Useful for debugging, not recommended during development.</li>
 					<li>Case-sensitivity precaution for CSSmin.php filename</li>
 				</ul>
 
