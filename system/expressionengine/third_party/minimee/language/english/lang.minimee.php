@@ -55,8 +55,8 @@ $lang = array(
 	'minify' => 'Minify Assets',
 	'minify_note' => 'Specify which types of assets to run through minification engine.<br />Note: HTML minification only available for EE2.4+',
 
-	'filename_hash' => 'Filename Hash Algorithm',
-	'filename_hash_note' => 'Choose which algorithm to create the cache filename.<br />`sanitize` only recommended during development; filenames will not exceed 200 characters in length.',
+	'hash_method' => 'Filename Hash Algorithm',
+	'hash_method_note' => 'Choose which algorithm to create the cache filename.<br />`Sanitize` is only recommended during development; filenames will not exceed 200 characters in length.',
 
 	'remote_mode' => 'Remote file mode?',
 	'remote_mode_note' => 'Specify how to fetch remote and {stylesheet=} URLs. \'Auto\' mode will try cURL first.',

@@ -129,8 +129,8 @@
 	/**
 	 * Filename Hash
 	 */
-	$label = lang('filename_hash', 'filename_hash') . sprintf($note_format, lang('filename_hash_note'));
-	$setting = form_dropdown('filename_hash', array('sha1' => lang('sha1'),'md5' => lang('md5'), 'sanitize' => lang('sanitize')), $settings['filename_hash'], 'id="filename_hash"');
+	$label = lang('hash_method', 'hash_method') . sprintf($note_format, lang('hash_method_note'));
+	$setting = form_dropdown('hash_method', array('sha1' => lang('sha1'),'md5' => lang('md5'), 'sanitize' => lang('sanitize')), $settings['hash_method'], 'id="hash_method"');
 	$this->table->add_row($label, $setting);
 	
 

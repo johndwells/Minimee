@@ -41,7 +41,7 @@ class Minimee_config {
 		'css_prepend_mode'		=> '',
 		'css_prepend_url'		=> '',
 		'disable'				=> '',
-		'filename_hash'			=> '',
+		'hash_method'			=> '',
 		'js_library'			=> '',
 		'minify_css'			=> '',
 		'minify_html'			=> '',
@@ -457,7 +457,7 @@ class Minimee_config {
 			break;
 
 			/* ENUM */
-			case('filename_hash') :
+			case('hash_method') :
 				return preg_match('/sha1|md5|sanitize|sanitise/i', $value) ? $value : 'sha1';
 			break;
 			
