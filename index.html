@@ -125,38 +125,44 @@
 				<hr />
 				<br />
 
-				<h2>New Features for 2.x</h2>
+				<div class="row">
+					<div class="span7">
+						<h2>New Features for 2.x</h2>
 
-				<ul>
-					<li><strong>ALL settings</strong> can be specified via config or extension, <em>as well as</em> via tag parameters</li>
-					<li>Ability to turn on and off minification and/or combining <strong>per asset type</strong></li>
-					<li>Better, more verbose debugging with EE's <a href="http://expressionengine.com/user_guide/cp/admin/output_and_debugging_preferences.html">Template Debugging</a></li>
-					<li><strong>New API available for 3rd party add-ons</strong></li>
-					<li>Path &amp; URL settings can now be relative to site</li>
-					<li>Out-of-the-box default configuration means near zero setup</li>
-					<li>New shorthand <code>exp:minimee</code> tag allows for quick caching, plus access to a powerful API "interface"</li>
-					<li>New ways to display your cache: in a tag, embedded inline, or just the URL</li>
-					<li>Purpose-built compatibility with RequireJS, LABjs, etc</li>
-					<li>Disable or override the URLs which are prepended to image &amp; @import paths in CSS</li>
-					<li>New <code>priority=""</code> parameter allows you to queue assets into a specific order</li>
-					<li>For EE2.4 and above, assets are queue'd and sorted <strong>after</strong> all templates have been parsed (see the "Croxton Queue" below)</li>
-					<li>New <code>cleanup=""</code> setting for automatically deleting expired caches</li>
-					<li>Verbose template debugging messages to help easily track down errors</li>
-					<li>Hooks for 3rd party integration (see <a href="https://github.com/johndwells/Minimee-LESS">Minimee+LESS</a>, <a href="https://github.com/johndwells/MSMinimee">MSMinimee</a>)</li>
-					<li><strong>Plus bug fixes, more fine-grained control, and other improvements!</strong></li>
-				</ul>
+						<ul>
+							<li><strong>ALL settings</strong> can be specified via config or extension, <em>as well as</em> via tag parameters</li>
+							<li>Ability to turn on and off minification and/or combining <strong>per asset type</strong></li>
+							<li>Better, more verbose debugging with EE's <a href="http://expressionengine.com/user_guide/cp/admin/output_and_debugging_preferences.html">Template Debugging</a></li>
+							<li><strong>New API available for 3rd party add-ons</strong></li>
+							<li>Path &amp; URL settings can now be relative to site</li>
+							<li>Out-of-the-box default configuration means near zero setup</li>
+							<li>New shorthand <code>exp:minimee</code> tag allows for quick caching, plus access to a powerful API "interface"</li>
+							<li>New ways to display your cache: in a tag, embedded inline, or just the URL</li>
+							<li>Purpose-built compatibility with RequireJS, LABjs, etc</li>
+							<li>Disable or override the URLs which are prepended to image &amp; @import paths in CSS</li>
+							<li>New <code>priority=""</code> parameter allows you to queue assets into a specific order</li>
+							<li>For EE2.4 and above, assets are queue'd and sorted <strong>after</strong> all templates have been parsed (see the "Croxton Queue" below)</li>
+							<li>New <code>cleanup=""</code> setting for automatically deleting expired caches</li>
+							<li>Verbose template debugging messages to help easily track down errors</li>
+							<li>Hooks for 3rd party integration (see <a href="https://github.com/johndwells/Minimee-LESS">Minimee+LESS</a>, <a href="https://github.com/johndwells/MSMinimee">MSMinimee</a>)</li>
+							<li><strong>Plus bug fixes, more fine-grained control, and other improvements!</strong></li>
+						</ul>
 
-				<br />
+					</div>
 
-				<h2>Since 1.x:</h2>
+					<div class="span4 offset1">
 
-				<ul>
-					<li>For EE2.4 and above, can minify your HTML</li>
-					<li>Works with EE global variables and <code>{stylesheet=""}</code></li>
-					<li>Works with external files, over cURL or file_get_contents()</li>
-					<li>Embed combined &amp; minified content directly inline to your template</li>
-					<li>Compatible with server-side compression &amp; caching</li>
-				</ul>
+						<h3>Since 1.x:</h3>
+
+						<ul>
+							<li>For EE2.4 and above, can minify your HTML</li>
+							<li>Works with EE global variables and <code>{stylesheet=""}</code></li>
+							<li>Works with external files, over cURL or file_get_contents()</li>
+							<li>Embed combined &amp; minified content directly inline to your template</li>
+							<li>Compatible with server-side compression &amp; caching</li>
+						</ul>
+					</div>
+				</div>
 
 			</div> <!-- /#description -->
 
@@ -170,11 +176,11 @@
 					<h1>Installation</h1>
 				</div>
 
-				<div class="well pull-right offset1 span5">
+				<div class="well pull-right offset1 span4">
 
 					<div class="alert alert-error">
 
-						<h3>System Requirements:</h3>
+						<h4>System Requirements:</h4>
 						<ul>
 							<li>PHP5+</li>
 							<li>ExpressionEngine 2.1+</li>
@@ -195,7 +201,6 @@
 				</div>
 
 				<h2>Installing Minimee</h2>
-
 				<ol>
 					<li>Create a cache folder on your server, accessible by a URL, and ensure permissions allow for reading &amp; writing.</li>
 					<li>Copy the minimee folder to your system/expressionengine/third_party folder</li>
