@@ -645,7 +645,7 @@ dd {
 hr {
   margin: 20px 0;
   border: 0;
-  border-top: 1px solid #aaaaaa;
+  border-top: 1px solid #333333;
 }
 abbr[title] {
   cursor: help;

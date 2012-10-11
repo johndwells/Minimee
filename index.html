@@ -80,7 +80,7 @@
 							<a class="btn" rel="event-tar" href="https://github.com/johndwells/Minimee/tarball/master">Download<br /><strong>TAR Ball</strong></a>
 							<a class="btn btn-info" rel="event-fork" href="https://github.com/johndwells/Minimee">Fork On<br /><strong>GitHub</strong></a>
 						</div>
-						<p style="font-size: .95em">&nbsp;<i class="icon-bookmark icon-white"></i> Version 2.x, <small>Releasing October 2012</small></p>
+						<p style="font-size: .95em">&nbsp;<i class="icon-bookmark icon-white"></i> Releasing October 2012 | <a href="https://github.com/johndwells/Minimee" title="Minimee on Github">Change log</a></p>
 					</div>
 				</div>
 			</div>
@@ -233,16 +233,20 @@
 
 				<h3>Step 3: Filename Case Sensitivity</h3>
 
-				<p>There is a file who's name has <strong><em>changed case</em></strong>, which may go unrecognised with versioning systems such as SVN/Git; while a check is in place to account for this, it is recommended that you double-check the filename's casing has been properly maintained (subsequent versions of Minimee may drop this check to save time). The file is:</p>
+				<p>Two files' names have <strong><em>changed case</em></strong>, which may go unrecognised with versioning systems such as SVN/Git, and may cause trouble on case-sensitive filesystems. While a check is in place to account for this, it is recommended that you double-check that the names have been properly maintained, as subsequent versions of Minimee may drop this check to save time. The files are:</p>
 
 <pre class="brush:plain">// correct:
 /system/expressionengine/third_party/minimee/libraries/JSMin.php
-
 // incorrect:
 /system/expressionengine/third_party/minimee/libraries/jsmin.php
-</pre>
 
-				<p>Once you have upgraded Minimee on your server, either through deployment or FTP, you should make sure that this file has its proper case as above.</p>
+// and
+
+// correct:
+/system/expressionengine/third_party/minimee/libraries/CSSmin.php
+// incorrect:
+/system/expressionengine/third_party/minimee/libraries/CSSMin.php
+</pre>
 
 				<h3>Step 4: Cache folder cleanup</h3>
 
@@ -272,7 +276,7 @@
 				<ul class="thumbnails">
 					<li class="span11">
 						<div class="thumbnail">
-							<img src="img/config-basic.png" alt="Screenshot of Basic Preferences">
+							<a href="img/config-basic.png" title="View Large"><img src="img/config-basic.png" alt="Screenshot of Basic Preferences"></a>
 
 							<h3>Basic Preferences</h3>
 							<p>The first panel allows for basic configuration of Minimee, including whether to combine and/or minify each asset type.</p>
@@ -282,7 +286,7 @@
 					</li>
 					<li class="span11">
 						<div class="thumbnail">
-							<img src="img/config-advanced.png" alt="Screenshot of Advanced Preferences">
+							<a href="img/config-advanced.png" title="View Large"><img src="img/config-advanced.png" alt="Screenshot of Advanced Preferences"></a>
 
 							<h3>Advanced Preferences</h3>
 							<p>For 90% of all setups, you will not need to edit the Advanced Preferences. If you do and encounter problems, these should be the first things you reset or change.</p>
@@ -302,7 +306,9 @@
 					<li><a href="https://gist.github.com/1329538">This little-known gist</a> from <a href="https://twitter.com/airways">@airways</a></li>
 				</ul>
 
-				<p>To configure Minimee via EE's <code>$config</code> array, the following values are available:</p>
+				<br />
+
+				<p class="alert alert-notice">Double-click anywhere in the code block to be able to copy the raw source.</p>
 
 				<pre class="pre-scrollable brush:php">$config['minimee'] = array(
 
@@ -438,6 +444,15 @@
     'css_prepend_url'   =&gt; '/path/to/site.com',
 
     /**
+     * Specify what algorithm to use when creating cache filenames.
+     * 'serialize' enforces a 200 character limit, and is
+     * only recommended during development.
+     * Values: 'md5', 'sha1', or 'serialize'/'serialise'
+     * Default: sha1
+     */
+    'filename_hash'   =&gt; 'sha1',
+
+    /**
      * Specify which minification library to use for your JS.
      * Please note that JSMinPlus is VERY memory-intensive. Not recommended
      * unless you really know what you're doing. Seriously.
@@ -455,6 +470,7 @@
     'remote_mode'       =&gt; 'auto'
 );
 </pre>
+
 			</div> <!-- /#configuration -->
 
 
@@ -467,7 +483,7 @@
 					<h1>Tags &amp; Parameters</h1>
 				</div>
 
-				<p class="alert alert-info">In addition to any <a href="#configuration">Configuration</a> values mentioned above, the following parameters can also be passed at runtime:</p>
+				<p class="alert alert-info"><strong>Heads up!</strong> All <a href="#configuration">Configuration</a> values mentioned above can also be specified as tag parameters. Refer to the EE $config code sample for key/value combinations.</p>
 
 				<table class="table table-bordered table-striped">
 					<caption><h3>exp:minimee:css <small>and</small> exp:minimee:js</h3></caption>
@@ -560,6 +576,8 @@
 				</table>
 
 				<br />
+				<hr />
+				<br />
 
 				<table class="table table-bordered table-striped">
 					<caption><h3>exp:minimee:display</h3></caption>
@@ -642,6 +660,8 @@
 					</tbody>
 				</table>
 
+				<br />
+				<hr />
 				<br />
 
 				<table class="table table-bordered table-striped">
@@ -798,7 +818,7 @@
 
 				<p>Since Minimee 1.x there has been the ability to "queue" assets and then display the final cache later in your EE template.  It's a simple two-step process:</p>
 
-				<h5>Step <span class="badge">1</span>: Add <code>queue=</code> parameter to your <code>exp:minimee:css</code> or <code>exp:minimee:js</code> opening tag:</h5>
+				<h5><br />Step <span class="badge">1</span>: Add <code>queue=</code> parameter to your <code>exp:minimee:css</code> or <code>exp:minimee:js</code> opening tag:</h5>
 
 				<pre class="brush:ee">{exp:minimee:css queue="head_css"}
     &lt;link rel="stylesheet" href="css/reset.css"&gt;
@@ -818,7 +838,7 @@
 {/exp:minimee:css}
 </pre>
 
-				<h5>Step <span class="badge">2</span>: Once all assets have been queue'd, you can finally display your tag output with the <code>exp:minimee:display</code> tag; use <code>css=</code> or <code>js=</code> as your tag parameter depending on the type of asset, and specify the name of the queue:</h5>
+				<h5><br />Step <span class="badge">2</span>: Once all assets have been queue'd, you can finally display your tag output with the <code>exp:minimee:display</code> tag; use <code>css=</code> or <code>js=</code> as your tag parameter depending on the type of asset, and specify the name of the queue:</h5>
 
 				<pre class="brush:ee">{exp:minimee:display css="head_css"}
 
@@ -864,7 +884,7 @@
 
 				<p>There are now multiple approaches to "embedding" the contents of your cache inline with the rest of your HTML content. Let's cover 2 basic options:</p>
 
-				<h5>Option 1: Using a Queue + Display method</h5>
+				<h5><br />Option 1: Using a Queue + Display method</h5>
 
 				<p>Begin with Step <span class="badge">1</span> above under <strong>Queueing + Display</strong>.  This will queue one or more assets for display.</p>
 
@@ -885,7 +905,7 @@
 &lt;/style&gt;
 </pre>
 
-				<h5>Option 2: Directly changing display mode</h5>
+				<h5><br />Option 2: Directly changing display mode</h5>
 
 				<p>The return mode of <code>exp:minimee:js</code> and <code>exp:minimee:css</code> tags can now be altered in a single call, by specifying the <code>display</code> value at the same time. When doing so, it is recommended to also provide the appropriate <code>attribute:name="value"</code> parameters as well, so that the contents are automatically wrapped in tags:</p>
 
@@ -1000,12 +1020,12 @@
 					<div class="accordion-group">
 						<div class="accordion-heading">
 							<a class="accordion-toggle" data-toggle="collapse" data-parent="#faqAccordion" href="#faqThree">
-								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;What determins a cache's filename?
+								<span class="badge badge-warning">Q:</span>&nbsp;&nbsp;&nbsp;What determines a cache's filename?
 							</a>
 						</div>
 						<div id="faqThree" class="accordion-body collapse">
 							<div class="accordion-inner">
-								<p>A cache filename begins with an md5() hash created from the list of assets being cached together. Minimee then appends the last modified timestamp, and if an optional cachebusting string has been specified, comes next. The result format is:</p>
+								<p>A cache filename begins with a configurable hash option (see <a href="#configuration" title="Configuration">Configuration</a> section above), created from the list of assets being cached together. Minimee then appends the last modified timestamp, and if an optional cachebusting string has been specified, comes next. The result format is:</p>
 
 								<pre class="brush:plain">// md5.timestamp.[cachebust].ext
 03b5614606d3e8d2f28d0b07f802fbbb.1332460675.v2.5.css
