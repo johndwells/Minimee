@@ -58,6 +58,7 @@
 							<li><a href="#parameters">Tags &amp; Parameters</a></li>
 							<li><a href="#examples">Examples</a></li>
 							<li><a href="#frequent">FAQs</a></li>
+							<li><a href="#changelog">Changelog</a></li>
 						</ul>
 					</div>
 				</div>
@@ -80,7 +81,7 @@
 							<a class="btn" rel="event-tar" href="https://github.com/johndwells/Minimee/tarball/master">Download<br /><strong>TAR Ball</strong></a>
 							<a class="btn btn-info" rel="event-fork" href="https://github.com/johndwells/Minimee">Fork On<br /><strong>GitHub</strong></a>
 						</div>
-						<p style="font-size: .95em">&nbsp;<i class="icon-bookmark icon-white"></i> Releasing October 2012 | <a href="https://github.com/johndwells/Minimee" title="Minimee on Github">Change log</a></p>
+						<p style="font-size: .95em">&nbsp;<i class="icon-bookmark icon-white"></i> Releasing October 2012 | <a href="#changelog" title="Change Log">Changelog</a></p>
 					</div>
 				</div>
 			</div>
@@ -1293,6 +1294,130 @@
 					</div>
 				</div>
 			</div> <!-- /#frequent -->
+
+			<div id="changelog">
+
+				<div class="page-header">
+					<h1>Changelog</h1>
+				</div>
+
+				<h3>Version 2.1.0 <small>October 2012</small></h3>
+
+				<ul>
+				<li>ALL settings can be specified via config or extension, as well as via tag parameters</li>
+				<li>Ability to turn on and off minification and/or combining per asset type</li>
+				<li>Better, more verbose debugging with EE's Template Debugging</li>
+				<li>New API available for 3rd party add-ons</li>
+				<li>Path &amp; URL settings can now be relative to site</li>
+				<li>Out-of-the-box default configuration means near zero setup</li>
+				<li>New shorthand exp:minimee tag allows for quick caching, plus access to a powerful API "interface"</li>
+				<li>New ways to display your cache: in a tag, embedded inline, or just the URL</li>
+				<li>Purpose-built compatibility with RequireJS, LABjs, etc</li>
+				<li>Disable or override the URLs which are prepended to image &amp; @import paths in CSS</li>
+				<li>New priority="" parameter allows you to queue assets into a specific order</li>
+				<li>For EE2.4 and above, assets are queue'd and sorted after all templates have been parsed (see the "Croxton Queue" below)</li>
+				<li>New cleanup="" setting for automatically deleting expired caches</li>
+				<li>Verbose template debugging messages to help easily track down errors</li>
+				<li>Hooks for 3rd party integration (see Minimee+LESS, MSMinimee)</li>
+				<li>Plus bug fixes, more fine-grained control, and other improvements!</li>
+				</ul>
+
+
+				<h3>Version 1.1.7 <small>April 16, 2012</small></h3>
+
+				<ul>
+				<li>Skip HTML minification of template type is not webpage or static.</li>
+				</ul>
+
+
+				<h3>Version 1.1.6 <small>February 03, 2012</small></h3>
+
+				<ul>
+				<li>Play nice with other hooks (sloppy)</li>
+				</ul>
+
+
+				<h3>Version 1.1.5 <small>January 30, 2012</small></h3>
+
+				<ul>
+				<li>HTML Minification (requires EE2.4)</li>
+				<li>Bug Fix: upgrade scripts may have been skipped in certain edge cases</li>
+				</ul>
+
+
+				<h3>Version 1.1.3 <small>June 23, 2011</small></h3>
+
+				<ul>
+				<li>New: embed cached contents inline to your template</li>
+				<li>Improved: Alter how error &amp; debug logging is performed</li>
+				<li>Improved: Unset variables along way to keep memory usage down</li>
+				</ul>
+
+
+				<h3>Version 1.1.2 <small>February 22, 2011</small></h3>
+
+				<ul>
+				<li>Add new Base Path and Base URL advanced settings</li>
+				<li>Split settings form into basic/advanced</li>
+				</ul>
+
+
+				<h3>Version 1.1.1 <small>January 19, 2011</small></h3>
+
+				<ul>
+				<li>Fix nasty bug that was erasing URLs from CSS files</li>
+				</ul>
+
+
+				<h3>Version 1.1.0 <small>January 03, 2011</small></h3>
+
+				<ul>
+				<li>Big rewrite to embrace PHP5!</li>
+				<li>Support cURL and file_get_contents()</li>
+				<li>rely on processed markup as template for output (see http://bit.ly/dngqjK)</li>
+				<li>parse for global variables if necessary</li>
+				<li>change boolean config/param values to 'yes' or 'no'</li>
+				<li>remove STRICT option - all files must exist for Minimee to work</li>
+				<li>add new DEBUG option to output error messages as HTML comments</li>
+				</ul>
+
+
+				<h3>Version 1.0.2 <small>October 15, 2010</small></h3>
+
+				<ul>
+				<li>Support of {stylesheet} super global (thanks @winterstetter)</li>
+				<li>Enable settings via config.php (thanks @wesbaker)</li>
+				<li>Improved stability of strict mode &amp; queue function</li>
+				<li>Improved debug &amp; error messaging</li>
+				<li>Avoids DB query if configured via globals or config</li>
+				</ul>
+
+
+				<h3>Version 1.0.1 <small>October 11, 2010</small></h3>
+
+				<ul>
+				<li>Check for OpenSSL support</li>
+				<li>Improved logging messages</li>
+				<li>Fixed bug in "strict" mode</li>
+				<li>Support for NSM Addon Updater</li>
+				<li>Thanks to @gohearsay and @simoncox for help testing</li>
+				</ul>
+
+
+				<h3>Version 1.0.0 <small>October 09, 2010</small></h3>
+
+				<ul>
+				<li>Initial release</li>
+				</ul>
+
+
+				<h2>Want Bleeding Edge?</h2>
+
+				<p>This master branch will always contain the "stable" release of Minimee, where the version number should match what is listed on the <a href="http://johndwells.github.com/Minimee">Full Documentation</a> page, as well as <a href="http://devot-ee.com/add-ons/minimee">on @devot-ee</a> and on my <a href="http://johndwells.com/software/minimee">personal website</a>.</p>
+
+				<p>To follow development of Version 2.x, refer to the <a href="https://github.com/johndwells/Minimee/tree/version2">version2 branch</a>. Note that the reported version number for that branch (e.g. <code>2.1.0</code> found in minimee/config.php) will not increment, despite any changes made.  Version increments will always happen at the master branch first.</p>
+
+			</div> <!-- /#changelog -->
 
 		</div> <!-- /#container -->
 
