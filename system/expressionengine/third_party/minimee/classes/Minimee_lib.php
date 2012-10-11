@@ -643,12 +643,14 @@ class Minimee_lib {
 
 				// what to find & replace
 				$find_replace = array(
+					// stylesheet= $_GET query
+					$s_key => '',
+					// type extension
+					'/\.' . $this->type . '/i' => '',
 					// leading slash
 					'/^\//'	=> '',
 					// other slashes
-					'/\//'	=> '.',
-					// stylesheet= $_GET query
-					$s_key => ''
+					'/\//'	=> '.'
 				);
 				
 				// first, remove leading slashes and replace the rest with periods
