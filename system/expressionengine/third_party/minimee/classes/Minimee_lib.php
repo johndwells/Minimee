@@ -633,12 +633,27 @@ class Minimee_lib {
 		Minimee_helper::log('Creating cache name from `' . $name . '`.', 3);
 
 		// create our cache filename by selected hash
-		switch($this->config->hash_method) :
+		switch ($this->config->hash_method) :
 
 			case 'sanitise' :
 			case 'sanitize' :
+
+				// pattern to match any stylesheet= queries
+				$s_key = ($this->EE->config->item('index_page')) ? '/' . $this->EE->config->item('index_page') . '\?css=/' : '/\?css=/';
+
+				// what to find & replace
+				$find_replace = array(
+					// leading slash
+					'/^\//'	=> '',
+					// other slashes
+					'/\//'	=> '.',
+					// stylesheet= $_GET query
+					$s_key => ''
+				);
+				
 				// first, remove leading slashes and replace the rest with periods
-				$name = preg_replace(array('/^\//', '/\//'), array('', '.'), $name);
+				$name = preg_replace(array_keys($find_replace), array_values($find_replace), $name);
+
 				// now sanitise
 				$this->cache_filename_hash = $this->EE->security->sanitize_filename($name);
 
@@ -647,6 +662,7 @@ class Minimee_lib {
 				{
 					$this->cache_filename_hash = substr($this->cache_filename_hash, 0, 200);
 				}
+
 			break;
 
 			case 'md5' :
