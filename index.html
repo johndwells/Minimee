@@ -451,7 +451,7 @@
      * Values: 'md5', 'sha1', or 'serialize'/'serialise'
      * Default: sha1
      */
-    'filename_hash'   =&gt; 'sha1',
+    'hash_method'   =&gt; 'sha1',
 
     /**
      * Specify which minification library to use for your JS.
@@ -1300,6 +1300,13 @@
 				<div class="page-header">
 					<h1>Changelog</h1>
 				</div>
+
+				<h3>Version 2.1.1 <small>October 2012</small</h3>
+
+				<ul>
+					<li>Add <code>hash_method</code> with option to serialise filenames, useful for debugging</li>
+					<li>Case-sensitivity precaution for CSSmin.php filename</li>
+				</ul>
 
 				<h3>Version 2.1.0 <small>October 2012</small></h3>
 
