@@ -78,7 +78,7 @@
 						<div class="btn-group">
 							<a class="btn" rel="event-zip" href="https://github.com/johndwells/Minimee/zipball/master">Download<br /><strong>ZIP File</strong></a>
 							<a class="btn" rel="event-tar" href="https://github.com/johndwells/Minimee/tarball/master">Download<br /><strong>TAR Ball</strong></a>
-							<a class="btn btn-info" rel="event-fork" href="https://github.com/johndwells/Minimee">Fork On<br /><strong>GitHub</strong></a>
+							<a class="btn btn-info" href="https://github.com/johndwells/Minimee">Fork On<br /><strong>GitHub</strong></a>
 						</div>
 						<p style="font-size: .95em">&nbsp;<i class="icon-bookmark icon-white"></i>Version 2.1.1 &mdash; 11 October 2012</p>
 					</div>
@@ -1439,7 +1439,7 @@
 
 				// Try to track downloads as events
 				$('a.btn').filter('[rel^=event-]').on('click', function(e) {
-					_gaq.push(['_trackEvent', 'Buttons', 'Download', $(this).attr('rel')]);
+					_gaq.push(['_trackEvent', 'Download', $(this).attr('rel')]);
 				});
 
 				// SyntaxHighlighter
