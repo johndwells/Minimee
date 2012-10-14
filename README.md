@@ -2,7 +2,7 @@
 
 * Author: [John D Wells](http://johndwells.com)
 
-## Version 1.1.7
+## Version 1.1.8
 
 ### Requirements:
 
