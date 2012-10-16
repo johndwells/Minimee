@@ -762,6 +762,33 @@
 						</tr>
 					</tbody>
 				</table>
+
+				<br />
+				<hr />
+				<br />
+
+				<table class="table table-bordered table-striped">
+					<caption><h3>exp:minimee:html</h3></caption>
+					<thead>
+						<tr>
+							<th>Description</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<p>This tag is required only when all are true:</p>
+								<ol>
+									<li>You have configured Minimee via EE's $config object</li>
+									<li>Minimee's extension is disabled</li>
+									<li>You are not using any of Minimee's other tags for CSS or JS processing</li>
+								</ol>
+								<p>When the above are all true, then Minimee needs to be called once during template parsing to know to minify your HTML. Placing this tag somewhere in your template will do just that.</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
 			</div> <!-- /#parameters -->
 
 
