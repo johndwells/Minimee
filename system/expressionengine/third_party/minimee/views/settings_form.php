@@ -179,8 +179,8 @@
 	 * Spit out our advanced table
 	 */
 ?>
-	<p><a href="#" id="minimee_advanced_handle"><?php echo lang('advanced_config'); ?></a> (<?php echo lang('optional'); ?>)<br /><br /></p>
-	<div id="minimee_advanced_table"><?php echo $this->table->generate(); ?></div>
+	<p style="display: none"><a href="#" id="minimee_advanced_handle"><?php echo lang('advanced_config'); ?></a> (<?php echo lang('optional'); ?>)<br /><br /></p>
+	<div id="minimee_advanced_table" data-hide="<?php echo ($hide_advanced_on_startup) ? 'y' : 'n'; ?>"><?php echo $this->table->generate(); ?></div>
 <?php
 
 
@@ -229,7 +229,6 @@
 			MINIMEE.$adv_table = $('#minimee_advanced_table');
 			MINIMEE.$adv_handle = $('#minimee_advanced_handle').parent('p');
 
-			MINIMEE.$adv_table.hide();
 			MINIMEE.$adv_handle.click(function(e) {
 				e.preventDefault();
 				MINIMEE.$adv_handle.slideUp();
@@ -241,6 +240,13 @@
 				MINIMEE.$adv_handle.slideDown();
 				MINIMEE.$adv_table.slideUp();
 			});
+
+			if(MINIMEE.$adv_table.data('hide') == 'y')
+			{
+				MINIMEE.$adv_handle.show();
+				MINIMEE.$adv_table.hide();
+			}
+
 		});
 	</script>
 
