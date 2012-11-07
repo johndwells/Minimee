@@ -805,6 +805,9 @@ class Minimee_lib {
 	protected function _minify($type, $contents, $filename, $rel = FALSE)
 	{
 		$before = strlen($contents);
+
+		// used in case we need to return orig
+		$contents_orig = $contents;
 	
 		switch ($type) :
 			
@@ -933,16 +936,27 @@ class Minimee_lib {
 		// calculate weight loss
 		$after = strlen($contents);
 		$change = round((($before - $after) / $before) * 100, 2);
-		Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $change . '%.', 3);
-		
+
 		// quick check that contents are not empty
 		if($after == 0)
 		{
 			Minimee_helper::log('Minification has returned an empty string for `' . $filename . '`.', 2);
 		}
 
+		// did we actually reduce our file size? It's possible an already minified asset
+		// uses a more aggressive algorithm than Minify; in that case, keep original contents
+		if($change > 0)
+		{
+			Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $change . '%.', 3);
+		}
+		else
+		{
+			Minimee_helper::log('Minification unable to reduce ' . $filename . ', so using original content.', 3);
+			$contents = $contents_orig;
+		}
+
 		// cleanup		
-		unset($before, $after, $change);
+		unset($before, $after, $change, $contents_orig);
 		
 		// return our (maybe) minified contents
 		return $contents;
