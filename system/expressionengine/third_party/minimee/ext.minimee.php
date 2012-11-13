@@ -302,13 +302,15 @@ class Minimee_ext {
 
 		// Used to determine if any advanced settings have been changed
 		$clean = $this->config->sanitise_settings($this->config->get_allowed());
+		$basic = array('disable', 'cache_path', 'cache_url', 'combine_css', 'combine_js', 'minify_css', 'minify_js', 'minify_html');
 
 		// remove basic settings
-		$clean = array_diff($clean, array('disable', 'cache_path', 'cache_url', 'combine_css', 'combine_js', 'minify_css', 'minify_js', 'minify_html'));
+		$diff = array_diff(array_keys($clean), $basic);
 		$hide_advanced_on_startup = 'TRUE';
-		foreach($clean as $key => $val)
+
+		foreach($diff as $key)
 		{
-			if($val != $current[$key])
+			if($clean[$key] != $current[$key])
 			{
 				$hide_advanced_on_startup = FALSE;
 				break;
