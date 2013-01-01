@@ -952,7 +952,18 @@ class Minimee_lib {
 		else
 		{
 			Minimee_helper::log('Minification unable to reduce ' . $filename . ', so using original content.', 3);
-			$contents = $contents_orig;
+
+			// still need to rewrite URLs
+			if ($relativePath !== NULL)
+			{
+				Minimee_helper::library('css_urirewriter');
+	
+				$contents = Minify_CSS_UriRewriter::prepend($contents_orig, $relativePath);
+			}
+			else
+			{
+				$contents = $contents_orig;
+			}
 		}
 
 		// cleanup		
