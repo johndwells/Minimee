@@ -827,6 +827,9 @@ class Minimee_lib {
 					{
 						return $contents;
 					}
+
+					// re-set $contents_orig in case we need to return
+					$contents_orig = $contents;
 				}
 				// HOOK END
 
@@ -874,6 +877,9 @@ class Minimee_lib {
 					{
 						return $contents;
 					}
+
+					// re-set $contents_orig in case we need to return
+					$contents_orig = $contents;
 				}
 				// HOOK END
 
