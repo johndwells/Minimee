@@ -115,7 +115,6 @@
 								<p>The architecture of Minimee<sup>(2)</sup> has given me the opportunity to build other add-ons that extend Minimee's capabilities.  So if you're curious, have a look at:</p>
 								<ul>
 									<li><a href="https://github.com/johndwells/MSMinimee">MSMinimee</a> - a module that brings full MSM-compatibility to Minimee</li>
-									<li><a href="https://github.com/johndwells/Minimee-LESS">Minimee+LESS</a> - adds LESS processing to Minimee</li>
 								</ul>
 							</div>
 						</div>
@@ -145,7 +144,7 @@
 							<li>For EE2.4 and above, assets are queue'd and sorted <strong>after</strong> all templates have been parsed (see the "Croxton Queue" below)</li>
 							<li>New <code>cleanup=""</code> setting for automatically deleting expired caches</li>
 							<li>Verbose template debugging messages to help easily track down errors</li>
-							<li>Hooks for 3rd party integration (see <a href="https://github.com/johndwells/Minimee-LESS">Minimee+LESS</a>, <a href="https://github.com/johndwells/MSMinimee">MSMinimee</a>)</li>
+							<li>Hooks for 3rd party integration (see <a href="https://github.com/johndwells/MSMinimee">MSMinimee</a>)</li>
 							<li><strong>Plus bug fixes, more fine-grained control, and other improvements!</strong></li>
 						</ul>
 
@@ -1107,9 +1106,7 @@
 
 								<p>When you specify a cachebust value, such as <code>v1.0</code>, this value is appended toward the end of the cache filename (see above). In most situations this is not necessary, since Minimee will continue to look at file timestamps and create new cache files as required.</p>
 
-								<p>However one case where it does come in handy is when you are using Minimee+LESS, and having LESS process <code>@import</code> files.  Since these files are processed outside of Minimee, it will be unaware of filesystem changes.</p>
-
-								<p>Another scenario is when you have a requirement to run your assets through EE's parsing engine and therefore must use the <code>{path=}</code> global variable. Since Minimee cannot check for updates on <code>{path=}</code> assets (see below), you might use <code>cachebust</code> to prompt Minimee to create a new cache.</p>
+								<p>One useful scenario for this feature is when you have a requirement to run your assets through EE's parsing engine and therefore must use the <code>{path=}</code> global variable. Since Minimee cannot check for updates on <code>{path=}</code> assets (see below), you might use <code>cachebust</code> to prompt Minimee to create a new cache.</p>
 
 								<p>You may also prefer to simply use the cachebust string as part of tracking your website "revisions". You can create a global variable <code>{gv_cachebust}</code>, and pass this as a parameter to each of minimee's opening tags like so:</p>
 
@@ -1331,7 +1328,7 @@
 				<h3>Version 2.1.6 <small>17 January 2013</small</h3>
 
 				<ul>
-					<li>Fix edge case where 3rd party pre-processed contents (e.g. Minimee+LESS) were not being written in cache.</li>
+					<li>Fix edge case where 3rd party pre-processed contents were not being written in cache.</li>
 				</ul>
 
 				<h3>Version 2.1.5 <small>8 January 2013</small</h3>
@@ -1383,7 +1380,7 @@
 				<li>For EE2.4 and above, assets are queue'd and sorted after all templates have been parsed (see the "Croxton Queue" below)</li>
 				<li>New cleanup="" setting for automatically deleting expired caches</li>
 				<li>Verbose template debugging messages to help easily track down errors</li>
-				<li>Hooks for 3rd party integration (see Minimee+LESS, MSMinimee)</li>
+				<li>Hooks for 3rd party integration (see MSMinimee)</li>
 				<li>Plus bug fixes, more fine-grained control, and other improvements!</li>
 				</ul>
 
