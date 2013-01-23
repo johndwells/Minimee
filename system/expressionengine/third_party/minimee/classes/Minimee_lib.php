@@ -878,7 +878,7 @@ class Minimee_lib {
 						return $contents;
 					}
 
-					// re-set $contents_orig in case we need to return
+					// copy to $contents_orig in case we need to return
 					$contents_orig = $contents;
 				}
 				// HOOK END
@@ -888,6 +888,9 @@ class Minimee_lib {
 				{
 					Minimee_helper::library('css_urirewriter');
 					$contents = Minify_CSS_UriRewriter::prepend($contents, $rel . '/');
+
+					// copy to $contents_orig in case we need to return
+					$contents_orig = $contents;
 				}
 
 				// minify if configured to do so
