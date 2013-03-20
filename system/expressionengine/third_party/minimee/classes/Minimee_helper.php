@@ -75,7 +75,6 @@ class Minimee_helper {
 		if (self::$_config === FALSE)
 		{
 			self::$_config = new Minimee_config();
-			self::$_config->init();
 		}
 		
 		return self::$_config;
