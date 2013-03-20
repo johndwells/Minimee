@@ -92,7 +92,8 @@ class Minimee_ext {
 		// reset our runtime to 'factory' defaults, and return as array
 		$settings = $this->config->factory()->to_array();
 	
-		$data = array(
+		// template_post_parse hook
+		$this->EE->db->insert('extensions', array(
 			'class'		=> __CLASS__,
 			'hook'		=> 'template_post_parse',
 			'method'	=> 'template_post_parse',
@@ -100,9 +101,18 @@ class Minimee_ext {
 			'priority'	=> 10,
 			'version'	=> $this->version,
 			'enabled'	=> 'y'
-		);
-		
-		$this->EE->db->insert('extensions', $data);
+		));
+
+		// EE Debug Toolbar hook
+		$this->EE->db->insert('extensions', array(
+			'class'		=> __CLASS__,
+			'hook'		=> 'ee_debug_toolbar_add_panel',
+			'method'	=> 'ee_debug_toolbar_add_panel',
+			'settings'	=> serialize($settings),
+			'priority'	=> 10,
+			'version'	=> $this->version,
+			'enabled'	=> 'y'
+		));
 
 		Minimee_helper::log('Extension has been activated.', 3);
 	}
@@ -120,6 +130,35 @@ class Minimee_ext {
 		$this->EE->db->delete('extensions');
 
 		Minimee_helper::log('Extension has been disabled.', 3);
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Method for template_post_parse hook
+	 *
+	 * @param 	array	Array of debug panels
+	 * @param 	arrat	A collection of toolbar settings and values
+	 * @return 	array	The amended array of debug panels
+	 */
+	public function ee_debug_toolbar_add_panel($panels, $view)
+	{
+		// play nice with others
+		$panels = ($this->EE->extensions->last_call != '' ? $this->EE->extensions->last_call : $panels);
+	
+		$panels['minimee'] = new Eedt_panel_model();
+		$panels['minimee']->set_name('minimee');
+		$panels['minimee']->set_button_label("Minimee");
+		$panels['minimee']->set_button_icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpEREU2RjlGRTg5OEUxMUUyOTlCMTlDMDhFN0VBQzFDMiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpEREU2RjlGRjg5OEUxMUUyOTlCMTlDMDhFN0VBQzFDMiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjFCODdBMTdGODk4NzExRTI5OUIxOUMwOEU3RUFDMUMyIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjFCODdBMTgwODk4NzExRTI5OUIxOUMwOEU3RUFDMUMyIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+lnldLAAAAIhJREFUeNpi/P//PwMlgImBUkCGC/xR9JJogBoQXwJiSXIMUALifyB9UOwL0stCpGYFIL6LxH8FxO+xhYEnDs3/kfA9bGHADMTVUAUr8Wi+jxEBUAPi0RT2ArE8LptxxUI0mga8mnHFQiyxmvFFYwwxmgmlgxK0aCPZAF4gDibGAMYBz40AAQYALoRzAAbMaGoAAAAASUVORK5CYII=");
+		$panels['minimee']->set_panel_contents($this->EE->load->view('eedebug_panel', array('logs' => Minimee_helper::get_log()), TRUE));
+
+		if(Minimee_helper::log_has_error())
+		{
+			$panels['minimee']->set_button_icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoxQjg3QTE3RDg5ODcxMUUyOTlCMTlDMDhFN0VBQzFDMiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDoxQjg3QTE3RTg5ODcxMUUyOTlCMTlDMDhFN0VBQzFDMiI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjFCODdBMTdCODk4NzExRTI5OUIxOUMwOEU3RUFDMUMyIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjFCODdBMTdDODk4NzExRTI5OUIxOUMwOEU3RUFDMUMyIi8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+u3anBwAAAONJREFUeNpi/P//PwNFAM0AJiC2x6PcBohZkfUyoSlQB2IvPAZ4ArEBNhfwAbE5EF8G4n9A3IBFcwkQ/wXiO0DsAMSCYL1QA0AmzwSZh4QbkTSXosktBGJ/ZANgoBFNYSoQx6KJTURxPZZYqEPTgIwnYHgfRzQmYtGciy0GmXCE9h8sYj+ISQcgUIjHC42EvFCMpgFkWDqaWBM2A0CJZxaawh4kg+vR5BYBcQCyAaJA7ArEd6EKerH4FmbIMyD2A2IpbF4wBuLpeJLyVCB2xBcGoIzihscAkBw3sgGMlGZngAADAE0TkggC76C/AAAAAElFTkSuQmCC");
+			$panels['minimee']->set_panel_css_class('flash');
+		}
+
+		return $panels;
 	}
 	// ------------------------------------------------------
 
@@ -399,6 +438,47 @@ class Minimee_ext {
 			$query->free_result();			
 
 			Minimee_helper::log('Upgraded to 2.0.0', 3);
+		}
+
+		
+		/**
+		 * 2.1.8
+		 * 
+		 * - Include debug panel via EE Debug Toolbar
+		 */
+		if ($current < '2.1.8')
+		{
+			// grab a copy of our settings
+			$query = $this->EE->db
+							->select('settings')
+							->from('extensions')
+							->where('class', __CLASS__)
+							->limit(1)
+							->get();
+			
+			if ($query->num_rows() > 0)
+			{
+				$settings = $query->row()->settings;
+			}
+			else
+			{
+				$settings = serialize($this->config->factory()->to_array());
+			}
+			
+			// add extension hook
+			$this->EE->db->insert('extensions', array(
+				'class'		=> __CLASS__,
+				'hook'		=> 'ee_debug_toolbar_add_panel',
+				'method'	=> 'ee_debug_toolbar_add_panel',
+				'settings'	=> $settings,
+				'priority'	=> 10,
+				'version'	=> $this->version,
+				'enabled'	=> 'y'
+			));
+
+			$query->free_result();
+
+			Minimee_helper::log('Upgraded to 2.1.8', 3);
 		}
 
 		// update table row with version
