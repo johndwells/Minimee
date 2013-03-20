@@ -259,7 +259,7 @@ class Minimee_helper {
 		// basic EE logging
 		log_message($severity, MINIMEE_NAME . ": {$message}");
 
-		// If not in CP, let's also log to template
+		// Can we also log our message to the template debugger?
 		if (REQ == 'PAGE')
 		{
 			get_instance()->TMPL->log_item(MINIMEE_NAME . " [{$severity}]: {$message}");
