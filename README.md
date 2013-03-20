@@ -23,7 +23,6 @@ Minimee is inspired and influenced by [SL Combinator](http://experienceinternet.
 The architecture of Minimee2 has given me the opportunity to build other add-ons that extend Minimee's capabilities.  So if you're curious, have a look at:
 
 * [MSMinimee](https://github.com/johndwells/MSMinimee) - a module that brings full MSM-compatibility to Minimee
-* [Minimee+LESS](https://github.com/johndwells/Minimee-LESS) - adds LESS processing to Minimee
 
 ## Want Bleeding Edge?
 
