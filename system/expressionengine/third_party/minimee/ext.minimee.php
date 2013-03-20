@@ -76,8 +76,6 @@ class Minimee_ext {
 
 		// grab instance of our config object
 		$this->config = Minimee_helper::config();
-		
-		Minimee_helper::log('Extension has been instantiated.', 3);
 	}
 	// ------------------------------------------------------
 
