@@ -143,6 +143,9 @@ class Minimee_ext {
 	 */
 	public function ee_debug_toolbar_add_panel($panels, $view)
 	{
+		// do nothing if not a page
+		if(REQ != 'PAGE') return $panels;
+
 		// play nice with others
 		$panels = ($this->EE->extensions->last_call != '' ? $this->EE->extensions->last_call : $panels);
 	
