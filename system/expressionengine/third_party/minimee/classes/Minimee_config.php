@@ -349,9 +349,10 @@ class Minimee_config {
 		{
 			// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
 			$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
+			$this->EE->extensions->extensions['ee_debug_toolbar_add_panel'][10]['Minimee_ext'] = array('ee_debug_toolbar_add_panel', '', MINIMEE_VER);
 	  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
 
-			Minimee_helper::log('Manually injected into template_post_parse extension hook.', 3);
+			Minimee_helper::log('Manually injected into extension hooks.', 3);
 		}
 		
 		Minimee_helper::log('Settings have been saved in session cache. Settings came from: ' . $this->location, 3);
