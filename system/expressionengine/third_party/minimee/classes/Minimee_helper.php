@@ -75,7 +75,6 @@ class Minimee_helper {
 		if (self::$_config === FALSE)
 		{
 			self::$_config = new Minimee_config();
-			self::$_config->init();
 		}
 		
 		return self::$_config;
@@ -260,18 +259,11 @@ class Minimee_helper {
 		// basic EE logging
 		log_message($severity, MINIMEE_NAME . ": {$message}");
 
-		// If not in CP, let's also log to template
+		// Can we also log our message to the template debugger?
 		if (REQ == 'PAGE')
 		{
 			get_instance()->TMPL->log_item(MINIMEE_NAME . " [{$severity}]: {$message}");
 		}
-
-		// If we are in CP and encounter an error, throw a nasty show_message()
-		if (REQ == 'CP' && $severity == self::$_levels[1])
-		{
-			show_error(MINIMEE_NAME . " [{$severity}]: {$message}");
-		}
-
 	}
 	// ------------------------------------------------------
 
