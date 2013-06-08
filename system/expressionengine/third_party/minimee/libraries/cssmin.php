@@ -369,7 +369,7 @@ class Minify_CSS {
         if ('/' !== $url[0]) {
             //if (strpos($url, '//') > 0) {
             // hotfix: http://devot-ee.com/add-ons/support/minimee/viewthread/7208
-            if (strpos($url, ‘//’) > 0 || stristr($url,“data:image”)) {
+            if (strpos($url, '//') > 0 || stristr($url,'data:image')) {
                 // probably starts with protocol, do not alter
             } else {
                 // relative URI, rewrite!
