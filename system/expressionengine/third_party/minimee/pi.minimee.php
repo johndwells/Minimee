@@ -205,11 +205,7 @@ class Minimee {
 		}
 		try
 		{
-			$filenames = $this->MEE->set_type($this->type)
-								   ->set_files($this->files)
-								   ->flightcheck()
-								   ->check_headers()
-								   ->cache();
+			$filenames = $this->MEE->run($this->type, $this->files);
 
 			// format and return
 			return $this->_return($filenames);
@@ -547,11 +543,7 @@ HEREDOC;
 		// let's do this
 		try
 		{
-			$filenames = $this->MEE->set_type($this->type)
-								   ->set_files($this->files)
-								   ->flightcheck()
-								   ->check_headers()
-								   ->cache();
+			$filenames = $this->MEE->run($this->type, $this->files);
 
 			// format and return
 			return $this->_return($filenames);
@@ -884,11 +876,7 @@ HEREDOC;
 		// let's do this
 		try
 		{
-			$filenames = $this->MEE->set_type($this->type)
-								   ->set_files($this->files)
-								   ->flightcheck()
-								   ->check_headers()
-								   ->cache();
+			$filenames = $this->MEE->run($this->type, $this->files);
 
 			// format and return
 			return $this->_return($filenames);
