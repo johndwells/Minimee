@@ -471,6 +471,27 @@ class Minimee_lib {
 
 
 	/**
+	 * Reset all internal props
+	 *
+	 * @return object 	Self
+	 */
+	public function reset()
+	{
+		$this->cache_lastmodified		= '';
+		$this->cache_filename_hash		= '';
+		$this->cache_filename			= '';
+		$this->filesdata				= array();
+		$this->remote_mode				= '';
+		$this->stylesheet_query		= FALSE;
+		$this->type					= '';
+
+		// chaining
+		return $this;
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Our basic run
 	 *
 	 * @param String 	Type of cache (css or js)
@@ -479,7 +500,8 @@ class Minimee_lib {
 	 */
 	public function run($type, $files)
 	{
-		return $this->set_type($type)
+		return $this->reset()
+					->set_type($type)
 					->set_files($files)
 					->flightcheck()
 					->check_headers()
