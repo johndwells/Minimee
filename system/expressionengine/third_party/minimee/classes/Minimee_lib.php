@@ -98,11 +98,7 @@ class Minimee_lib {
 	 */
 	public function css($files)
 	{
-		return $this->set_type('css')
-					->set_files($files)
-					->flightcheck()
-					->check_headers()
-					->cache();
+		return $this->run('css', $files);
 	}
 	// ------------------------------------------------------
 
@@ -115,11 +111,7 @@ class Minimee_lib {
 	 */
 	public function js($files)
 	{
-		return $this->set_type('js')
-					->set_files($files)
-					->flightcheck()
-					->check_headers()
-					->cache();
+		return $this->run('js', $files);
 	}
 	// ------------------------------------------------------
 
