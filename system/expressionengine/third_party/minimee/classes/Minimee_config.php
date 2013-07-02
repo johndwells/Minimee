@@ -117,7 +117,7 @@ class Minimee_config {
 		}
 
 		// Nothing found. Something might be wrong so log a debug message
-		Minimee_helper::log('`' . $prop . '` is not a valid setting.', 2);
+		Minimee_helper::log(sprintf(lang('config_prop_not_valid'), $prop), 2);
 
 		return NULL;
 	}
@@ -249,7 +249,7 @@ class Minimee_config {
 		// Test: Manually passed?
 		if ($settings === FALSE && is_array($override))
 		{
-			Minimee_helper::log('Settings have been manually passed.', 3);
+			Minimee_helper::log(lang('config_settings_manual_override'), 3);
 
 			$this->location = 'manual';
 
@@ -283,7 +283,7 @@ class Minimee_config {
 		// Run on default
 		if ( $settings === FALSE)
 		{
-			Minimee_helper::log('Could not find any settings to use. Trying defaults.', 3);
+			Minimee_helper::log(lang('config_settings_using_defaults'), 3);
 			
 			$this->location = 'default';
 			
@@ -352,10 +352,10 @@ class Minimee_config {
 			$this->EE->extensions->extensions['ee_debug_toolbar_add_panel'][10]['Minimee_ext'] = array('ee_debug_toolbar_add_panel', '', MINIMEE_VER);
 	  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
 
-			Minimee_helper::log('Manually injected into extension hooks.', 3);
+			Minimee_helper::log(lang('config_extension_manually_inject'), 3);
 		}
 		
-		Minimee_helper::log('Settings have been saved in session cache. Settings came from: ' . $this->location, 3);
+		Minimee_helper::log(sprintf(lang('config_settings_saved'), $this->location), 3);
 		
 		// chaining
 		return $this;
@@ -413,7 +413,7 @@ class Minimee_config {
 	public function sanitise_settings($settings)
 	{
 		if ( ! is_array($settings)) {
-			Minimee_helper::log('Trying to sanitise a non-array of settings.', 2);
+			Minimee_helper::log(lang('config_sanitise_non_array'), 2);
 			return array();
 		}
 
@@ -525,18 +525,18 @@ class Minimee_config {
 	        {
 				$this->location = 'config';
 
-				Minimee_helper::log('Settings taken from EE config.', 3);
+				Minimee_helper::log(lang('config_settings_from_config'), 3);
 	        }
 	        else
 	        {
 	        	$settings = FALSE;
 
-				Minimee_helper::log('Settings taken from EE config must be a non-empty array.', 2);
+				Minimee_helper::log(lang('config_settings_config_array_empty'), 2);
 	        }
 		}
 		else
 		{
-			Minimee_helper::log('No settings found in EE config.', 3);
+			Minimee_helper::log(lang('config_settings_config_not_found'), 3);
 		}
 		
 		return $settings;
@@ -564,14 +564,14 @@ class Minimee_config {
         {
 			$this->location = 'config';
 
-			Minimee_helper::log('Your Minimee config is using the "legacy" setup from 1.x, please see docs for more.', 2);
-			Minimee_helper::log('Settings taken from EE config "legacy".', 3);
+			Minimee_helper::log(lang('config_settings_legacy_warning'), 2);
+			Minimee_helper::log('', 3);
         }
         else
         {
         	$settings = FALSE;
 
-			Minimee_helper::log('No settings found in EE config as "legacy" format.', 3);
+			Minimee_helper::log(lang('config_settings_from_legacy'), 3);
         }
 		
 		return $settings;
@@ -603,11 +603,11 @@ class Minimee_config {
 
 				$this->location = 'db';
 
-				Minimee_helper::log('Settings retrieved from database.', 3);
+				Minimee_helper::log(lang('config_settings_from_db'), 3);
 			}
 			else
 			{
-				Minimee_helper::log('No settings found in database.', 3);
+				Minimee_helper::log(lang('config_settings_db_not_found'), 3);
 			}
 			
 			$query->free_result();
@@ -666,14 +666,14 @@ class Minimee_config {
         {
 			$this->location = 'global_vars';
 
-			Minimee_helper::log('Minimee is using the "legacy" setup from 1.x, setting via the global vars, which has been deprecated. Please see docs for more.', 2);
-			Minimee_helper::log('Settings taken from EE global vars "legacy".', 3);
+			Minimee_helper::log(lang('config_settings_legacy_global_var_warning'), 2);
+			Minimee_helper::log(lang('config_settings_from_legacy'), 3);
         }
         else
         {
         	$settings = FALSE;
 
-			Minimee_helper::log('No settings found in EE global vars as "legacy" format.', 3);
+			Minimee_helper::log(lang('config_settings_legacy_not_found'), 3);
         }
 		
 		return $settings;

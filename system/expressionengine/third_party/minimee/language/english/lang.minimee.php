@@ -2,6 +2,30 @@
 
 $lang = array(
 
+
+	// -------------------------------------------
+	//  classes/Minimee_config.php
+	// -------------------------------------------
+	'config_prop_not_valid' => '`%s` is not a valid setting.',
+	'config_settings_manual_override' => 'Settings have been manually passed.',
+	'config_settings_using_defaults' => 'Could not find any settings to use. Trying defaults.',
+	'config_extension_manually_inject' => 'Manually injected into extension hooks.',
+	'config_settings_saved' => 'Settings have been saved in session cache. Settings came from: %s',
+	'config_sanitise_non_array' => 'Trying to sanitise a non-array of settings.',
+	'config_settings_from_config' => 'Settings taken from EE config.',
+	'config_settings_config_array_empty' => 'Settings taken from EE config must be a non-empty array.',
+	'config_settings_config_not_found' => 'No settings found in EE config.',
+	'config_settings_legacy_warning' => 'Your Minimee config is using the "legacy" setup from 1.x, please see docs for more.',
+	'config_settings_from_legacy' => 'Settings taken from EE config "legacy".',
+	'config_settings_from_db' => 'Settings retrieved from database.',
+	'config_settings_db_not_found' => 'No settings found in database.',
+	'config_settings_legacy_global_var_warning' => 'Minimee is using the "legacy" setup from 1.x, setting via the global vars, which has been deprecated. Please see docs for more.',
+	'config_settings_from_legacy' => 'Settings taken from EE global vars "legacy".',
+	'config_settings_legacy_not_found' => 'No settings found in EE global vars as "legacy" format.',
+
+	// -------------------------------------------
+	//  Extensions CP
+	// -------------------------------------------
 	'advanced_config' => 'Advanced Preferences',
 	'basic_config' => 'Basic Preferences',
 	'optional' => 'optional',
@@ -16,7 +40,6 @@ $lang = array(
 	'md5' => 'MD5',
 	'sanitize' => 'Sanitize',
 
-	/* Settings */
 	'base_path' => 'Base Path',
 	'base_path_note' => 'The location on your webserver where your <i>source</i> CSS and JS files sit.<br />Optional, defaults to FCPATH constant (the root path to your site).',
 	'base_path_hint' => 'e.g. ' . rtrim(FCPATH, '/'),
@@ -69,7 +92,7 @@ $lang = array(
 	'js_library' => 'JS Library',
 	'js_library_note' => 'Specify which library to use for JS minification. Defaults to JSMin.',
 	'jsmin' => 'JSMin',
-	'jsminplus' => 'JSMinPlus',
-	
+	'jsminplus' => 'JSMinPlus',	
+
 	'' => ''
 );

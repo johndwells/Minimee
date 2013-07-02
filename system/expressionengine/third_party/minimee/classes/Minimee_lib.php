@@ -44,6 +44,11 @@ class Minimee_lib {
 
 
 	/**
+	 * keep track of how many bytes saved during minification
+	 */
+	protected $diff_total			= 0;
+
+	/**
 	 * Minimee_config
 	 */
 	public $config;
@@ -93,11 +98,7 @@ class Minimee_lib {
 	 */
 	public function css($files)
 	{
-		return $this->set_type('css')
-					->set_files($files)
-					->flightcheck()
-					->check_headers()
-					->cache();
+		return $this->run('css', $files);
 	}
 	// ------------------------------------------------------
 
@@ -110,11 +111,7 @@ class Minimee_lib {
 	 */
 	public function js($files)
 	{
-		return $this->set_type('js')
-					->set_files($files)
-					->flightcheck()
-					->check_headers()
-					->cache();
+		return $this->run('js', $files);
 	}
 	// ------------------------------------------------------
 
@@ -307,6 +304,20 @@ class Minimee_lib {
 
 
 	/**
+	 * Add to total diff; returns new total
+	 *
+	 * @return Integer Total bytes saved after minification
+	 */
+	public function diff_total($diff = 0)
+	{
+		$this->diff_total = $diff + $this->diff_total;
+
+		return $this->diff_total;
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Flightcheck - make some basic config checks before proceeding
 	 *
 	 * @return void
@@ -460,6 +471,27 @@ class Minimee_lib {
 
 
 	/**
+	 * Reset all internal props
+	 *
+	 * @return object 	Self
+	 */
+	public function reset()
+	{
+		$this->cache_lastmodified		= '';
+		$this->cache_filename_hash		= '';
+		$this->cache_filename			= '';
+		$this->filesdata				= array();
+		$this->remote_mode				= '';
+		$this->stylesheet_query		= FALSE;
+		$this->type					= '';
+
+		// chaining
+		return $this;
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Our basic run
 	 *
 	 * @param String 	Type of cache (css or js)
@@ -468,7 +500,8 @@ class Minimee_lib {
 	 */
 	public function run($type, $files)
 	{
-		return $this->set_type($type)
+		return $this->reset()
+					->set_type($type)
 					->set_files($files)
 					->flightcheck()
 					->check_headers()
@@ -484,6 +517,9 @@ class Minimee_lib {
 	 */	
 	protected function _create_cache()
 	{
+		// zero our diff total
+		$this->diff_total = 0;
+
 		// the eventual contents of our cache
 		$cache = '';
 		
@@ -602,6 +638,13 @@ class Minimee_lib {
 
 		// return our settings to our runtime
 		$this->config->reset()->extend($runtime);
+
+		// Log total bytes saved, if we saved any, and if there was more than one file to minify (otherwise we're reporting something we've already mentioned in a previous log)
+		if($this->diff_total > 0 && count($this->filesdata) > 1)
+		{
+			$diff_formatted = ($this->diff_total < 100) ? $this->diff_total . 'b' : round($this->diff_total / 1000, 2) . 'kb';
+			Minimee_helper::log('Total savings: ' . $diff_formatted . ' across ' . count($this->filesdata) . ' files.', 3);
+		}
 
 		// write our cache file
 		$this->_write_cache($cache);
@@ -928,7 +971,7 @@ class Minimee_lib {
 
 		// calculate weight loss
 		$after = strlen($contents);
-		$change = round((($before - $after) / $before) * 100, 2);
+		$diff = $before - $after;
 
 		// quick check that contents are not empty
 		if($after == 0)
@@ -938,9 +981,15 @@ class Minimee_lib {
 
 		// did we actually reduce our file size? It's possible an already minified asset
 		// uses a more aggressive algorithm than Minify; in that case, keep original contents
-		if($change > 0)
+		if($diff > 0)
 		{
-			Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $change . '%.', 3);
+			$diff_formatted = ($diff < 100) ? $diff . 'b' : round($diff / 1000, 2) . 'kb';
+			$change = round(($diff / $before) * 100, 2);
+
+			Minimee_helper::log('Minification has reduced ' . $filename . ' by ' . $diff_formatted . ' (' . $change . '%).', 3);
+
+			// add to our running total
+			$this->diff_total($diff);
 		}
 		else
 		{
@@ -948,8 +997,8 @@ class Minimee_lib {
 			$contents = $contents_orig;
 		}
 
-		// cleanup		
-		unset($before, $after, $change, $contents_orig);
+		// cleanup (leave some smaller variables because they may or may not have ever been set)
+		unset($contents_orig);
 		
 		// return our (maybe) minified contents
 		return $contents;
