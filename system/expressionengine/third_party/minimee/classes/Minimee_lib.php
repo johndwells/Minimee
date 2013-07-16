@@ -531,19 +531,26 @@ class Minimee_lib {
 		
 		// save our runtime settings temporarily
 		$runtime = $this->config->get_runtime();
-		
+
 		foreach ($this->filesdata as $key => $file) :
 		
 			// file runtime settings can be overridden by tag runtime settings
 			$this->config->reset()->extend($runtime)->extend($file['runtime']);
+
+			// determine our initial prepend url
+			$css_prepend_url = ($this->config->css_prepend_url) ? $this->config->css_prepend_url : $this->config->base_url;
 		
 			switch ($file['source']) :
 	
-				case ('stylesheet');
 				case ('remote') :
-				
-					// no relative paths for either sources
-					$css_prepend_url = FALSE;
+
+					// overwrite the prepend url based off the location of remote asset
+					$css_prepend_url = $file['name'];
+
+					// get directory level URL of the asset
+					$css_prepend_url = dirname($css_prepend_url);
+
+				case ('stylesheet');
 					
 					// fgc & curl both need http(s): on front
 					// so if ommitted, prepend it manually, based on requesting protocol
@@ -612,9 +619,11 @@ class Minimee_lib {
 					// grab contents of file
 					$contents = file_get_contents(realpath(Minimee_helper::remove_double_slashes($this->config->base_path . '/' . $file['name'])));
 					
-					// determine css prepend url
-					$css_prepend_url = ($this->config->css_prepend_url) ? $this->config->css_prepend_url : $this->config->base_url;
-					$css_prepend_url = dirname(Minimee_helper::remove_double_slashes($css_prepend_url . '/' . $file['name'], TRUE));
+					// base the prepend url off the location of asset
+					$css_prepend_url = Minimee_helper::remove_double_slashes($css_prepend_url . '/' . $file['name'], TRUE);
+
+					// get directory level URL of the asset
+					$css_prepend_url = dirname($css_prepend_url);
 				break;
 	
 			endswitch;
