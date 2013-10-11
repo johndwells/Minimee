@@ -1518,6 +1518,8 @@
 				});
 
 				// SyntaxHighlighter
+				// Copy & Paste bugfix: https://bitbucket.org/alexg/syntaxhighlighter/issue/174/double-click-and-copy-spaces-copied-as-c2
+				SyntaxHighlighter.defaults['quick-code'] = false;
 				SyntaxHighlighter.all();
 
 				// Refresh Scrollspy after SyntaxHighlighter has run
