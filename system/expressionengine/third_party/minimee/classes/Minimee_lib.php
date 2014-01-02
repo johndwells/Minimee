@@ -1137,7 +1137,7 @@ class Minimee_lib {
 		}
 
 		// free memory where possible
-		unset($filepath, $success);
+		unset($filepath, $z_file, $success);
 	}
 	// ------------------------------------------------------
 }
