@@ -46,6 +46,7 @@ class Minimee_config {
 		'minify_css'			=> '',
 		'minify_html'			=> '',
 		'minify_js'				=> '',
+		'save_gz'				=> '',
 		'remote_mode'			=> ''
 	);
 	
@@ -445,6 +446,7 @@ class Minimee_config {
 			case('cleanup') :
 			case('disable') :
 			case('minify_html') :
+			case('save_gz') :
 				return ($value === TRUE OR preg_match('/1|true|on|yes|y/i', $value)) ? 'yes' : 'no';
 			break;
 		
