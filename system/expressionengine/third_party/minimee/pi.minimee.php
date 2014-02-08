@@ -35,6 +35,18 @@ $plugin_info = array(
 class Minimee {
 
 	/**
+	 * Reference to our cache
+	 */
+	private $cache 					= NULL;
+
+
+	/**
+	 * Our magical config class
+	 */
+	private $config 				= NULL;
+
+
+	/**
 	 * EE, obviously
 	 */
 	private $EE 					= NULL;
@@ -50,18 +62,6 @@ class Minimee {
 	 * An array of attributes to use when wrapping cache contents in a tag
 	 */
 	public $attributes				= '';
-
-
-	/**
-	 * Reference to our cache
-	 */
-	public $cache 					= NULL;
-
-
-	/**
-	 * Our magical config class
-	 */
-	public $config 					= NULL;
 
 
 	/**
@@ -143,6 +143,8 @@ class Minimee {
 		{
 			$this->return_data = $this->api($str);
 		}
+
+		Minimee_helper::log('Minimee instantiated', 3);
 	}
 	// ------------------------------------------------------
 
@@ -215,6 +217,8 @@ class Minimee {
 
 	/**
 	 * Plugin function: exp:minimee:contents
+	 * 
+	 * @return mixed string or empty
 	 */
 	public function contents()
 	{
@@ -339,6 +343,8 @@ class Minimee {
 	 * Plugin function: exp:minimee:link
 	 * 
 	 * Alias to exp:minimee:url
+	 * 
+	 * @return mixed string or empty
 	 */
 	public function link()
 	{
@@ -351,6 +357,8 @@ class Minimee {
 	 * Plugin function: exp:minimee:tag
 	 *
 	 * Return the tags for cache
+	 * 
+	 * @return mixed string or empty
 	 */
 	public function tag()
 	{
@@ -363,6 +371,8 @@ class Minimee {
 	 * Plugin function: exp:minimee:url
 	 * 
 	 * Rather than returning the tags or cache contents, simply return URL to cache(s)
+	 * 
+	 * @return mixed string or empty
 	 */
 	public function url()
 	{
