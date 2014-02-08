@@ -690,8 +690,8 @@ class Minimee_lib {
 					$s_key => '',
 					// type extension
 					'/\.' . $this->type . '/i' => '',
-					// leading slash
-					'/^\//'	=> '',
+					// leading slashes
+					'/^\/+/'	=> '',
 					// other slashes
 					'/\//'	=> '.'
 				);
