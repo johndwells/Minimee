@@ -391,7 +391,7 @@ class Minimee_ext {
 		 * 
 		 * - refactor to use new Minimee_config object
 		 */
-		if ($current < '2.0.0')
+		if (version_compare($current, '2.0.0', '<'))
 		{
 			$query = $this->EE->db
 							->select('settings')
@@ -445,7 +445,7 @@ class Minimee_ext {
 		 * 
 		 * - Include debug panel via EE Debug Toolbar
 		 */
-		if ($current < '2.1.8')
+		if (version_compare($current, '2.1.8', '<'))
 		{
 			// grab a copy of our settings
 			$query = $this->EE->db
