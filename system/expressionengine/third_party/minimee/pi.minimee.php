@@ -59,12 +59,6 @@ class Minimee {
 
 
 	/**
-	 * Boolean whether we are calling from template_post_parse
-	 */
-	public $calling_from_hook		= FALSE;
-
-
-	/**
 	 * Our magical config class
 	 */
 	public $config 					= NULL;
@@ -250,9 +244,11 @@ class Minimee {
 	/**
 	 * Plugin function: exp:minimee:display
 	 * 
+	 * @param string type of display to return
+	 * @param bool true or false whether calling from template_post_parse hook
 	 * @return mixed string or empty
 	 */
-	public function display($method = '')
+	public function display($method = '', $calling_from_hook = FALSE)
 	{
 		// abort error if no queue was provided		
 		if ( ! $this->EE->TMPL->fetch_param('js') && ! $this->EE->TMPL->fetch_param('css'))
@@ -264,7 +260,7 @@ class Minimee {
 		$this->_set_display($method);
 
 		// try to postpone until template_post_parse
-		if ($out = $this->_postpone($this->display))
+		if ( ! $calling_from_hook && $out = $this->_postpone($this->display))
 		{
 			return $out;
 		}
@@ -691,16 +687,15 @@ HEREDOC;
 
 		else
 		{
-			// re-set our tag template
+			// set our tag template
 			$this->template = $this->cache[$this->type][$this->queue]['template'];
 
 			// TODO: re-set other runtime properties
-			
+
 			// files: order by priority
 			ksort($this->cache[$this->type][$this->queue]['files']);
 
-			// flatten to one array
-			$this->files = array();
+			// build our files property
 			foreach($this->cache[$this->type][$this->queue]['files'] as $file)
 			{
 				$this->files = array_merge($this->files, $file);
@@ -709,8 +704,7 @@ HEREDOC;
 			// on_error: order by priority
 			ksort($this->cache[$this->type][$this->queue]['on_error']);
 
-			// flatten to one array
-			$this->on_error = '';
+			// build our on_error property
 			foreach($this->cache[$this->type][$this->queue]['on_error'] as $error)
 			{
 				$this->on_error .= implode("\n", $error) . "\n";
@@ -765,36 +759,26 @@ HEREDOC;
 		
 		else
 		{
-			// if calling from our hook return FALSE
-			if ($this->calling_from_hook)
+			// base our needle off the calling tag
+			$needle = sha1($this->EE->TMPL->tagproper);
+			
+			// save our tagparams to re-instate during calling of hook
+			$tagparams = $this->EE->TMPL->tagparams;
+			
+			if ( ! isset($this->cache['template_post_parse']))
 			{
-				return FALSE;
+				$this->cache['template_post_parse'] = array();
 			}
 			
-			// store TMPL settings and return our $needle to find later
-			else
-			{
-				// base our needle off the calling tag
-				$needle = sha1($this->EE->TMPL->tagproper);
-				
-				// save our tagparams to re-instate during calling of hook
-				$tagparams = $this->EE->TMPL->tagparams;
-				
-				if ( ! isset($this->cache['template_post_parse']))
-				{
-					$this->cache['template_post_parse'] = array();
-				}
-				
-				$this->cache['template_post_parse'][$needle] = array(
-					'method' => $method,
-					'tagparams' => $tagparams
-				);
-				
-				Minimee_helper::log('Postponing process of Minimee::display(`' . $method . '`) until template_post_parse hook.', 3);
-				
-				// return needle so we can find it later
-				return LD.$needle.RD;
-			}
+			$this->cache['template_post_parse'][$needle] = array(
+				'method' => $method,
+				'tagparams' => $tagparams
+			);
+			
+			Minimee_helper::log('Postponing process of Minimee::display(`' . $method . '`) until template_post_parse hook.', 3);
+			
+			// return needle so we can find it later
+			return LD.$needle.RD;
 		}
 	}
 	// ------------------------------------------------------

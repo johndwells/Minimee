@@ -203,11 +203,9 @@ class Minimee_ext {
 				include_once PATH_THIRD . 'minimee/pi.minimee.php';
 			}
 
+			// create a new instance of Minimee each time to guarantee defaults
 			$m = new Minimee();
-			
-			// this tells Minimee that we are calling it from hook
-			$m->calling_from_hook = TRUE;
-			
+
 			// save our TMPL values to put back into place once finished
 			$tagparams = $this->EE->TMPL->tagparams;
 
@@ -215,9 +213,13 @@ class Minimee_ext {
 			foreach($this->cache['template_post_parse'] as $needle => $tag)
 			{
 				Minimee_helper::log('Calling Minimee::display("' . $tag['method'] . '") during template_post_parse: ' . serialize($tag['tagparams']), 3);
-
+				
 				$this->EE->TMPL->tagparams = $tag['tagparams'];
-				$out = $m->display($tag['method']);
+
+				// our second parameter tells Minimee we are calling from template_post_parse
+				$out = $m->display($tag['method'], TRUE);
+
+				// replace our needle with output
 				$template = str_replace(LD.$needle.RD, $out, $template);
 
 				// reset Minimee for next loop
