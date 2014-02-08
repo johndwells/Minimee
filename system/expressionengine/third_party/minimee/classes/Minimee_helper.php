@@ -259,6 +259,20 @@ class Minimee_helper {
 
 
 	/**
+	 * Returns an array of all public properties of our Minimee plugin.
+	 * Used to easily reset() to defaults.
+	 *
+	 * @return 	array	Array of public properties of Minimee class
+	 */
+	public static function minimee_class_vars()
+	{
+		$m = new Minimee;
+		return get_class_vars(get_class($m));
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Helper function to parse content looking for CSS and JS tags.
 	 * Returns array of links found.
 	 * @param 	string	String to search

@@ -219,6 +219,9 @@ class Minimee_ext {
 				$this->EE->TMPL->tagparams = $tag['tagparams'];
 				$out = $m->display($tag['method']);
 				$template = str_replace(LD.$needle.RD, $out, $template);
+
+				// reset Minimee for next loop
+				$m->reset();
 			}
 			
 			// put things back into place

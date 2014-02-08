@@ -801,6 +801,27 @@ HEREDOC;
 
 
 	/**
+	 * Reset class properties to their defaults
+	 * 
+	 * @return mixed string or empty
+	 */
+	public function reset()
+	{
+		$defaults = Minimee_helper::minimee_class_vars();
+
+		foreach ($defaults as $name => $default)
+		{
+			$this->$name = $default;
+		}
+
+		Minimee_helper::log('Public properties have been reset to their defaults.', 3);
+
+		return $this;
+	}
+	// ------------------------------------------------------
+
+
+	/**
 	 * Return contents as determined by $this->display
 	 * 
 	 * @return mixed string or empty
