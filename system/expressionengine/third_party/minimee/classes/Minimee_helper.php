@@ -131,9 +131,10 @@ class Minimee_helper {
 	 */
 	public static function library($which)
 	{
-		// try to bump our memory limits for good measure
-		if ( ! isset(get_instance()->session->cache['memory_limit']))
+		// a few housekeeping items before we start loading our libraries
+		if ( ! isset(get_instance()->session->cache['loader']))
 		{
+			// try to bump our memory limits for good measure
 			@ini_set('memory_limit', '12M');
 			@ini_set('memory_limit', '16M');
 			@ini_set('memory_limit', '32M');
@@ -141,12 +142,12 @@ class Minimee_helper {
 			@ini_set('memory_limit', '128M');
 			@ini_set('memory_limit', '256M');
 
-			// don't do this again
-			get_instance()->session->cache['memory_limit'] = TRUE;
-
 			// Latest changes to Minify adopt a "loader" over sprinkled require's
 			require_once(PATH_THIRD . 'minimee/libraries/Minify/Loader.php');
 			Minify_Loader::register();
+
+			// don't do this again
+			get_instance()->session->cache['loader'] = TRUE;
 		}
 
 		// require_once our library of choice
