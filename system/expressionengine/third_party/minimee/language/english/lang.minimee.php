@@ -83,6 +83,11 @@ $lang = array(
 
 	'remote_mode' => 'Remote file mode?',
 	'remote_mode_note' => 'Specify how to fetch remote and {stylesheet=} URLs. \'Auto\' mode will try cURL first.',
+
+	'minify_html_hook' => 'Hook for HTML Minification',
+	'minify_html_hook_note' => 'If you have CE Cache installed, you may run HTML minification during its ce_cache_pre_save hook.',
+	'template_post_parse' => 'EE - template_post_parse',
+	'ce_cache_pre_save' => 'CE Cache - ce_cache_pre_save',
 	
 	'css_library' => 'CSS Library',
 	'css_library_note' => 'Specify which library to use for CSS minification. Defaults to Minify.',

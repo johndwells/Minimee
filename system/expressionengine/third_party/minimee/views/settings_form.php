@@ -176,6 +176,14 @@
 
 
 	/**
+	 * Minify HTML hook
+	 */
+	$label = lang('minify_html_hook', 'minify_html_hook') . sprintf($note_format, lang('minify_html_hook_note'));
+	$setting = form_dropdown('minify_html_hook', array('template_post_parse' => lang('template_post_parse'),'ce_cache_pre_save' => lang('ce_cache_pre_save'),), $settings['minify_html_hook'], 'id="minify_html_hook"');
+	$this->table->add_row($label, $setting);
+
+
+	/**
 	 * Spit out our advanced table
 	 */
 ?>
