@@ -186,15 +186,15 @@ class Minimee_ext {
 	/**
 	 * Hook for CE Cache
 	 * 
-	 * @param string $tagdata
+	 * @param string $template
 	 * @param string $type 'fragment' or 'static'
 	 */
-	public function ce_cache_pre_save($tagdata, $type)
+	public function ce_cache_pre_save($template, $type)
 	{
 		// play nice with others
 		if (isset($this->EE->extensions->last_call) && $this->EE->extensions->last_call)
 		{
-			$tagdata = $this->EE->extensions->last_call;
+			$template = $this->EE->extensions->last_call;
 		}
 
 		// Are we configured to run HTML minification on this hook?
