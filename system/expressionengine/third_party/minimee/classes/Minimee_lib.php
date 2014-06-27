@@ -630,8 +630,17 @@ class Minimee_lib {
 			{
 				Minimee_helper::log('Fetched contents of `' . $file['name'] . '`.', 3);
 	
-				// minify contents and append to $cache
-				$cache .= $this->_minify($this->type, $contents, $file['name'], $css_prepend_url) . "\n";
+				// minify contents
+				$minified = $this->_minify($this->type, $contents, $file['name'], $css_prepend_url);
+
+				// tack on a colon at end of JS?
+				if($this->type == 'js' && substr($minified, -1) != ';')
+				{
+					$minified .= ';';
+				}
+				
+				//  and append to $cache
+				$cache .= $minified . "\n";
 			}
 
 		endforeach;
