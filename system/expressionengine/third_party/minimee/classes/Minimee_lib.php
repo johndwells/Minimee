@@ -633,7 +633,7 @@ class Minimee_lib {
 				// minify contents
 				$minified = $this->_minify($this->type, $contents, $file['name'], $css_prepend_url);
 
-				// tack on a colon at end of JS?
+				// tack on a semicolon at end of JS?
 				if($this->type == 'js' && substr($minified, -1) != ';')
 				{
 					$minified .= ';';
