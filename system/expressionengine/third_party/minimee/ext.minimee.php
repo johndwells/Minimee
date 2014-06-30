@@ -150,6 +150,7 @@ class Minimee_ext {
 		$panels['minimee'] = new Eedt_panel_model();
 		$panels['minimee']->set_name('minimee');
 		$panels['minimee']->set_button_label("Minimee");
+		$panels['minimee']->set_button_icon(URL_THIRD_THEMES .'minimee/images/minimee.png');
 		$panels['minimee']->set_panel_contents($this->EE->load->view('eedebug_panel', array('logs' => Minimee_helper::get_log()), TRUE));
 
 		if(Minimee_helper::log_has_error())
