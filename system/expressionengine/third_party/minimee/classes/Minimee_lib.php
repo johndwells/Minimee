@@ -856,8 +856,6 @@ class Minimee_lib {
 	 */
 	protected function _minify($type, $contents, $filename, $rel = FALSE)
 	{
-		$before = strlen($contents);
-
 		// used in case we need to return orig
 		$contents_orig = $contents;
 	
@@ -979,6 +977,7 @@ class Minimee_lib {
 		endswitch;
 
 		// calculate weight loss
+		$before = strlen($contents_orig);
 		$after = strlen($contents);
 		$diff = $before - $after;
 
