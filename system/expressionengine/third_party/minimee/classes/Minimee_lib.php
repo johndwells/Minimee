@@ -1102,6 +1102,16 @@ class Minimee_lib {
 		@chmod($filepath, FILE_READ_MODE);
 
 		Minimee_helper::log('Cache file `' . $this->cache_filename . '` was written to ' . $this->config->cache_path, 3);
+
+		// creating the compressed file
+		if($this->config->is_yes('save_gz'))
+		{
+			$z_file = gzopen ($filepath.'.gz', 'w9');
+			gzwrite ($z_file, $file_data);
+			gzclose($z_file);
+			@chmod($filepath.'.gz', FILE_READ_MODE);
+			Minimee_helper::log('Gzipped file `' . $this->cache_filename . '.gz` was written to ' . $this->config->cache_path, 3);
+		}
 		
 		// Do we need to clean up expired caches?
 		if ($this->config->is_yes('cleanup'))
@@ -1124,7 +1134,7 @@ class Minimee_lib {
 		}
 
 		// free memory where possible
-		unset($filepath, $success);
+		unset($filepath, $z_file, $success);
 	}
 	// ------------------------------------------------------
 }
