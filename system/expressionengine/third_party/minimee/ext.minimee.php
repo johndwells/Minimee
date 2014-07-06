@@ -485,7 +485,7 @@ class Minimee_ext {
 			Minimee_helper::log('Upgraded to 2.1.8', 3);
 		}
 
-		// update table row with version
+		// update table rows with version
 		$this->EE->db->where('class', __CLASS__);
 		$this->EE->db->update(
 					'extensions', 
