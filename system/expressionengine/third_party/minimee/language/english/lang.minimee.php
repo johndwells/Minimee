@@ -94,5 +94,9 @@ $lang = array(
 	'jsmin' => 'JSMin',
 	'jsminplus' => 'JSMinPlus',	
 
+	'save_gz' => 'Generate gzip?',
+	'save_gz_note' => 'Requires the Zlib compression library, and modifications to your htaccess file. Consult the <a href="http://johndwells.github.io/Minimee/" title="Minimee Docs">docs</a> for more.',
+
+
 	'' => ''
 );

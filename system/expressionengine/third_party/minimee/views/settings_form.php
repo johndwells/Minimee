@@ -176,6 +176,14 @@
 
 
 	/**
+	 * Save Gzip?
+	 */
+	$label = lang('save_gz', 'save_gz') . sprintf($note_format, lang('save_gz_note'));
+	$setting = form_dropdown('save_gz', array('no' => lang('No'),'yes' => lang('Yes')), $settings['save_gz'], 'id="save_gz"');
+	$this->table->add_row($label, $setting);
+
+
+	/**
 	 * Spit out our advanced table
 	 */
 ?>
