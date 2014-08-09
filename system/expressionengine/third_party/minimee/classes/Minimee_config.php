@@ -45,6 +45,7 @@ class Minimee_config {
 		'js_library'			=> '',
 		'minify_css'			=> '',
 		'minify_html'			=> '',
+		'minify_html_hook' 		=> '',
 		'minify_js'				=> '',
 		'save_gz'				=> '',
 		'remote_mode'			=> ''
@@ -463,7 +464,7 @@ class Minimee_config {
 			case('hash_method') :
 				return preg_match('/sha1|md5|sanitize|sanitise/i', $value) ? $value : 'sha1';
 			break;
-			
+
 			case('remote_mode') :
 				return preg_match('/auto|curl|fgc/i', $value) ? $value : 'auto';
 			break;
@@ -474,6 +475,10 @@ class Minimee_config {
 			
 			case('css_library') :
 				return preg_match('/cssmin|minify/i', $value) ? $value : 'minify';
+			break;
+			
+			case('minify_html_hook') :
+				return preg_match('/template_post_parse|ce_cache_pre_save/i', $value) ? $value : 'template_post_parse';
 			break;
 			
 			/* String - Paths */

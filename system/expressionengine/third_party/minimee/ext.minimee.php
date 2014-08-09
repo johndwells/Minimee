@@ -112,6 +112,17 @@ class Minimee_ext {
 			'enabled'	=> 'y'
 		));
 
+		// CE Cache ce_cache_pre_save hook
+		$this->EE->db->insert('extensions', array(
+			'class'		=> __CLASS__,
+			'hook'		=> 'ce_cache_pre_save',
+			'method'	=> 'ce_cache_pre_save',
+			'settings'	=> serialize($settings),
+			'priority'	=> 10,
+			'version'	=> $this->version,
+			'enabled'	=> 'y'
+		));
+
 		Minimee_helper::log('Extension has been activated.', 3);
 	}
 	// ------------------------------------------------------
@@ -173,12 +184,39 @@ class Minimee_ext {
 	// ------------------------------------------------------
 
 
+	/**
+	 * Hook for CE Cache
+	 * 
+	 * @param string $template
+	 * @param string $type 'fragment' or 'static'
+	 */
+	public function ce_cache_pre_save($template, $type)
+	{
+		// play nice with others
+		if (isset($this->EE->extensions->last_call) && $this->EE->extensions->last_call)
+		{
+			$template = $this->EE->extensions->last_call;
+		}
+
+		// Are we configured to run HTML minification on this hook?
+		if ($this->config->minify_html_hook != 'ce_cache_pre_save')
+		{
+			Minimee_helper::log('HTML minification is not configured to run when saving CE Cache contents.', 3);
+			return $template;
+		}
+
+		// do and done
+		Minimee_helper::log('HTML minification is configured to run whenever saving CE Cache contents.', 3);
+		return $this->_minify_html($template);
+	}
+	// ------------------------------------------------------
+
 
 	/**
 	 * Method for template_post_parse hook
 	 *
 	 * @param 	string	Parsed template string
-	 * @param 	bool	Whether is a sub-template or not
+	 * @param 	bool	Whether is a sub-template (partial as of EE 2.8) or not
 	 * @param 	string	Site ID
 	 * @return 	string	Template string, possibly minified
 	 */
@@ -196,78 +234,25 @@ class Minimee_ext {
 			return $template;
 		}
 		
-		// see if we need to post-render any plugin methods
-		if (isset($this->cache['template_post_parse']))
-		{
-			if ( ! class_exists('Minimee'))
-			{
-				include_once PATH_THIRD . 'minimee/pi.minimee.php';
-			}
-
-			// create a new instance of Minimee each time to guarantee defaults
-			$m = new Minimee();
-
-			// save our TMPL values to put back into place once finished
-			$tagparams = $this->EE->TMPL->tagparams;
-
-			// loop through & call each method
-			foreach($this->cache['template_post_parse'] as $needle => $tag)
-			{
-				Minimee_helper::log('Calling Minimee::display("' . $tag['method'] . '") during template_post_parse: ' . serialize($tag['tagparams']), 3);
-				
-				$this->EE->TMPL->tagparams = $tag['tagparams'];
-
-				// our second parameter tells Minimee we are calling from template_post_parse
-				$out = $m->display($tag['method'], TRUE);
-
-				// replace our needle with output
-				$template = str_replace(LD.$needle.RD, $out, $template);
-
-				// reset Minimee for next loop
-				$m->reset();
-			}
-			
-			// put things back into place
-			$this->EE->TMPL->tagparams = $tagparams;
-		}
-		
 		// do nothing if not (likely) html!
 		if ( ! preg_match('/webpage|static/i', $this->EE->TMPL->template_type))
 		{
 			return $template;
 		}
 		
-		// Are we configured to run through HTML minifier?
-		if ($this->config->is_no('minify_html'))
+		// attempt to post-process Minimee's display tag
+		$template = $this->_display_post_parse($template);
+		
+		// Are we configured to run HTML minification on this hook?
+		if ($this->config->minify_html_hook != 'template_post_parse')
 		{
-			Minimee_helper::log('HTML minification is disabled.', 3);
+			Minimee_helper::log('HTML minification is not configured to run during template_post_parse.', 3);
 			return $template;
 		}
-
-		// is Minimee nonetheless disabled?
-		if ($this->config->is_yes('disable'))
-		{
-			Minimee_helper::log('HTML minification aborted because Minimee has been disabled completely.', 3);
-			return $template;
-		}
-
-		// we've made it this far, so...
-		Minimee_helper::log('Running HTML minification.', 3);
-
-		Minimee_helper::library('html');
-
-		// run css & js minification?
-		$opts = array();
-		if($this->config->is_yes('minify_css'))
-		{
-			$opts['cssMinifier'] = array('Minify_CSS', 'minify');
-		}
-		if($this->config->is_yes('minify_js'))
-		{
-			$opts['jsMinifier'] = array('JSMin', 'minify');
-		}
-
-		return Minify_HTML::minify($template, $opts);
+		
+		// do and done
+		Minimee_helper::log('HTML minification is configured to run during the final call to template_post_parse.', 3);
+		return $this->_minify_html($template);
 	}
 	// ------------------------------------------------------
 
@@ -486,6 +471,46 @@ class Minimee_ext {
 			Minimee_helper::log('Upgraded to 2.1.8', 3);
 		}
 
+		/**
+		 * 2.2.0
+		 * 
+		 * - Add compatibility with CE Cache hook
+		 */
+		if (version_compare($current, '2.2.0', '<'))
+		{
+			// grab a copy of our settings
+			$query = $this->EE->db
+							->select('settings')
+							->from('extensions')
+							->where('class', __CLASS__)
+							->limit(1)
+							->get();
+			
+			if ($query->num_rows() > 0)
+			{
+				$settings = $query->row()->settings;
+			}
+			else
+			{
+				$settings = serialize($this->config->factory()->to_array());
+			}
+			
+			// add extension hook
+			$this->EE->db->insert('extensions', array(
+				'class'		=> __CLASS__,
+				'hook'		=> 'ce_cache_pre_save',
+				'method'	=> 'ce_cache_pre_save',
+				'settings'	=> $settings,
+				'priority'	=> 10,
+				'version'	=> $this->version,
+				'enabled'	=> 'y'
+			));
+
+			$query->free_result();
+
+			Minimee_helper::log('Upgraded to 2.2.0', 3);
+		}
+
 		// update table row with version
 		$this->EE->db->where('class', __CLASS__);
 		$this->EE->db->update(
@@ -494,6 +519,95 @@ class Minimee_ext {
 		);
 
 		Minimee_helper::log('Upgrade complete. Now running ' . $this->version, 3);
+	}
+	// ------------------------------------------------------
+
+	/**
+	 * Helper function to find & process any queue'd plugin tags
+	 *
+	 * @param string $template
+	 * @return string
+	 */
+	protected function _display_post_parse($template)
+	{
+		// see if we need to post-render any plugin methods
+		if (isset($this->cache['template_post_parse']))
+		{
+			if ( ! class_exists('Minimee'))
+			{
+				include_once PATH_THIRD . 'minimee/pi.minimee.php';
+			}
+
+			// create a new instance of Minimee each time to guarantee defaults
+			$m = new Minimee();
+
+			// save our TMPL values to put back into place once finished
+			$tagparams = $this->EE->TMPL->tagparams;
+
+			// loop through & call each method
+			foreach($this->cache['template_post_parse'] as $needle => $tag)
+			{
+				Minimee_helper::log('Calling Minimee::display("' . $tag['method'] . '") during template_post_parse: ' . serialize($tag['tagparams']), 3);
+				
+				$this->EE->TMPL->tagparams = $tag['tagparams'];
+
+				// our second parameter tells Minimee we are calling from template_post_parse
+				$out = $m->display($tag['method'], TRUE);
+
+				// replace our needle with output
+				$template = str_replace(LD.$needle.RD, $out, $template);
+
+				// reset Minimee for next loop
+				$m->reset();
+			}
+			
+			// put things back into place
+			$this->EE->TMPL->tagparams = $tagparams;
+		}
+		
+		return $template;
+	}
+	// ------------------------------------------------------
+
+
+	/**
+	 * Run html minification on template tagdata
+	 *
+	 * @param string $template
+	 * @return 	string
+	 */
+	protected function _minify_html($template)
+	{
+		// Are we configured to run through HTML minifier?
+		if ($this->config->is_no('minify_html'))
+		{
+			Minimee_helper::log('HTML minification is disabled.', 3);
+			return $template;
+		}
+		
+		// is Minimee nonetheless disabled?
+		if ($this->config->is_yes('disable'))
+		{
+			Minimee_helper::log('HTML minification aborted because Minimee has been disabled completely.', 3);
+			return $template;
+		}
+
+		Minimee_helper::log('Running HTML minification.', 3);
+
+		Minimee_helper::library('html');
+
+		// run css & js minification?
+		$opts = array();
+		if($this->config->is_yes('minify_css'))
+		{
+			$opts['cssMinifier'] = array('Minify_CSS', 'minify');
+		}
+		if($this->config->is_yes('minify_js'))
+		{
+			$opts['jsMinifier'] = array('JSMin', 'minify');
+		}
+
+		return Minify_HTML::minify($template, $opts);
 	}
 	// ------------------------------------------------------
 
