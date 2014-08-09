@@ -1120,7 +1120,7 @@ class Minimee_lib {
 			{
 				while (false !== ($file = readdir($handle)))
 				{
-					if ($file == '.' || $file == '..' || $file === $this->cache_filename) continue;
+					if ($file == '.' || $file == '..' || $file === $this->cache_filename || $file === $this->cache_filename . '.gz') continue;
 
 					// matches should be deleted
 					if (strpos($file, $this->cache_filename_hash) === 0)
