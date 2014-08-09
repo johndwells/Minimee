@@ -29,7 +29,7 @@ $lang = array(
 	'advanced_config' => 'Advanced Preferences',
 	'basic_config' => 'Basic Preferences',
 	'optional' => 'optional',
-	'config_location_warning' => '<strong class="notice">Minimee appears to be configured elsewhere.</strong> There is likely no need to have this extension installed. Consult the <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
+	'config_location_warning' => '<strong class="notice">Minimee appears to be configured elsewhere.</strong> There is likely no need to have this extension installed. Consult the <a href="http://johndwells.github.io/Minimee/" title="Minimee Docs">docs</a> for more.',
 
 	'save' => 'Save Settings',
 	'auto' => 'Auto',
@@ -57,11 +57,11 @@ $lang = array(
 	'cache_url_hint' => 'e.g. ' . rtrim(get_instance()->config->item('base_url'), '/') . '/cache',
 
 	'cachebust' => 'Cache-Busting',
-	'cachebust_note' => 'Update this to a unique string to force Minimee to create a new cache file.<br />Optional, and for most scenarios unneccessary. Consult the <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
+	'cachebust_note' => 'Update this to a unique string to force Minimee to create a new cache file.<br />Optional, and for most scenarios unneccessary. Consult the <a href="http://johndwells.github.io/Minimee/" title="Minimee Docs">docs</a> for more.',
 	'cachebust_hint' => 'e.g. `1.0.0`.',
 	
 	'cleanup' => 'Cleanup Expired Caches',
-	'cleanup_note' => '<strong>Use with caution.</strong> When enabled, Minimee will automatically delete any cache file it determines has expired. Consult the <a href="http://johndwells.com/software/minimee" title="Minimee Docs">docs</a> for more.',
+	'cleanup_note' => '<strong>Use with caution.</strong> When enabled, Minimee will automatically delete any cache file it determines has expired. Consult the <a href="http://johndwells.github.io/Minimee/" title="Minimee Docs">docs</a> for more.',
 
 	'combine' => 'Combine Assets',
 	'combine_note' => 'Specify which types of assets to combine.',
