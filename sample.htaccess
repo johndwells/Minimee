@@ -1,0 +1,34 @@
+# ========================
+# Consult the documentation to learn how to use this file:
+# https://johndwells.github.io/Minimee
+# ========================
+
+# Serve the gzip encoding-type for files with .gz extension
+AddEncoding gzip .gz
+
+<IfModule mod_rewrite.c>
+
+# Check that the browser will accept gzipped content
+RewriteCond %{HTTP:Accept-encoding} gzip
+
+# Check that a gzipped version of the file exists 
+RewriteCond %{REQUEST_FILENAME}.gz -f
+
+# Append .gz to the requested filename
+RewriteRule ^(.*)$ $1.gz [L] 
+
+</IfModule>
+
+<IfModule mod_expires.c>
+
+# Enable expirations
+ExpiresActive On
+
+# Default directive is a year
+ExpiresDefault "access plus 1 year"
+
+# Turn ETag headers off
+Header unset ETag
+FileETag None
+
+</IfModule>
