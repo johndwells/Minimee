@@ -386,7 +386,7 @@ class Minimee {
 	 *
 	 * @return string Usage notes
 	 */	
-	public function usage()
+	public static function usage()
 	{
 		// just return basic usage
 		return <<<HEREDOC
