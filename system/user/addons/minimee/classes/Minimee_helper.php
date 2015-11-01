@@ -50,17 +50,15 @@ class Minimee_helper {
 	 */
 	public static function &cache()
 	{
-		$ee =& get_instance();
-
 		// be sure we have a cache set up
-		if ( ! isset($ee->session->cache['minimee']))
+		if ( ! isset(ee()->session->cache['minimee']))
 		{
-			$ee->session->cache['minimee'] = array();
+			ee()->session->cache['minimee'] = array();
 
 			self::log('Session cache has been created.', 3);
 		}
-		
-		return $ee->session->cache['minimee'];
+
+		return ee()->session->cache['minimee'];
 	}
 	// ------------------------------------------------------
 
@@ -76,7 +74,7 @@ class Minimee_helper {
 		{
 			self::$_config = new Minimee_config();
 		}
-		
+
 		return self::$_config;
 	}
 	// ------------------------------------------------------
@@ -168,7 +166,7 @@ class Minimee_helper {
 					{
 						require_once(PATH_THIRD . 'minimee/libraries/CSSmin.php');
 					}
-				
+
 					else
 					{
 						self::log('CSSMin.php in minimee/libraries needs to be renamed to the proper capitalisation of "CSSmin.php".', 2);
@@ -176,7 +174,7 @@ class Minimee_helper {
 					}
 				}
 			break;
-			
+
 			case ('css_urirewriter') :
 				if ( ! class_exists('Minify_CSS_UriRewriter'))
 				{
@@ -190,9 +188,9 @@ class Minimee_helper {
 					require_once(PATH_THIRD . 'minimee/libraries/EpiCurl.php');
 				}
 			break;
-			
+
 			case ('jsmin') :
-			
+
 				if ( ! class_exists('JSMin'))
 				{
 					// this sucks, but it's a case-insensitivity issue that we need to protect ourselves against
@@ -200,7 +198,7 @@ class Minimee_helper {
 					{
 						require_once(PATH_THIRD . 'minimee/libraries/JSMin.php');
 					}
-				
+
 					else
 					{
 						self::log('jsmin.php in minimee/libraries needs to be renamed to the proper capitalisation of "JSMin.php".', 2);
@@ -208,14 +206,14 @@ class Minimee_helper {
 					}
 				}
 			break;
-			
+
 			case ('jsminplus') :
 				if ( ! class_exists('JSMinPlus'))
 				{
 					require_once(PATH_THIRD . 'minimee/libraries/JSMinPlus.php');
 				}
 			break;
-			
+
 			case ('html') :
 				if ( ! class_exists('Minify_HTML'))
 				{
@@ -307,7 +305,7 @@ class Minimee_helper {
 		{
 			return FALSE;
 		}
-		
+
 		// free memory where possible
 		unset($pat);
 
@@ -333,7 +331,7 @@ class Minimee_helper {
 			// regex pattern removes all double slashes, preserving http:// and '//' at start
 			return preg_replace("#([^:])//+#", "\\1/", $string);
 		}
-		
+
 		// nope just a path
 		else
 		{
@@ -342,8 +340,8 @@ class Minimee_helper {
 		}
 	}
 	// ------------------------------------------------------
-	
-	
+
+
 	/**
 	 * A protocol-agnostic function to replace URL with path
 	 *
@@ -360,7 +358,3 @@ class Minimee_helper {
 		return preg_replace('@(https?:)?\/\/' . $agnostic_url . '@', $with, $haystack);
 	}
 }
-// END CLASS
-
-/* End of file Minimee_helper.php */
-/* Location: ./system/expressionengine/third_party/minimee/classes/Minimee_helper.php */

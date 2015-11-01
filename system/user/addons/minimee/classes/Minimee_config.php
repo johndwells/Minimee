@@ -12,12 +12,6 @@ require_once PATH_THIRD . 'minimee/classes/Minimee_helper.php';
 class Minimee_config {
 
 	/**
-	 * EE, obviously
-	 */
-	private $EE;
-	
-
-	/**
 	 * Where we find our config - 'db', 'config', 'hook', 'default' or 'manual'.
 	 * A 3rd party hook may also rename to something else.
 	 */
@@ -50,16 +44,16 @@ class Minimee_config {
 		'save_gz'				=> '',
 		'remote_mode'			=> ''
 	);
-	
-	
+
+
 	/**
 	 * Default settings
 	 *
 	 * Set once during init and NOT modified thereafter.
 	 */
 	protected $_default = array();
-	
-	
+
+
 	/**
 	 * Runtime settings
 	 *
@@ -75,14 +69,11 @@ class Minimee_config {
 	 * Constructor function
 	 *
 	 * If an array is passed, then we will avoid our own internal init
-	 * 
+	 *
 	 * @param Array	An array of settings to override normal init()
 	 */
 	public function __construct($override = FALSE)
 	{
-		// We need EE for normal operations
-		$this->EE =& get_instance();
-	
 		$this->init($override);
 	}
 	// ------------------------------------------------------
@@ -104,13 +95,13 @@ class Minimee_config {
 		{
 			return $this->_runtime[$prop];
 		}
-		
+
 		// Find & retrieve the default setting
 		if (array_key_exists($prop, $this->_default))
 		{
 			return $this->_default[$prop];
 		}
-		
+
 		// I guess it's OK to ask for a raw copy of our settings
 		if ($prop == 'settings')
 		{
@@ -170,7 +161,7 @@ class Minimee_config {
 		{
 			$this->settings = $extend;
 		}
-		
+
 		//chaining
 		return $this;
 	}
@@ -186,7 +177,7 @@ class Minimee_config {
 	{
 		// reset & extend to our empty allowed
 		$this->reset()->extend($this->get_allowed());
-		
+
 		//chaining
 		return $this;
 	}
@@ -247,7 +238,7 @@ class Minimee_config {
 		{
 			$settings = $this->_from_hook();
 		}
-		
+
 		// Test: Manually passed?
 		if ($settings === FALSE && is_array($override))
 		{
@@ -263,13 +254,13 @@ class Minimee_config {
 		{
 			$settings = $this->_from_config();
 		}
-		
+
 		// Test 3: Look in db
 		if ($settings === FALSE)
 		{
 			$settings = $this->_from_db();
 		}
-		
+
 		// Test 4: Legacy backwards-compatibility
 		if ($settings === FALSE)
 		{
@@ -281,14 +272,14 @@ class Minimee_config {
 				$settings = $this->_from_global_vars_legacy();
 			}
 		}
-		
+
 		// Run on default
 		if ( $settings === FALSE)
 		{
 			Minimee_helper::log(lang('config_settings_using_defaults'), 3);
-			
+
 			$this->location = 'default';
-			
+
 			// start with an empty array
 			$settings = array();
 		}
@@ -320,21 +311,21 @@ class Minimee_config {
 		if ( ! array_key_exists('cache_url', $settings) || $settings['cache_url'] == '')
 		{
 			// use config base_url if nothing set
-			$settings['cache_url'] = $this->EE->config->item('base_url') . '/cache';
+			$settings['cache_url'] = ee()->config->item('base_url') . '/cache';
 		}
-		
+
 		// Default base_path?
 		if ( ! array_key_exists('base_path', $settings) || $settings['base_path'] == '')
 		{
 			// use global FCPATH if nothing set
 			$settings['base_path'] = FCPATH;
 		}
-		
+
 		// Default base_url?
 		if ( ! array_key_exists('base_url', $settings) || $settings['base_url'] == '')
 		{
 			// use config base_url if nothing set
-			$settings['base_url'] = $this->EE->config->item('base_url');
+			$settings['base_url'] = ee()->config->item('base_url');
 		}
 
 		//Now make a complete & sanitised settings array, and set as our default
@@ -347,18 +338,18 @@ class Minimee_config {
 		 * See if we need to inject ourselves into extensions hook.
 		 * This allows us to bind to the template_post_parse hook without installing our extension
 		 */
-		if ($this->EE->config->item('allow_extensions') == 'y' &&  ! isset($this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
+		if (ee()->config->item('allow_extensions') == 'y' &&  ! isset(ee()->extensions->extensions['template_post_parse'][10]['Minimee_ext']))
 		{
 			// Taken from EE_Extensions::__construct(), around line 70 in system/expressionengine/libraries/Extensions.php
-			$this->EE->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
-			$this->EE->extensions->extensions['ee_debug_toolbar_add_panel'][10]['Minimee_ext'] = array('ee_debug_toolbar_add_panel', '', MINIMEE_VER);
-	  		$this->EE->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
+			ee()->extensions->extensions['template_post_parse'][10]['Minimee_ext'] = array('template_post_parse', '', MINIMEE_VER);
+			ee()->extensions->extensions['ee_debug_toolbar_add_panel'][10]['Minimee_ext'] = array('ee_debug_toolbar_add_panel', '', MINIMEE_VER);
+	  		ee()->extensions->version_numbers['Minimee_ext'] = MINIMEE_VER;
 
 			Minimee_helper::log(lang('config_extension_manually_inject'), 3);
 		}
-		
+
 		Minimee_helper::log(sprintf(lang('config_settings_saved'), $this->location), 3);
-		
+
 		// chaining
 		return $this;
 
@@ -421,12 +412,12 @@ class Minimee_config {
 
 		// reduce our $settings array to only valid keys
         $valid = array_flip(array_intersect(array_keys($this->_allowed), array_keys($settings)));
-        
+
 		foreach($valid as $setting => $value)
 		{
 			$valid[$setting] = $this->sanitise_setting($setting, $settings[$setting]);
 		}
-		
+
 		return $valid;
 	}
 	// ------------------------------------------------------
@@ -450,7 +441,7 @@ class Minimee_config {
 			case('save_gz') :
 				return ($value === TRUE OR preg_match('/1|true|on|yes|y/i', $value)) ? 'yes' : 'no';
 			break;
-		
+
 			/* Booleans default YES */
 			case('combine_css') :
 			case('combine_js') :
@@ -468,19 +459,19 @@ class Minimee_config {
 			case('remote_mode') :
 				return preg_match('/auto|curl|fgc/i', $value) ? $value : 'auto';
 			break;
-			
+
 			case('js_library') :
 				return preg_match('/jsmin|jsminplus/i', $value) ? $value : 'jsmin';
 			break;
-			
+
 			case('css_library') :
 				return preg_match('/cssmin|minify/i', $value) ? $value : 'minify';
 			break;
-			
+
 			case('minify_html_hook') :
 				return preg_match('/template_post_parse|ce_cache_pre_save/i', $value) ? $value : 'template_post_parse';
 			break;
-			
+
 			/* String - Paths */
 			case('cache_path') :
 			case('base_path') :
@@ -494,16 +485,16 @@ class Minimee_config {
 				return rtrim(Minimee_helper::remove_double_slashes($value, TRUE), '/');
 			break;
 
-			/* Default */			
+			/* Default */
 			default :
 				return $value;
 			break;
-		
+
 		endswitch;
 	}
 	// ------------------------------------------------------
-	
-	
+
+
 	/**
 	 * Return array of all settings at runtime
 	 */
@@ -523,10 +514,10 @@ class Minimee_config {
 		$settings = FALSE;
 
 		// check if Minimee is being set via config
-		if ($this->EE->config->item('minimee'))
+		if (ee()->config->item('minimee'))
 		{
-	        $settings = $this->EE->config->item('minimee');
-	        
+	        $settings = ee()->config->item('minimee');
+
 	        // better be an array!
 	        if (is_array($settings) && count($settings) > 0)
 	        {
@@ -545,11 +536,11 @@ class Minimee_config {
 		{
 			Minimee_helper::log(lang('config_settings_config_not_found'), 3);
 		}
-		
+
 		return $settings;
 	}
 	// ------------------------------------------------------
-	
+
 
 	/**
 	 * See if person forgot to change config setup when upgrading from 1.x.
@@ -559,7 +550,7 @@ class Minimee_config {
 		$settings = array();
 
 		// loop through entire config
-		foreach($this->EE->config->config as $key => $val)
+		foreach(ee()->config->config as $key => $val)
 		{
 			if(strpos($key, 'minimee_') === 0)
 			{
@@ -580,30 +571,30 @@ class Minimee_config {
 
 			Minimee_helper::log(lang('config_settings_from_legacy'), 3);
         }
-		
+
 		return $settings;
 	}
 	// ------------------------------------------------------
-	
-	
+
+
 	/**
 	 * Look for settings in database (set by our extension)
-	 * 
+	 *
 	 * @return void
 	 */
 	protected function _from_db()
 	{
 		$settings = FALSE;
 
-		if ($this->EE->config->item('allow_extensions') == 'y')
+		if (ee()->config->item('allow_extensions') == 'y')
 		{
-			$query = $this->EE->db
+			$query = ee()->db
 						->select('settings')
 						->from('extensions')
 						->where(array( 'enabled' => 'y', 'class' => 'Minimee_ext' ))
 						->limit(1)
 						->get();
-			
+
 			if ($query->num_rows() > 0)
 			{
 				$settings = unserialize($query->row()->settings);
@@ -616,11 +607,11 @@ class Minimee_config {
 			{
 				Minimee_helper::log(lang('config_settings_db_not_found'), 3);
 			}
-			
+
 			$query->free_result();
 
 		}
-		
+
 		return $settings;
 	}
 	// ------------------------------------------------------
@@ -628,17 +619,17 @@ class Minimee_config {
 
 	/**
 	 * Allow 3rd parties to provide own configuration settings
-	 * 
+	 *
 	 * @return mixed	array of settings of FALSE
 	 */
 	protected function _from_hook()
 	{
 		$settings = FALSE;
-		
-		if ($this->EE->extensions->active_hook('minimee_get_settings'))
+
+		if (ee()->extensions->active_hook('minimee_get_settings'))
 		{
 			// Must return FALSE or array()
-			$settings = $this->EE->extensions->call('minimee_get_settings', $this);
+			$settings = ee()->extensions->call('minimee_get_settings', $this);
 
 			// Technically the hook has an opportunity to set location to whatever it wishes;
 			// so only set to 'hook' if still false
@@ -647,7 +638,7 @@ class Minimee_config {
 				$this->location = 'hook';
 			}
 		}
-		
+
 		return $settings;
 	}
 	// ------------------------------------------------------
@@ -661,7 +652,7 @@ class Minimee_config {
 		$settings = array();
 
 		// loop through entire _global_vars array
-		foreach($this->EE->config->_global_vars as $key => $val)
+		foreach(ee()->config->_global_vars as $key => $val)
 		{
 			if(strpos($key, 'minimee_') === 0)
 			{
@@ -682,14 +673,8 @@ class Minimee_config {
 
 			Minimee_helper::log(lang('config_settings_legacy_not_found'), 3);
         }
-		
+
 		return $settings;
 	}
 	// ------------------------------------------------------
-	
-	
 }
-// END CLASS
-
-/* End of file Minimee_config.php */
-/* Location: ./system/expressionengine/third_party/minimee/classes/Minimee_config.php */

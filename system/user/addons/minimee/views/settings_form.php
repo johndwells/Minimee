@@ -35,7 +35,7 @@
 	    array('data' => lang('basic_config'), 'style' => 'width:50%;'),
 	    lang('setting')
 	);
-	
+
 
 	/**
 	 * Cache Path
@@ -124,7 +124,7 @@
 	$label = lang('cleanup', 'cleanup') . sprintf($note_format, lang('cleanup_note'));
 	$setting = form_dropdown('cleanup', array('no' => lang('No'),'yes' => lang('Yes')), $settings['cleanup'], 'id="cleanup"');
 	$this->table->add_row($label, $setting);
-	
+
 
 	/**
 	 * Filename Hash
@@ -132,7 +132,7 @@
 	$label = lang('hash_method', 'hash_method') . sprintf($note_format, lang('hash_method_note'));
 	$setting = form_dropdown('hash_method', array('sha1' => lang('sha1'),'md5' => lang('md5'), 'sanitize' => lang('sanitize')), $settings['hash_method'], 'id="hash_method"');
 	$this->table->add_row($label, $setting);
-	
+
 
 	/**
 	 * CSS Prepend Mode
@@ -216,32 +216,32 @@
 
 	<script type="text/javascript">
 		jQuery(function($) {
-		
+
 			<?php if ($flashdata_success) : ?>
-				$.ee_notice( '<?php echo $flashdata_success; ?>' , {type: "success", open:false}); 
+				$.ee_notice( '<?php echo $flashdata_success; ?>' , {type: "success", open:false});
 			<?php endif; ?>
-		
+
 			var MINIMEE = MINIMEE || [];
 
 			MINIMEE.$settings = $('.minimee_settings');
-			
+
 			MINIMEE.toggleSettings = function(val) {
-			
+
 				if (val == 'no')
 				{
 					MINIMEE.$settings.slideDown(600);
 				}
-				
+
 				else {
 					MINIMEE.$settings.slideUp(300);
 				}
-			
+
 			};
 
 			$('select[name="disable"]').change(function() {
 				MINIMEE.toggleSettings($(this).val());
 			}).trigger('change');
-				
+
 			MINIMEE.$adv_table = $('#minimee_advanced_table');
 			MINIMEE.$adv_handle = $('#minimee_advanced_handle').parent('p');
 
@@ -265,7 +265,3 @@
 
 		});
 	</script>
-
-<?php
-/* End of file settings_form.php */
-/* Location: ./system/expressionengine/third_party/minimee/views/settings_form.php */

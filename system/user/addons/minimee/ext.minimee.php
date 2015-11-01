@@ -14,7 +14,7 @@ require_once PATH_THIRD . 'minimee/classes/Minimee_helper.php';
  * @since		Version 2.0
  * @filesource
  */
- 
+
 // ------------------------------------------------------------------------
 
 /**
@@ -24,12 +24,6 @@ require_once PATH_THIRD . 'minimee/classes/Minimee_helper.php';
  * @link	http://johndwells.com/software/minimee
  */
 class Minimee_ext {
-
-	/**
-	 * EE, obviously
-	 */
-	private $EE;
-
 
 	/**
 	 * Standard Extension stuff
@@ -68,9 +62,6 @@ class Minimee_ext {
 	 */
 	public function __construct($settings = array())
 	{
-		// Got EE?
-		$this->EE =& get_instance();
-
 		// grab a reference to our cache
 		$this->cache =& Minimee_helper::cache();
 
@@ -82,16 +73,16 @@ class Minimee_ext {
 
 	/**
 	 * Activate Extension
-	 * 
+	 *
 	 * @return void
 	 */
 	public function activate_extension()
 	{
 		// reset our runtime to 'factory' defaults, and return as array
 		$settings = $this->config->factory()->to_array();
-	
+
 		// template_post_parse hook
-		$this->EE->db->insert('extensions', array(
+		ee()->db->insert('extensions', array(
 			'class'		=> __CLASS__,
 			'hook'		=> 'template_post_parse',
 			'method'	=> 'template_post_parse',
@@ -102,7 +93,7 @@ class Minimee_ext {
 		));
 
 		// EE Debug Toolbar hook
-		$this->EE->db->insert('extensions', array(
+		ee()->db->insert('extensions', array(
 			'class'		=> __CLASS__,
 			'hook'		=> 'ee_debug_toolbar_add_panel',
 			'method'	=> 'ee_debug_toolbar_add_panel',
@@ -113,7 +104,7 @@ class Minimee_ext {
 		));
 
 		// CE Cache ce_cache_pre_save hook
-		$this->EE->db->insert('extensions', array(
+		ee()->db->insert('extensions', array(
 			'class'		=> __CLASS__,
 			'hook'		=> 'ce_cache_pre_save',
 			'method'	=> 'ce_cache_pre_save',
@@ -135,8 +126,8 @@ class Minimee_ext {
 	 */
 	public function disable_extension()
 	{
-		$this->EE->db->where('class', __CLASS__);
-		$this->EE->db->delete('extensions');
+		ee()->db->where('class', __CLASS__);
+		ee()->db->delete('extensions');
 
 		Minimee_helper::log('Extension has been disabled.', 3);
 	}
@@ -156,13 +147,13 @@ class Minimee_ext {
 		if(REQ != 'PAGE') return $panels;
 
 		// play nice with others
-		$panels = ($this->EE->extensions->last_call != '' ? $this->EE->extensions->last_call : $panels);
-	
+		$panels = (ee()->extensions->last_call != '' ? ee()->extensions->last_call : $panels);
+
 		$panels['minimee'] = new Eedt_panel_model();
 		$panels['minimee']->set_name('minimee');
 		$panels['minimee']->set_button_label("Minimee");
 		$panels['minimee']->set_button_icon("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyhpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNS1jMDIxIDc5LjE1NTc3MiwgMjAxNC8wMS8xMy0xOTo0NDowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTQgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NjQxMzVDNTBGRDdCMTFFMzhDQzk5MzI3QzQ4QkE1NDUiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NjQxMzVDNTFGRDdCMTFFMzhDQzk5MzI3QzQ4QkE1NDUiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpFQkM3RkNGNUZENzUxMUUzOENDOTkzMjdDNDhCQTU0NSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpFQkM3RkNGNkZENzUxMUUzOENDOTkzMjdDNDhCQTU0NSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpUOrpsAAAAQSURBVHjaYvj//z8DQIABAAj8Av7bok0WAAAAAElFTkSuQmCC");
-		$panels['minimee']->set_panel_contents($this->EE->load->view('eedebug_panel', array('logs' => Minimee_helper::get_log()), TRUE));
+		$panels['minimee']->set_panel_contents(ee()->load->view('eedebug_panel', array('logs' => Minimee_helper::get_log()), TRUE));
 
 		if(Minimee_helper::log_has_error())
 		{
@@ -186,16 +177,16 @@ class Minimee_ext {
 
 	/**
 	 * Hook for CE Cache
-	 * 
+	 *
 	 * @param string $template
 	 * @param string $type 'fragment' or 'static'
 	 */
 	public function ce_cache_pre_save($template, $type)
 	{
 		// play nice with others
-		if (isset($this->EE->extensions->last_call) && $this->EE->extensions->last_call)
+		if (isset(ee()->extensions->last_call) && ee()->extensions->last_call)
 		{
-			$template = $this->EE->extensions->last_call;
+			$template = ee()->extensions->last_call;
 		}
 
 		// Are we configured to run HTML minification on this hook?
@@ -223,9 +214,9 @@ class Minimee_ext {
 	public function template_post_parse($template, $sub, $site_id)
 	{
 		// play nice with others
-		if (isset($this->EE->extensions->last_call) && $this->EE->extensions->last_call)
+		if (isset(ee()->extensions->last_call) && ee()->extensions->last_call)
 		{
-			$template = $this->EE->extensions->last_call;
+			$template = ee()->extensions->last_call;
 		}
 
 		// do nothing if not final template
@@ -233,23 +224,23 @@ class Minimee_ext {
 		{
 			return $template;
 		}
-		
+
 		// do nothing if not (likely) html!
-		if ( ! preg_match('/webpage|static/i', $this->EE->TMPL->template_type))
+		if ( ! preg_match('/webpage|static/i', ee()->TMPL->template_type))
 		{
 			return $template;
 		}
-		
+
 		// attempt to post-process Minimee's display tag
 		$template = $this->_display_post_parse($template);
-		
+
 		// Are we configured to run HTML minification on this hook?
 		if ($this->config->minify_html_hook != 'template_post_parse')
 		{
 			Minimee_helper::log('HTML minification is not configured to run during template_post_parse.', 3);
 			return $template;
 		}
-		
+
 		// do and done
 		Minimee_helper::log('HTML minification is configured to run during the final call to template_post_parse.', 3);
 		return $this->_minify_html($template);
@@ -266,14 +257,14 @@ class Minimee_ext {
 	{
 		if (empty($_POST))
 		{
-			Minimee_helper::log($this->EE->lang->line('unauthorized_access'), 1);
+			Minimee_helper::log(ee()->lang->line('unauthorized_access'), 1);
 		}
-		
+
 		else
 		{
 			// grab our posted form
 			$settings = $_POST;
-			
+
 			// checkboxes are funny: if they don't exist in post, they must be explicitly added and set to "no"
 			$checkboxes = array(
 				'combine_css',
@@ -282,7 +273,7 @@ class Minimee_ext {
 				'minify_html',
 				'minify_js'
 			);
-			
+
 			foreach($checkboxes as $key)
 			{
 				if ( ! isset($settings[$key]))
@@ -290,26 +281,26 @@ class Minimee_ext {
 					$settings[$key] = 'no';
 				}
 			}
-	
+
 			// run our $settings through sanitise_settings()
 			$settings = $this->config->sanitise_settings(array_merge($this->config->get_allowed(), $settings));
-			
+
 			// update db
-			$this->EE->db->where('class', __CLASS__)
+			ee()->db->where('class', __CLASS__)
 						 ->update('extensions', array('settings' => serialize($settings)));
-			
+
 			Minimee_helper::log('Extension settings have been saved.', 3);
 
-			// save the environment			
+			// save the environment
 			unset($settings);
 
 			// let frontend know we succeeeded
-			$this->EE->session->set_flashdata(
+			ee()->session->set_flashdata(
 				'message_success',
-			 	$this->EE->lang->line('preferences_updated')
+			 	ee()->lang->line('preferences_updated')
 			);
 
-			$this->EE->functions->redirect(BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=minimee');
+			ee()->functions->redirect(BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=minimee');
 		}
 	}
 	// ------------------------------------------------------
@@ -323,8 +314,8 @@ class Minimee_ext {
 	 */
 	public function settings_form($current)
 	{
-		$this->EE->load->helper('form');
-		$this->EE->load->library('table');
+		ee()->load->helper('form');
+		ee()->load->library('table');
 
 		// Merge the contents of our db with the allowed
 		$current = array_merge($this->config->get_allowed(), $current);
@@ -346,17 +337,17 @@ class Minimee_ext {
 			}
 		}
 
-		// view vars		
+		// view vars
 		$vars = array(
 			'config_warning' => ($this->config->location != 'db') ? lang('config_location_warning') : '',
 			'form_open' => form_open('C=addons_extensions'.AMP.'M=save_extension_settings'.AMP.'file=minimee'),
 			'settings' => $current,
 			'hide_advanced_on_startup' => $hide_advanced_on_startup,
-			'flashdata_success' => $this->EE->session->flashdata('message_success')
+			'flashdata_success' => ee()->session->flashdata('message_success')
 			);
 
 		// return our view
-		return $this->EE->load->view('settings_form', $vars, TRUE);			
+		return ee()->load->view('settings_form', $vars, TRUE);
 	}
 	// ------------------------------------------------------
 
@@ -376,21 +367,21 @@ class Minimee_ext {
 		{
 			return FALSE;
 		}
-		
+
 		/**
 		 * 2.0.0
-		 * 
+		 *
 		 * - refactor to use new Minimee_config object
 		 */
 		if (version_compare($current, '2.0.0', '<'))
 		{
-			$query = $this->EE->db
+			$query = ee()->db
 							->select('settings')
 							->from('extensions')
 							->where('class', __CLASS__)
 							->limit(1)
 							->get();
-			
+
 			if ($query->num_rows() > 0)
 			{
 				$settings = unserialize($query->row()->settings);
@@ -414,9 +405,9 @@ class Minimee_ext {
 
 				// Sanitise & merge to get a complete up-to-date array of settings
 				$settings = $this->config->sanitise_settings(array_merge($this->config->get_allowed(), $settings));
-				
-				// update db				
-				$this->EE->db
+
+				// update db
+				ee()->db
 						->where('class', __CLASS__)
 						->update('extensions', array(
 							'hook'		=> 'template_post_parse',
@@ -425,27 +416,27 @@ class Minimee_ext {
 						));
 			}
 
-			$query->free_result();			
+			$query->free_result();
 
 			Minimee_helper::log('Upgraded to 2.0.0', 3);
 		}
 
-		
+
 		/**
 		 * 2.1.8
-		 * 
+		 *
 		 * - Include debug panel via EE Debug Toolbar
 		 */
 		if (version_compare($current, '2.1.8', '<'))
 		{
 			// grab a copy of our settings
-			$query = $this->EE->db
+			$query = ee()->db
 							->select('settings')
 							->from('extensions')
 							->where('class', __CLASS__)
 							->limit(1)
 							->get();
-			
+
 			if ($query->num_rows() > 0)
 			{
 				$settings = $query->row()->settings;
@@ -454,9 +445,9 @@ class Minimee_ext {
 			{
 				$settings = serialize($this->config->factory()->to_array());
 			}
-			
+
 			// add extension hook
-			$this->EE->db->insert('extensions', array(
+			ee()->db->insert('extensions', array(
 				'class'		=> __CLASS__,
 				'hook'		=> 'ee_debug_toolbar_add_panel',
 				'method'	=> 'ee_debug_toolbar_add_panel',
@@ -473,19 +464,19 @@ class Minimee_ext {
 
 		/**
 		 * 2.2.0
-		 * 
+		 *
 		 * - Add compatibility with CE Cache hook
 		 */
 		if (version_compare($current, '2.2.0', '<'))
 		{
 			// grab a copy of our settings
-			$query = $this->EE->db
+			$query = ee()->db
 							->select('settings')
 							->from('extensions')
 							->where('class', __CLASS__)
 							->limit(1)
 							->get();
-			
+
 			if ($query->num_rows() > 0)
 			{
 				$settings = $query->row()->settings;
@@ -494,9 +485,9 @@ class Minimee_ext {
 			{
 				$settings = serialize($this->config->factory()->to_array());
 			}
-			
+
 			// add extension hook
-			$this->EE->db->insert('extensions', array(
+			ee()->db->insert('extensions', array(
 				'class'		=> __CLASS__,
 				'hook'		=> 'ce_cache_pre_save',
 				'method'	=> 'ce_cache_pre_save',
@@ -512,9 +503,9 @@ class Minimee_ext {
 		}
 
 		// update table row with version
-		$this->EE->db->where('class', __CLASS__);
-		$this->EE->db->update(
-					'extensions', 
+		ee()->db->where('class', __CLASS__);
+		ee()->db->update(
+					'extensions',
 					array('version' => $this->version)
 		);
 
@@ -542,14 +533,14 @@ class Minimee_ext {
 			$m = new Minimee();
 
 			// save our TMPL values to put back into place once finished
-			$tagparams = $this->EE->TMPL->tagparams;
+			$tagparams = ee()->TMPL->tagparams;
 
 			// loop through & call each method
 			foreach($this->cache['template_post_parse'] as $needle => $tag)
 			{
 				Minimee_helper::log('Calling Minimee::display("' . $tag['method'] . '") during template_post_parse: ' . serialize($tag['tagparams']), 3);
-				
-				$this->EE->TMPL->tagparams = $tag['tagparams'];
+
+				ee()->TMPL->tagparams = $tag['tagparams'];
 
 				// our second parameter tells Minimee we are calling from template_post_parse
 				$out = $m->display($tag['method'], TRUE);
@@ -560,11 +551,11 @@ class Minimee_ext {
 				// reset Minimee for next loop
 				$m->reset();
 			}
-			
+
 			// put things back into place
-			$this->EE->TMPL->tagparams = $tagparams;
+			ee()->TMPL->tagparams = $tagparams;
 		}
-		
+
 		return $template;
 	}
 	// ------------------------------------------------------
@@ -584,7 +575,7 @@ class Minimee_ext {
 			Minimee_helper::log('HTML minification is disabled.', 3);
 			return $template;
 		}
-		
+
 		// is Minimee nonetheless disabled?
 		if ($this->config->is_yes('disable'))
 		{
@@ -612,8 +603,3 @@ class Minimee_ext {
 	// ------------------------------------------------------
 
 }
-// END CLASS
-
-	
-/* End of file ext.minimee.php */ 
-/* Location: ./system/expressionengine/third_party/minimee/ext.minimee.php */
