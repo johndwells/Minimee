@@ -8,5 +8,6 @@ return array(
 	'author'        => MINIMEE_AUTHOR,
 	'author_url'    => MINIMEE_DOCS,
 	'description'   => MINIMEE_DESC,
-	'namespace'     => MINIMEE_NAME
+	'namespace'     => MINIMEE_NAME,
+	'docs_url'      => MINIMEE_DOCS
 );
