@@ -265,7 +265,8 @@ class Minimee_ext {
 			// grab our posted form
 			$settings = $_POST;
 
-			// checkboxes are funny: if they don't exist in post, they must be explicitly added and set to "no"
+			// checkboxes now come in as an array,
+			// but we want to cast them to a string, so as to be compatible with our config service
 			$checkboxes = array(
 				'combine_css',
 				'combine_js',
@@ -276,8 +277,10 @@ class Minimee_ext {
 
 			foreach($checkboxes as $key)
 			{
-				if ( ! isset($settings[$key]))
+				if (isset($settings[$key]))
 				{
+					$settings[$key] = $settings[$key][0];
+				} else {
 					$settings[$key] = 'no';
 				}
 			}
@@ -294,13 +297,15 @@ class Minimee_ext {
 			// save the environment
 			unset($settings);
 
-			// let frontend know we succeeeded
-			ee()->session->set_flashdata(
-				'message_success',
-			 	ee()->lang->line('preferences_updated')
-			);
+			// make an alert but defer until next request
+			ee('CP/Alert')->makeInline('minimee-save-settings-success')
+						  ->asSuccess()
+						  ->cannotClose()
+						  ->withTitle(lang('preferences_updated'))
+						  ->defer();
 
-			ee()->functions->redirect(BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file=minimee');
+			// return to the settings form
+			ee()->functions->redirect(ee('CP/URL')->make('addons/settings/minimee'));
 		}
 	}
 	// ------------------------------------------------------
@@ -314,40 +319,257 @@ class Minimee_ext {
 	 */
 	public function settings_form($current)
 	{
-		ee()->load->helper('form');
-		ee()->load->library('table');
-
 		// Merge the contents of our db with the allowed
 		$current = array_merge($this->config->get_allowed(), $current);
 
-		// Used to determine if any advanced settings have been changed
-		$clean = $this->config->sanitise_settings($this->config->get_allowed());
-		$basic = array('disable', 'cache_path', 'cache_url', 'combine_css', 'combine_js', 'minify_css', 'minify_js', 'minify_html');
-
-		// remove basic settings
-		$diff = array_diff(array_keys($clean), $basic);
-		$hide_advanced_on_startup = 'TRUE';
-
-		foreach($diff as $key)
+		if(($this->config->location != 'db'))
 		{
-			if($clean[$key] != $current[$key])
-			{
-				$hide_advanced_on_startup = FALSE;
-				break;
-			}
+			ee('CP/Alert')->makeInline('config-warning')
+						  ->asWarning()
+						  ->cannotClose()
+						  ->withTitle(lang('config_location_warning_title'))
+						  ->addToBody(lang('config_location_warning'))
+						  ->now();
 		}
 
 		// view vars
 		$vars = array(
-			'config_warning' => ($this->config->location != 'db') ? lang('config_location_warning') : '',
-			'form_open' => form_open('C=addons_extensions'.AMP.'M=save_extension_settings'.AMP.'file=minimee'),
-			'settings' => $current,
-			'hide_advanced_on_startup' => $hide_advanced_on_startup,
-			'flashdata_success' => ee()->session->flashdata('message_success')
-			);
+			'cp_page_title' => lang('preferences'),
+			'base_url' => ee('CP/URL')->make('addons/settings/minimee/save'),
+			'save_btn_text' => 'btn_save_settings',
+			'save_btn_text_working' => 'btn_saving',
+			'sections' => array(
+				'basic_config' => array(
+					array(
+						'title' => 'disable',
+						'fields' => array(
+							'disable' => array(
+								'type' => 'yes_no',
+								'value' => $current['disable']
+							)
+						)
+					),
+					array(
+						'title' => 'cache_path',
+						'desc' => 'cache_path_note',
+						'fields' => array(
+							'cache_path' => array(
+								'type' => 'text',
+								'value' => $current['cache_path']
+							)
+						)
+					),
+					array(
+						'title' => 'cache_url',
+						'desc' => 'cache_url_note',
+						'fields' => array(
+							'cache_url' => array(
+								'type' => 'text',
+								'value' => $current['cache_url']
+							)
+						)
+					),
+					array(
+						'title' => 'combine',
+						'desc' => 'combine_note',
+						'fields' => array(
+							'combine_css' => array(
+								'type' => 'checkbox',
+								'choices' => array(
+									'yes' => 'CSS'
+								),
+								'value' => $current['combine_css']
+							),
+							'combine_js' => array(
+								'type' => 'checkbox',
+								'choices' => array(
+									'yes' => 'JS'
+								),
+								'value' => $current['combine_js']
+							)
+						)
+					),
+					array(
+						'title' => 'minify',
+						'desc' => 'minify_note',
+						'fields' => array(
+							'minify_css' => array(
+								'type' => 'checkbox',
+								'choices' => array(
+									'yes' => 'CSS'
+								),
+								'value' => $current['minify_css']
+							),
+							'minify_js' => array(
+								'type' => 'checkbox',
+								'choices' => array(
+									'yes' => 'JS'
+								),
+								'value' => $current['minify_js']
+							),
+							'minify_html' => array(
+								'type' => 'checkbox',
+								'choices' => array(
+									'yes' => 'HTML'
+								),
+								'value' => $current['minify_html']
+							)
+						)
+					)
+				),
+				'advanced_config' => array(
+					array(
+						'title' => 'base_path',
+						'desc' => 'base_path_note',
+						'fields' => array(
+							'base_path' => array(
+								'type' => 'text',
+								'value' => $current['base_path']
+							)
+						)
+					),
+					array(
+						'title' => 'base_url',
+						'desc' => 'base_url_note',
+						'fields' => array(
+							'base_url' => array(
+								'type' => 'text',
+								'value' => $current['base_url']
+							)
+						)
+					),
+					array(
+						'title' => 'cachebust',
+						'desc' => 'cachebust_note',
+						'fields' => array(
+							'cachebust' => array(
+								'type' => 'text',
+								'value' => $current['cachebust']
+							)
+						)
+					),
+					array(
+						'title' => 'cleanup',
+						'desc' => 'cleanup_note',
+						'fields' => array(
+							'cleanup' => array(
+								'type' => 'yes_no',
+								'value' => $current['cleanup']
+							)
+						)
+					),
+					array(
+						'title' => 'hash_method',
+						'desc' => 'hash_method_note',
+						'fields' => array(
+							'hash_method' => array(
+								'type' => 'select',
+								'choices' => array(
+									'sha1' => lang('sha1'),
+									'md5' => lang('md5'),
+									'sanitize' => lang('sanitize')
+								),
+								'value' => $current['hash_method']
+							)
+						)
+					),
+					array(
+						'title' => 'css_prepend_mode',
+						'desc' => 'css_prepend_mode_note',
+						'fields' => array(
+							'css_prepend_mode' => array(
+								'type' => 'inline_radio',
+								'choices' => array(
+									'no' => lang('Off'),
+									'yes' => lang('On')
+								),
+								'value' => $current['css_prepend_mode']
+							)
+						)
+					),
+					array(
+						'title' => 'css_prepend_url',
+						'desc' => 'css_prepend_url_note',
+						'fields' => array(
+							'css_prepend_url' => array(
+								'type' => 'text',
+								'value' => $current['css_prepend_url']
+							)
+						)
+					),
+					array(
+						'title' => 'css_library',
+						'desc' => 'css_library_note',
+						'fields' => array(
+							'css_library' => array(
+								'type' => 'select',
+								'choices' => array(
+									'minify' => lang('minify'),
+									'cssmin' => lang('cssmin')
+								),
+								'value' => $current['css_library']
+							)
+						)
+					),
+					array(
+						'title' => 'js_library',
+						'desc' => 'js_library_note',
+						'fields' => array(
+							'js_library' => array(
+								'type' => 'select',
+								'choices' => array(
+									'jsmin' => lang('jsmin'),
+									'jsminplus' => lang('jsminplus')
+								),
+								'value' => $current['js_library']
+							)
+						)
+					),
+					array(
+						'title' => 'remote_mode',
+						'desc' => 'remote_mode_note',
+						'fields' => array(
+							'remote_mode' => array(
+								'type' => 'select',
+								'choices' => array(
+									'auto' => lang('auto'),
+									'curl' => lang('curl'),
+									'fgc' => lang('fgc')
+								),
+								'value' => $current['remote_mode']
+							)
+						)
+					),
+					array(
+						'title' => 'save_gz',
+						'desc' => 'save_gz_note',
+						'fields' => array(
+							'save_gz' => array(
+								'type' => 'yes_no',
+								'value' => $current['save_gz']
+							)
+						)
+					),
+					array(
+						'title' => 'minify_html_hook',
+						'desc' => 'minify_html_hook_note',
+						'fields' => array(
+							'minify_html_hook' => array(
+								'type' => 'select',
+								'choices' => array(
+									'template_post_parse' => lang('template_post_parse'),
+									'ce_cache_pre_save' => lang('ce_cache_pre_save')
+								),
+								'value' => $current['minify_html_hook']
+							)
+						)
+					)
+				)
+			)
+		);
 
 		// return our view
-		return ee()->load->view('settings_form', $vars, TRUE);
+		return ee('View')->make('minimee:settings_form')->render($vars);
 	}
 	// ------------------------------------------------------
 

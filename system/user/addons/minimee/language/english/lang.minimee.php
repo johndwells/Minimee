@@ -26,10 +26,12 @@ $lang = array(
 	// -------------------------------------------
 	//  Extensions CP
 	// -------------------------------------------
+	'preferences' => 'Preferences',
 	'advanced_config' => 'Advanced Preferences',
 	'basic_config' => 'Basic Preferences',
 	'optional' => 'optional',
 	'config_location_warning' => '<strong class="notice">Minimee appears to be configured elsewhere.</strong> There is likely no need to have this extension installed. Consult the <a href="http://johndwells.github.io/Minimee/" title="Minimee Docs">docs</a> for more.',
+	'config_location_warning_title' => 'Notice',
 
 	'save' => 'Save Settings',
 	'auto' => 'Auto',
