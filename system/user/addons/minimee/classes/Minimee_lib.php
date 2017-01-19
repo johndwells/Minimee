@@ -756,7 +756,7 @@ class Minimee_lib {
 		{
 			$versions = array();
 
-			$sql = "SELECT t.template_name, tg.group_name, t.edit_date, t.save_template_file FROM exp_templates t, exp_template_groups tg
+			$sql = "SELECT t.template_name, tg.group_name, t.edit_date FROM exp_templates t, exp_template_groups tg
 					WHERE  t.group_id = tg.group_id
 					AND    t.template_type = 'css'
 					AND    t.site_id = '".ee()->db->escape_str(ee()->config->item('site_id'))."'";
@@ -769,7 +769,7 @@ class Minimee_lib {
 				{
 					$versions[$row['group_name'].'/'.$row['template_name']] = $row['edit_date'];
 
-					if (ee()->config->item('save_tmpl_files') == 'y' AND ee()->config->item('tmpl_file_basepath') != '' AND $row['save_template_file'] == 'y')
+					if (ee()->config->item('save_tmpl_files') == 'y' AND ee()->config->item('tmpl_file_basepath') != '')
 					{
 						$basepath = ee()->config->slash_item('tmpl_file_basepath').ee()->config->item('site_short_name').'/';
 						$basepath .= $row['group_name'].'.group/'.$row['template_name'].'.css';
