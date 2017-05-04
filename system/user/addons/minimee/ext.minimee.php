@@ -226,7 +226,7 @@ class Minimee_ext {
 		}
 
 		// do nothing if not (likely) html!
-		if ( ! preg_match('/webpage|static/i', ee()->TMPL->template_type))
+		if ( ! preg_match('/webpage|static|404/i', ee()->TMPL->template_type))
 		{
 			return $template;
 		}
