@@ -141,10 +141,10 @@ class Minimee_helper {
 			@ini_set('memory_limit', '256M');
 
 			// Latest changes to Minify adopt a "loader" over sprinkled require's
-            if ( ! class_exists('Minify_Loader')) {
-                require_once(PATH_THIRD . 'minimee/libraries/Minify/Loader.php');
-                Minify_Loader::register();
-            }
+			if ( ! class_exists('Minify_Loader')) {
+				require_once(PATH_THIRD . 'minimee/libraries/Minify/Loader.php');
+				Minify_Loader::register();
+			}
 
 
 			// don't do this again
